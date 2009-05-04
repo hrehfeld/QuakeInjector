@@ -21,16 +21,20 @@ public class EngineStarter {
 		ArrayList<String> cmd = new ArrayList<String>(5);
 
 		cmd.add(quakeExe.getAbsolutePath());
+		//processbuilder doesn't like arguments with spaces
 		if (quakeCmdline != null) {
-			cmd.add(quakeCmdline);
+			for (String s: quakeCmdline.split(" ")) { cmd.add(s); }
 		}
 		if (mapCmdline != null) {
-			cmd.add(mapCmdline);
+			for (String s: mapCmdline.split(" ")) { cmd.add(s); }
 		}
-		cmd.add("+map " + startmap);
+		cmd.add("+map");
+		cmd.add(startmap);
 		
 		ProcessBuilder pb = new ProcessBuilder(cmd);
 		pb.directory(quakeDir);
+
+		System.out.println(cmd);
 		
 		Process p = pb.start();		
 	}
