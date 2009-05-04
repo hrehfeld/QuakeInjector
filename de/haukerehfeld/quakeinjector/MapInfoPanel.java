@@ -28,7 +28,6 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	private JButton playButton = new JButton(playText);
 
 	private JComboBox startmaps;
-	private JLabel startmap;
 	
     /**
 	 * Currently selected map
@@ -72,8 +71,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		add(playButton);
 
 		startmaps = new JComboBox();
-		startmap = new JLabel("");
-		
+		add(startmaps);
 	}
 
 
@@ -167,19 +165,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	}
 
 	private void refreshMapInfo() {
-		if (selectedMap.isInstalled()) {
-			installButton.setEnabled(false);
-			uninstallButton.setEnabled(true);
-			playButton.setEnabled(true);
-			startmaps.setEnabled(true);
-		}
-		else {
-			uninstallButton.setEnabled(false);
-			playButton.setEnabled(false);
-			installButton.setEnabled(true);
-			installButton.setText(installText + " " + selectedMap.getId());
-			startmaps.setEnabled(false);
-		}
+		installButton.setText(installText + " " + selectedMap.getId());
 
 		//we do this regardless of displaying the list, because we can
 		//then simply get the selection from the list even if there's
@@ -190,16 +176,24 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 			startmaps.addItem(startmap);
 		}
 
-		if (maps.size() > 1) {
-			remove(startmap);
-			add(startmaps);
+		if (selectedMap.isInstalled()) {
+			installButton.setEnabled(false);
+			uninstallButton.setEnabled(true);
+			playButton.setEnabled(true);
+			
+			boolean enableList = false;
+			if (maps.size() > 1) {
+				enableList = true;
+			}
+			startmaps.setEnabled(enableList);
 		}
 		else {
-			startmap.setText(maps.get(0));
-			add(startmap);
-			remove(startmaps);
-			
+			uninstallButton.setEnabled(false);
+			playButton.setEnabled(false);
+			installButton.setEnabled(true);
+			startmaps.setEnabled(false);
 		}
+
 	}
 
 	public void stateChanged(ChangeEvent e) {
