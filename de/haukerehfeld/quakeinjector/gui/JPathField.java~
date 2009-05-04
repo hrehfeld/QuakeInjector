@@ -1,0 +1,19 @@
+/**
+ * An input element to input paths
+ */
+public class JPathField {
+
+	public JPathField(String defaultPath, String label) {
+		GridLayout grid = new GridLayout(0,2);
+		setLayout(grid);
+
+		final JTextField enginePath = new JTextField(config.get("enginePath"), 32);
+		{
+			JLabel enginePathText = new JLabel("Path to quake directory", SwingConstants.RIGHT);
+
+			enginePathText.setLabelFor(enginePath);
+			configPanel.add(enginePathText);
+			configPanel.add(enginePath);
+		}
+	
+}
