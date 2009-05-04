@@ -9,8 +9,8 @@ import de.haukerehfeld.quakeinjector.gui.*;
 import java.io.*;
 
 public class EngineConfigDialog extends JDialog {
-	private String enginePath;
-	private String engineExecutable;
+	private File enginePath;
+	private File engineExecutable;
 	private String engineCommandline;
 	
 	public EngineConfigDialog(final JFrame frame,
@@ -19,8 +19,8 @@ public class EngineConfigDialog extends JDialog {
 							  String cmdlineDefault) {
 		super(frame, "Engine Configuration", true);
 
-		this.enginePath = enginePathDefault;
-		this.engineExecutable = engineExeDefault;
+		this.enginePath = new File(enginePathDefault);
+		this.engineExecutable = new File(enginePathDefault + File.separator + engineExeDefault);
 		this.engineCommandline = cmdlineDefault;
 
 		JLabel description = new JLabel("Configure engine specifics", SwingConstants.CENTER);
@@ -34,49 +34,63 @@ public class EngineConfigDialog extends JDialog {
 
 		final JTextField cmdline;
 		//grid panel for input/label
-		{
-			{
-				cmdline = new JTextField(cmdlineDefault, 40);
-				LabelFieldPanel cmdlinePanel = new LabelFieldPanel("Quake commandline options",
-																   cmdline);
-				configPanel.add(cmdlinePanel);
-			}
-		}
-		
-		final JPathPanel enginePathPanel = new JPathPanel(enginePathDefault,
-													 "Path to quake directory",
-													 new JPathPanel.PathVerifier.Verifier() {
-														 public boolean verify(String path) {
-															 File f = new File(path);
-															 return (f.exists()
-																	 && f.isDirectory()
-																	 && f.canRead()
-																	 && f.canWrite());
-														 }
-													 });
+		cmdline = new JTextField(cmdlineDefault, 40);
+		LabelFieldPanel cmdlinePanel = new LabelFieldPanel("Quake commandline options",
+														   cmdline);
+		configPanel.add(cmdlinePanel);
+
+		//"Path to quake directory",
+		final JPathPanel enginePathPanel = new JPathPanel(new JPathPanel.Verifier() {
+				public boolean verify(File f) {
+					return (f.exists()
+							&& f.isDirectory()
+							&& f.canRead()
+							&& f.canWrite());
+				}
+			},
+			enginePathDefault);
+		enginePathPanel.addErrorListener(new ErrorListener() {
+				public void errorOccured(ErrorEvent e) {
+					String msg = ((JPathPanel) e.getSource()).getPath()
+						+ " is not a valid directory that I can write to!";
+					String title = "Invalid Path";
+
+					warningDialogue(title, msg);
+				}
+			});
 		configPanel.add(enginePathPanel);
 
-		final JPathPanel engineExePanel = new JPathPanel(engineExeDefault,
-													"Quake Executable",
-													 new JPathPanel.PathVerifier.Verifier() {
-														 public boolean verify(String f) {
-															 File exe = new File(enginePathPanel.getText()
-																				 + File.separator
-																				 + f);
-															 return (exe.exists()
-																	 && !exe.isDirectory()
-																	 && exe.canRead()
-																	 && exe.canExecute());
-														 }
-													 });
+		//"Quake Executable",
+		final JPathPanel engineExePanel = new JPathPanel(
+			new JPathPanel.Verifier() {
+				public boolean verify(File exe) {
+					return (exe.exists()
+							&& !exe.isDirectory()
+							&& exe.canRead()
+							&& exe.canExecute());
+				}
+			},
+			engineExeDefault,
+			new File(enginePathDefault));
+				
+		engineExePanel.addErrorListener(new ErrorListener() {
+				public void errorOccured(ErrorEvent e) {
+					String msg = ((JPathPanel) e.getSource()).getPath()
+						+ " is not a valid file that I can execute!";
+					String title = "Invalid Path";
+
+					warningDialogue(title, msg);
+
+				}
+			});
 		configPanel.add(engineExePanel);
 
 		
 		add(new ClosePanel(this,
 						   new ActionListener() {
 							   public void actionPerformed(ActionEvent e) {
-								   enginePath = enginePathPanel.getText();
-								   engineExecutable = engineExePanel.getText();
+								   enginePath = enginePathPanel.getPath();
+								   engineExecutable = engineExePanel.getPath();
 								   engineCommandline = cmdline.getText();
 							  }
 						   }),
@@ -86,10 +100,17 @@ public class EngineConfigDialog extends JDialog {
 		setVisible(true);
 	}
 
-	public String getEnginePath() {
+	private void warningDialogue(String title, String msg) {
+		JOptionPane.showMessageDialog(this, //no owner frame
+									  msg,
+									  title,
+									  JOptionPane.WARNING_MESSAGE);
+	}
+
+	public File getEnginePath() {
 		return enginePath;
 	}
-	public String getEngineExecutable() {
+	public File getEngineExecutable() {
 		return engineExecutable;
 	}
 	public String getCommandline() {

@@ -3,94 +3,132 @@ package de.haukerehfeld.quakeinjector.gui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.*;
 
 import java.io.File;
+import java.util.ArrayList;
+
+import de.haukerehfeld.quakeinjector.ChangeListenerList;
 
 /**
  * A Panel to input paths
  */
 public class JPathPanel extends JPanel {
+	private ArrayList<ErrorListener> errorListeners = new ArrayList<ErrorListener>();
+
+	private ChangeListenerList changeListeners = new ChangeListenerList();
 
 	private int inputLength = 32;
 
 	private JTextField path;
 
-	public JPathPanel(String defaultPath, String labelText, PathVerifier.Verifier check) {
+	private final File basePath;
+
+	private Verifier check;
+
+	public JPathPanel(Verifier check, String defaultPath) {
+		this(check, defaultPath, null);
+	}
+	
+	public JPathPanel(Verifier check,
+					  String defaultPath,
+					  File basePath) {
+		this.check = check;
+		this.basePath = basePath;
+		
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
-		path = new JTextField(defaultPath, inputLength);
-		PathVerifier verifier = new PathVerifier(check);
+		this.path = new JTextField(defaultPath, inputLength);
+		PathVerifier verifier = new PathVerifier();
 		path.setInputVerifier(verifier);
 		path.addActionListener(verifier);
-		JLabel label = new JLabel(labelText, SwingConstants.RIGHT);
-		
-		label.setLabelFor(path);
-		add(label);
 		add(path);
-	}
 
-	public String getText() {
-		return path.getText();
-	}
-
-
-	/**
-	 * Verify a JTextField for a correct path
-	 */
-	public static class PathVerifier extends InputVerifier implements ActionListener {
-		private Verifier check;
-
-		public PathVerifier(Verifier check) {
-			this.check = check;
-		}
 		
-		public boolean shouldYieldFocus(JComponent input) {
-			String path = getPath(input);
+	}
 
-			if (verify(path)) {
-				return true;
-			}
+	public File getPath() {
+		return getPath(this.path.getText());
+	}
+	
+	private File getPath(String path) {
+		File file;
+		if (basePath != null) {
+			file = new File(basePath.getAbsolutePath() + File.separator + path);
+		}
+		else {
+			file = new File(path);
+		}
+		return file;
+	}
 
-			JOptionPane.showMessageDialog(null, //no owner frame
-                                          path + " is not a valid directory that I can write to!", //text to display
-                                          "Invalid Path", //title
-                                          JOptionPane.WARNING_MESSAGE);
-
-            //Reinstall the input verifier.
-            input.setInputVerifier(this);
-
+	private boolean verifyBla(String path) {
+		if (path == null) {
 			return false;
 		}
 
-		//This method checks input, but should cause no side effects.
-		public boolean verify(JComponent input) {
-			return verify(getPath(input));
-		}
+		return this.check.verify(getPath(path));
+	}
 
-		public String getPath(JComponent input) {
-			if (input instanceof JTextField) {
-				return ((JTextField) input).getText();
-			}
+	private String getPathString(JComponent input) {
+		if (!(input instanceof JTextField)) {
 			return null;
 		}
+		return ((JTextField) input).getText();
+	}
 
-		public boolean verify(String path) {
-			if (path == null) {
-				return false;
+	public void addErrorListener(ErrorListener e) {
+		errorListeners.add(e);
+	}
+
+	private void notifyErrorListeners() {
+		ErrorEvent e = new SimpleErrorEvent(this);
+		for (ErrorListener l: errorListeners) {
+			l.errorOccured(e);
+		}
+	}
+
+	public void addChangeListener(ChangeListener l) {
+		changeListeners.addChangeListener(l);
+	}
+
+	private void notifyChangeListeners() {
+		changeListeners.notifyChangeListeners(this);
+	}
+
+	public interface Verifier {
+		public boolean verify(File file);
+	}
+
+
+	private class PathVerifier extends InputVerifier implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JTextField source = (JTextField)e.getSource();
+			shouldYieldFocus(source);
+			source.selectAll();
+		}
+
+		@Override
+		public boolean verify(JComponent input) {
+			return verifyBla(getPathString(input));
+		}
+
+		@Override
+		public boolean shouldYieldFocus(JComponent input) {
+			String path = getPathString(input);
+
+			if (verifyBla(path)) {
+				notifyChangeListeners();
+				return true;
 			}
-			
-			return this.check.verify(path);
-		}
 
-        public void actionPerformed(ActionEvent e) {
-			System.out.println("bla");
-            JTextField source = (JTextField)e.getSource();
-            shouldYieldFocus(source); //ignore return value
-            source.selectAll();
-        }
+			notifyErrorListeners();
 
-		public interface Verifier {
-			public boolean verify(String file);
+			//Reinstall the input verifier.
+			input.setInputVerifier(this);
+
+			return false;
 		}
-	}	
+	}
 }

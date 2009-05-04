@@ -69,23 +69,23 @@ public class QuakeInjector {
 	}
 
 
-	private void saveEngineConfig(String enginePath,
-								  String engineExecutable,
+	private void saveEngineConfig(File enginePath,
+								  File engineExecutable,
 								  String commandline) {
 		setEngineConfig(enginePath, engineExecutable, commandline);
 
-		config.setEnginePath(enginePath);
-		config.setEngineExecutable(engineExecutable);
+		config.setEnginePath(enginePath.getAbsolutePath());
+		config.setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable));
 		config.setEngineCommandline(commandline);
 		
 		config.write();
 	}
 
-	private void setEngineConfig(String enginePath,
-								 String engineExecutable,
+	private void setEngineConfig(File enginePath,
+								 File engineExecutable,
 								 String commandline) {
-		starter.setQuakeDirectory(new File(enginePath));
-		starter.setQuakeExecutable(new File(enginePath + File.separator + engineExecutable));
+		starter.setQuakeDirectory(enginePath);
+		starter.setQuakeExecutable(engineExecutable);
 		starter.setQuakeCommandline(commandline);
 	}
 	
