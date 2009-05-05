@@ -75,7 +75,27 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	}
 
 
+	public void installRequirements(MapInfo map) {
+		for (MapInfo requirement: map.getRequirements()) {
+			String id = requirement.getId();
+			if (installed.get(id) != null) {
+				System.out.print("Required package " + id + " already installed.");
+			}
+			else {
+				System.out.print("Required package " + id + " not installed. Installing...");
+				install(requirement);
+			}
+		}
+	}
+
 	public void install() {
+		install(selectedMap);
+	}
+
+	public void install(MapInfo selectedMap) {
+		installRequirements(selectedMap);
+		
+		
 		final Installer installer = new Installer(selectedMap,
 												  paths.getRepositoryUrl(selectedMap.getId()),
 												  paths.getQuakeBase());
@@ -160,11 +180,11 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	public void setMapInfo(MapInfo map) {
 		this.selectedMap = map;
 
-		refreshMapInfo();
+		refreshUi();
 
 	}
 
-	private void refreshMapInfo() {
+	private void refreshUi() {
 		installButton.setText(installText + " " + selectedMap.getId());
 
 		//we do this regardless of displaying the list, because we can
@@ -197,6 +217,6 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	}
 
 	public void stateChanged(ChangeEvent e) {
-		refreshMapInfo();
+		refreshUi();
 	}
 }
