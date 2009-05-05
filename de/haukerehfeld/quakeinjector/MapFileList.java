@@ -18,7 +18,7 @@ public class MapFileList implements Iterable<String> {
 	}
 
 	public void add(String file) {
-		files.add(file);
+		files.add(file.replace('\\', '/'));
 	}
 
 	/**
