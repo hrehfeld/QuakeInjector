@@ -170,7 +170,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		//we do this regardless of displaying the list, because we can
 		//then simply get the selection from the list even if there's
 		//only one option
-		ArrayList<String> maps = selectedMap.getStartmaps();
+		java.util.List<String> maps = selectedMap.getStartmaps();
 		startmaps.removeAllItems();
 		for (String startmap: maps) {
 			startmaps.addItem(startmap);

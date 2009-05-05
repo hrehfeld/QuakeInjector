@@ -1,6 +1,7 @@
 package de.haukerehfeld.quakeinjector;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -37,7 +38,8 @@ public class MapInfo {
 
 	private String commandline;
 
-	private ArrayList<String> startmaps;
+	private List<String> startmaps;
+	private List<MapInfo> requirements;
 
 	public MapInfo(String id,
 				   String author,
@@ -45,7 +47,7 @@ public class MapInfo {
 				   int size,
 				   Date date,
 				   boolean isInstalled) {
-		this(id, author, title, size, date, isInstalled, null, null, null);
+		this(id, author, title, size, date, isInstalled, null, null, null, null);
 	}
 
 	public MapInfo(String id,
@@ -56,7 +58,8 @@ public class MapInfo {
 				   boolean isInstalled,
 				   String relativeBaseDir,
 				   String commandline,
-				   ArrayList<String> startmaps) {
+				   List<String> startmaps,
+				   List<MapInfo> requirements) {
 		this.id = id;
 		this.author = author;
 		this.title = title;
@@ -66,6 +69,7 @@ public class MapInfo {
 		this.relativeBaseDir = relativeBaseDir;
 		this.commandline = commandline;
 		this.startmaps = startmaps;
+		this.requirements = requirements;
 	}
 	
 
@@ -98,7 +102,7 @@ public class MapInfo {
 		return commandline;
 	}
 
-	public ArrayList<String> getStartmaps() {
+	public List<String> getStartmaps() {
 		return startmaps;
 	}
 
@@ -110,6 +114,14 @@ public class MapInfo {
 		isInstalled = installed;
 		
 		listeners.notifyChangeListeners(this);
+	}
+
+	public void setRequirements(List<MapInfo> requirements) {
+		this.requirements = requirements;
+	}
+
+	public List<MapInfo> getRequirements() {
+		return this.requirements;
 	}
 
 }

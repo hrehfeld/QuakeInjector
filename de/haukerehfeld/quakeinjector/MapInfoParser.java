@@ -11,13 +11,18 @@ import java.util.GregorianCalendar;
 import java.util.Date;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MapInfoParser implements java.io.Serializable {
 	/**
 	 * Parse the complete document
 	 */
-	public ArrayList<MapInfo> parse() {
-		ArrayList<MapInfo> mapinfos = new ArrayList<MapInfo>();
+	public List<MapInfo> parse() {
+		HashMap<String,MapInfo> mapinfos = new HashMap<String,MapInfo>();
+		Map<MapInfo,List<String>> requirements = new HashMap<MapInfo,List<String>>();
+		List<MapInfo> mapList = new ArrayList<MapInfo>(mapinfos.size());
 
 		try {
 			Document document = XmlUtils.getDocument(
@@ -26,14 +31,14 @@ public class MapInfoParser implements java.io.Serializable {
 			Element files = document.getDocumentElement();
 //			System.out.println(files.getTagName());
 
-			NodeList list = files.getChildNodes();
 
-			for (int i = 0; i < list.getLength(); ++i) {
-				Node file = list.item(i);
+			for (Node file: XmlUtils.iterate(files.getChildNodes())) {
+				if (XmlUtils.isElement(file)) {
+					MapInfo mapinfo = parseMapInfo((Element) file, requirements);
+					mapinfos.put(mapinfo.getId(), mapinfo);
 
-				if (file.getNodeType() == Node.ELEMENT_NODE) {
-					MapInfo mapinfo = parseMapInfo((Element) file);
-					mapinfos.add(mapinfo);
+					//add to final list
+					mapList.add(mapinfo);
 				}
 				/** @todo 2009-03-29 01:36 hrehfeld    find out why this happens */
 				else {
@@ -49,13 +54,31 @@ public class MapInfoParser implements java.io.Serializable {
 			System.out.println("Couldn't parse xml!");
 		}
 
-		return mapinfos;
+		// we still need to resolve requirements
+		for (MapInfo currentMap: mapList) {
+			List<String> reqs = requirements.get(currentMap);
+
+			List<MapInfo> resolvedRequirements = new ArrayList<MapInfo>(reqs.size());
+			for (String s: reqs) {
+				MapInfo requiredMapInfo = mapinfos.get(s);
+				if (requiredMapInfo == null) {
+					System.out.println("Warning: requirement " + s
+									   + " couldn't be found in the package list. "
+									   + currentMap.getId() + " requires it and may not work correctly");
+					continue;
+				}
+				resolvedRequirements.add(requiredMapInfo);
+			}
+			currentMap.setRequirements(resolvedRequirements);
+		}
+
+		return mapList;
 	}
 
 	/**
 	 * Parse a single MapInfo/file entry
 	 */
-	private MapInfo parseMapInfo(Element file) {
+	private MapInfo parseMapInfo(Element file, Map<MapInfo,List<String>> reqResolve) {
 		String id = file.getAttribute("id");
 
 		String title = XmlUtils.getFirstElement(file, "title").getTextContent().trim();
@@ -76,15 +99,13 @@ public class MapInfoParser implements java.io.Serializable {
 		String cmdline = null;
 		ArrayList<String> startmaps = new ArrayList<String>();
 
+		ArrayList<String> requirements = new ArrayList<String>();
+
 		// parse techinfo stuff
 		Element techinfo = XmlUtils.getFirstElement(file, "techinfo");
 		if (techinfo != null) {
-			NodeList list = techinfo.getChildNodes();
-
-			for (int i = 0; i < list.getLength(); ++i) {
-				Node node = list.item(i);
-
-				if (node.getNodeType() != Node.ELEMENT_NODE) {
+			for (Node node: XmlUtils.iterate(techinfo.getChildNodes())) {
+				if (!XmlUtils.isElement(node)) {
 					continue;
 				}
 				Element info = (Element) node;
@@ -98,6 +119,14 @@ public class MapInfoParser implements java.io.Serializable {
 				else if (info.getTagName().equals("startmap")) {
 					startmaps.add(info.getTextContent());
 				}
+				else if (info.getTagName().equals("requirements")) {
+					for (Node reqFile: XmlUtils.iterate(info.getChildNodes())) {
+						if (XmlUtils.isElement(reqFile)) {
+							String r = ((Element) reqFile).getAttribute("id");
+							requirements.add(r);
+						}
+					}
+				}
 			}
 		}
 
@@ -110,15 +139,18 @@ public class MapInfoParser implements java.io.Serializable {
 			startmaps.add(id);
 		}
 
-		return new MapInfo(id,
-						   author,
-						   title,
-						   size,
-						   MapInfoParser.parseDate(date),
-						   false,
-						   relativeBaseDir,
-						   cmdline,
-						   startmaps);
+		MapInfo result = new MapInfo(id,
+									 author,
+									 title,
+									 size,
+									 MapInfoParser.parseDate(date),
+									 false,
+									 relativeBaseDir,
+									 cmdline,
+									 startmaps,
+									 null);
+		reqResolve.put(result, requirements);
+		return result;
 	}
 
 	/**

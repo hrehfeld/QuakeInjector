@@ -3,6 +3,7 @@ package de.haukerehfeld.quakeinjector;
 import java.util.HashMap;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import java.io.File;
 
@@ -86,7 +87,7 @@ public class InstalledMaps extends HashMap<String, MapFileList> {
 		remove(files.getId());
 	}
 
-	public void set(ArrayList<MapInfo> maps) {
+	public void set(List<MapInfo> maps) {
 		for (MapInfo m: maps) {
 			if (containsKey(m.getId())) {
 				m.setInstalled(true);

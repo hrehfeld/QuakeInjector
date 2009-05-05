@@ -6,6 +6,7 @@ import org.w3c.dom.*;
 import java.io.*;
 
 import java.lang.RuntimeException;
+import java.util.Iterator;
 
 public class XmlUtils {
 	/**
@@ -20,7 +21,7 @@ public class XmlUtils {
 			return null;
 		}
 		
-		if (node.getNodeType() != Node.ELEMENT_NODE) {
+		if (!isElement(node)) {
 			throw new RuntimeException("XML Parsing error: " + name + " is not an Element");
 		}
 
@@ -32,6 +33,7 @@ public class XmlUtils {
 		       org.xml.sax.SAXException {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setIgnoringElementContentWhitespace(true);
 			DocumentBuilder db = dbf.newDocumentBuilder();
 	 
 			Document doc = db.parse(file);
@@ -41,5 +43,40 @@ public class XmlUtils {
 			return null;
 		}
 	}
-	
+
+	public static java.lang.Iterable<Node> iterate(NodeList list) {
+		return new NodeListIterator(list);
+	}
+
+	public static class NodeListIterator implements Iterator<Node>,
+		java.lang.Iterable<Node> {
+		private NodeList list;
+		private int i = 0;
+
+		public NodeListIterator(NodeList list) {
+			this.list = list;
+		}
+
+		public Node next() {
+			i++;
+
+			return list.item(i);
+		}
+
+		public boolean hasNext() {
+			return i + 1 < list.getLength();
+		}
+
+		public void remove() {
+			throw new java.lang.UnsupportedOperationException();
+		}
+
+		public Iterator<Node> iterator() {
+			return this;
+		}
+	}
+
+	public static boolean isElement(Node n) {
+		return (n.getNodeType() == Node.ELEMENT_NODE);
+	}
 }

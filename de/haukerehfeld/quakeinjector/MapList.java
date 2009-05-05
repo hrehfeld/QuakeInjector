@@ -14,24 +14,25 @@ import javax.swing.event.TableModelEvent;
 public class MapList extends AbstractTableModel implements ChangeListener {
 	private ChangeListenerList listeners = new ChangeListenerList();
 	
-	private ArrayList<MapInfo> data;
+	private List<MapInfo> data;
 
 	private String[] columnNames = {"Name",
 									"Title",
 									"Author",
 									"Releasedate",
-									"Installed"};
+									"Installed",
+									"Requirements"};
 
 	public MapList() {
 		data = new ArrayList<MapInfo>();
 	}
 
-	public MapList(ArrayList<MapInfo> data) {
+	public MapList(List<MapInfo> data) {
 		setMapList(data);
 	}
 
 
-	public void setMapList(ArrayList<MapInfo> data) {
+	public void setMapList(List<MapInfo> data) {
 		this.data = data;
 
 		for (MapInfo m: data) {
@@ -64,6 +65,12 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 		case 2: return info.getAuthor();
 		case 3: return info.getDate();
 		case 4: return new Boolean(info.isInstalled());
+		case 5:
+			String result = "";
+			for (MapInfo m: info.getRequirements()) {
+				result += m.getId() + ", ";
+			}
+			return result;
 			/*
 			 * Should never be used
 			 */

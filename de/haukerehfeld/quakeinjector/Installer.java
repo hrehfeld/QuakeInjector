@@ -34,6 +34,14 @@ public class Installer extends SwingWorker<MapFileList, Void> {
 	public MapFileList doInBackground() {
 		try {
 			System.out.println("Installing " + map.getId());
+
+// 			for (String requirement: map.getRequirements()) {
+// 				System.out.print("Required: ");
+
+// 				new Installer
+// 			}
+
+			
 			MapFileList files = download(url);
 
 			return files;

@@ -1,10 +1,14 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.awt.*;
+//import java.awt.*;
+import java.awt.Container;
+import java.awt.Dimension;
+
 import java.awt.event.*;
 import javax.swing.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import java.io.File;
 
@@ -116,9 +120,9 @@ public class QuakeInjector {
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
 
 		final MapInfoParser parser = new MapInfoParser();
-		SwingWorker<ArrayList<MapInfo>,Void> parse = new SwingWorker<ArrayList<MapInfo>, Void>() {
+		SwingWorker<List<MapInfo>,Void> parse = new SwingWorker<List<MapInfo>, Void>() {
 			@Override
-			public ArrayList<MapInfo> doInBackground() {
+			public List<MapInfo> doInBackground() {
 				try {
 					installedMaps.read();
 				}
@@ -126,7 +130,7 @@ public class QuakeInjector {
 					/** @todo 2009-04-28 19:00 hrehfeld    better error reporting? */
 					System.out.println(e.getMessage());
 				}
-				ArrayList<MapInfo> maps = parser.parse();
+				java.util.List<MapInfo> maps = parser.parse();
 				installedMaps.set(maps);
 				return maps;
 			}
