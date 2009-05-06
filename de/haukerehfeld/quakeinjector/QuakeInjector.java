@@ -6,6 +6,9 @@ import java.awt.Dimension;
 
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.table.TableRowSorter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,20 +98,50 @@ public class QuakeInjector {
 	
 
 	private void addMainPane(Container panel) {
+		JPanel mainPanel = new JPanel();
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 
 		final MapList maplist = new MapList();
 		
 		//create a table
 		final JTable table = new JTable(maplist);
+		final TableRowSorter<MapList> sorter = new TableRowSorter<MapList>(maplist);
+		table.setRowSorter(sorter);
+		
 		table.setPreferredScrollableViewportSize(new Dimension(500, 600));
 		table.setFillsViewportHeight(true);
 		table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
+		{
+			JPanel filterPanel = new JPanel(new SpringLayout());
+			filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.LINE_AXIS));
+			JLabel filterText = new JLabel("Filter: ", SwingConstants.TRAILING);
+			filterPanel.add(filterText);
+
+			final JTextField filter = new JTextField();
+			filter.getDocument().addDocumentListener(
+                new DocumentListener() {
+                    public void changedUpdate(DocumentEvent e) { filter(); }
+                    public void insertUpdate(DocumentEvent e) { filter(); }
+                    public void removeUpdate(DocumentEvent e) { filter(); }
+
+					private void filter() {
+						maplist.filter(sorter, filter.getText());
+					}
+                });
+			filterText.setLabelFor(filter);
+			filterPanel.add(filter);
+
+			mainPanel.add(filterPanel);
+
+		}
 
 		//Create the scroll pane and add the table to it.
 		JScrollPane scrollPane = new JScrollPane(table);
 
-		panel.add(scrollPane);
+
+		mainPanel.add(scrollPane);
+		panel.add(mainPanel);
 
 		final InstalledMaps installedMaps = new InstalledMaps();
 

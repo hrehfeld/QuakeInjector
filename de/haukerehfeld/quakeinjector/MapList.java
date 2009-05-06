@@ -1,27 +1,38 @@
 package de.haukerehfeld.quakeinjector;
 
 import javax.swing.JTable;
+import javax.swing.table.TableRowSorter;
+import javax.swing.RowFilter;
 import javax.swing.table.AbstractTableModel;
 
 import java.util.GregorianCalendar;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
 
 public class MapList extends AbstractTableModel implements ChangeListener {
-	private ChangeListenerList listeners = new ChangeListenerList();
+	private static final int name = 0;
+	private static final int title = 1;
+	private static final int author = 2;
+	private static final int releasedate = 3;
+	private static final int installed = 4;
+	private static final int requirements = 5;
 	
-	private List<MapInfo> data;
-
 	private String[] columnNames = {"Name",
 									"Title",
 									"Author",
 									"Releasedate",
 									"Installed",
 									"Requirements"};
+
+	private ChangeListenerList listeners = new ChangeListenerList();
+	
+	private List<MapInfo> data;
+
 
 	public MapList() {
 		data = new ArrayList<MapInfo>();
@@ -60,12 +71,12 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 
 	public Object getColumnData(int col, MapInfo info) {
 		switch (col) {
-		case 0: return info.getId();
-		case 1: return info.getTitle();
-		case 2: return info.getAuthor();
-		case 3: return info.getDate();
-		case 4: return new Boolean(info.isInstalled());
-		case 5:
+		case name: return info.getId();
+		case title: return info.getTitle();
+		case author: return info.getAuthor();
+		case releasedate: return info.getDate();
+		case installed: return new Boolean(info.isInstalled());
+		case requirements:
 			String result = "";
 			for (MapInfo m: info.getRequirements()) {
 				result += m.getId() + ", ";
@@ -106,6 +117,39 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 		
 	}
 
+
+	/** 
+	 * Update the row filter regular expression from the expression in
+	 * the text box.
+	 */
+	public void filter(TableRowSorter<MapList> sorter, final String filterText) {
+		//If current expression doesn't parse, don't update.
+		final Pattern pattern;
+		try {
+			pattern = Pattern.compile(".*" + filterText + ".*",
+									  Pattern.CASE_INSENSITIVE + Pattern.UNICODE_CASE);
+		} catch (java.util.regex.PatternSyntaxException e) {
+			return;
+		}
+
+		System.out.println(pattern.matcher("trinca").matches());
+		
+
+		RowFilter<MapList, Integer> rf = new RowFilter<MapList,Integer>() {
+			public boolean include(Entry<? extends MapList, ? extends Integer> entry) {
+				int[] columnsToCheck = { name, title, author };
+				
+				for (int i: columnsToCheck) {
+					if (pattern.matcher(entry.getStringValue(i)).matches()) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+		sorter.setRowFilter(rf);
+	}					
+	
 
 //     /*
 //      * Don't need to implement this method unless your table's
