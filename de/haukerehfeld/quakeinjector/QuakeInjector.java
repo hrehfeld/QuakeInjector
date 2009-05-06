@@ -148,8 +148,10 @@ public class QuakeInjector {
 		MapInfoPanel interactionPanel = new MapInfoPanel(paths, installedMaps, starter);
 		maplist.addChangeListener(interactionPanel);
 		panel.add(interactionPanel);
-		ShowMapInfoSelectionHandler selectionHandler = new ShowMapInfoSelectionHandler(interactionPanel,
-																					   maplist);
+		ShowMapInfoSelectionHandler selectionHandler
+			= new ShowMapInfoSelectionHandler(interactionPanel,
+											  maplist,
+											  table);
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
 
 		final MapInfoParser parser = new MapInfoParser();

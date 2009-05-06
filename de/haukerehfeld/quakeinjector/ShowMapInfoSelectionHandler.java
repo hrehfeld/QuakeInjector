@@ -14,9 +14,12 @@ class ShowMapInfoSelectionHandler implements ListSelectionListener {
 
 	private MapList list;
 
-	public ShowMapInfoSelectionHandler(MapInfoPanel panel, MapList list) {
+	private JTable table;
+
+	public ShowMapInfoSelectionHandler(MapInfoPanel panel, MapList list, JTable table) {
 		this.panel = panel;
 		this.list = list;
+		this.table = table;
 	}
 
 	/**
@@ -26,7 +29,7 @@ class ShowMapInfoSelectionHandler implements ListSelectionListener {
 		ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 
 		if (!lsm.isSelectionEmpty()) {
-			int selection = getSelection(lsm);
+			int selection = table.convertRowIndexToModel(getSelection(lsm));
 			setMapInfo(selection);
 		}
 	}

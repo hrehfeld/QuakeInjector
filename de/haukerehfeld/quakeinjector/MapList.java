@@ -132,9 +132,6 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 			return;
 		}
 
-		System.out.println(pattern.matcher("trinca").matches());
-		
-
 		RowFilter<MapList, Integer> rf = new RowFilter<MapList,Integer>() {
 			public boolean include(Entry<? extends MapList, ? extends Integer> entry) {
 				int[] columnsToCheck = { name, title, author };
