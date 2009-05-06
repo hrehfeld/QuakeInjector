@@ -123,25 +123,35 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 	 * the text box.
 	 */
 	public void filter(TableRowSorter<MapList> sorter, final String filterText) {
-		//If current expression doesn't parse, don't update.
-		final Pattern pattern;
-		try {
-			pattern = Pattern.compile(".*" + filterText + ".*",
-									  Pattern.CASE_INSENSITIVE + Pattern.UNICODE_CASE);
-		} catch (java.util.regex.PatternSyntaxException e) {
-			return;
+		final int[] columnsToCheck = { name, title, author, releasedate };
+
+		String[] filterTexts = filterText.split(" ");
+
+		final List<Pattern> patterns = new ArrayList<Pattern>(filterTexts.length);
+		for (String filter: filterTexts) {
+			try {
+				patterns.add(Pattern.compile(".*" + filter + ".*",
+											 Pattern.CASE_INSENSITIVE + Pattern.UNICODE_CASE));
+			} catch (java.util.regex.PatternSyntaxException e) {
+				continue;
+			}
 		}
 
 		RowFilter<MapList, Integer> rf = new RowFilter<MapList,Integer>() {
 			public boolean include(Entry<? extends MapList, ? extends Integer> entry) {
-				int[] columnsToCheck = { name, title, author };
-				
-				for (int i: columnsToCheck) {
-					if (pattern.matcher(entry.getStringValue(i)).matches()) {
-						return true;
+				//match all patters in at least one column
+				for (Pattern pattern: patterns) {
+					boolean matches = false;
+					for (int i: columnsToCheck) {
+						if (pattern.matcher(entry.getStringValue(i)).matches()) {
+							matches = true;
+						}
+					}
+					if (!matches) {
+						return false;
 					}
 				}
-				return false;
+				return true;
 			}
 		};
 		sorter.setRowFilter(rf);
