@@ -11,6 +11,8 @@ import de.haukerehfeld.quakeinjector.gui.*;
 import java.io.*;
 
 public class EngineConfigDialog extends JDialog {
+	private final static String windowTitle = "Engine Configuration";
+
 	private final ChangeListenerList listeners = new ChangeListenerList();
 	private final JPathPanel enginePath;
 	private final JPathPanel engineExecutable;
@@ -20,7 +22,7 @@ public class EngineConfigDialog extends JDialog {
 							  String enginePathDefault,
 							  String engineExeDefault,
 							  String cmdlineDefault) {
-		super(frame, "Engine Configuration", true);
+		super(frame, windowTitle, true);
 
 		JLabel description = new JLabel("Configure engine specifics", SwingConstants.CENTER);
 		description.setLabelFor(this);
