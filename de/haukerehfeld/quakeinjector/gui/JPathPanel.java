@@ -9,6 +9,9 @@ import java.io.File;
 import java.util.ArrayList;
 
 import de.haukerehfeld.quakeinjector.ChangeListenerList;
+import de.haukerehfeld.quakeinjector.RelativePath;
+import javax.swing.filechooser.*;
+import javax.swing.JFileChooser;
 
 /**
  * A Panel to input paths
@@ -23,17 +26,32 @@ public class JPathPanel extends JPanel {
 
 	private final JTextField path;
 	private final JLabel errorLabel;
+	private final JButton fileChooserButton;
+	private final JFileChooser chooser;
 
 
 	private final Verifier check;
 
-	public JPathPanel(Verifier check, String defaultPath) {
-		this(check, defaultPath, null);
+	/**
+	 * @param filesAndOrDirectories what kind of files can be selected with the filechooser:
+	 *        one of JFileChooser.DIRECTORIES_ONLY,
+	 *               JFileChooser.FILES_AND_DIRECTORIES,
+	 *               JFileChooser.FILES_ONLY
+	 */
+	public JPathPanel(Verifier check, String defaultPath, int filesAndOrDirectories) {
+		this(check, defaultPath, null, filesAndOrDirectories);
 	}
-	
+
+	/**
+	 * @param filesAndOrDirectories what kind of files can be selected with the filechooser:
+	 *        one of JFileChooser.DIRECTORIES_ONLY,
+	 *               JFileChooser.FILES_AND_DIRECTORIES,
+	 *               JFileChooser.FILES_ONLY
+	 */
 	public JPathPanel(Verifier check,
 					  String defaultPath,
-					  File basePath) {
+					  File basePath,
+					  int filesAndOrDirectories) {
 		this.check = check;
 		this.basePath = basePath;
 		
@@ -47,6 +65,23 @@ public class JPathPanel extends JPanel {
 
 		this.errorLabel = new JLabel();
 		add(errorLabel);
+
+		this.chooser = new JFileChooser(getPath());
+		chooser.setFileSelectionMode(filesAndOrDirectories);
+		
+		this.fileChooserButton = new JButton("Select");
+        fileChooserButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					int returnVal = chooser.showOpenDialog(JPathPanel.this);
+
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						File file = chooser.getSelectedFile();
+
+						setPath(file);
+					}
+				}
+			});
+		add(fileChooserButton);
 	}
 
 	/**
@@ -65,6 +100,7 @@ public class JPathPanel extends JPanel {
 			return false;
 		}
 		else {
+			chooser.setCurrentDirectory(getPath());
 			notifyChangeListeners();
 			return true;
 		}
@@ -78,8 +114,26 @@ public class JPathPanel extends JPanel {
 	}
 	
 	public void setBasePath(File basePath) {
+		File oldExe = getPath();
 		this.basePath = basePath;
+		this.path.setText(RelativePath.getRelativePath(basePath, oldExe));
 		verify();
+	}
+
+	public void setPath(String path) {
+		setPath(new File(path));
+	}
+	
+	public void setPath(File path) {
+		String pathString;
+		if (basePath != null) {
+			pathString = RelativePath.getRelativePath(basePath, path);
+		}
+		else {
+			pathString = path.getAbsolutePath();
+		}
+
+		this.path.setText(pathString);
 	}
 
 	/**

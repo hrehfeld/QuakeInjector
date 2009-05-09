@@ -63,7 +63,8 @@ public class EngineConfigDialog extends JDialog {
 					return null;
 				}
 			},
-			enginePathDefault);
+			enginePathDefault,
+			javax.swing.JFileChooser.DIRECTORIES_ONLY);
 		configPanel.add(enginePath);
 		
 		//"Quake Executable",
@@ -89,7 +90,8 @@ public class EngineConfigDialog extends JDialog {
 				}
 			},
 			engineExeDefault,
-			new File(enginePathDefault));
+			new File(enginePathDefault),
+			javax.swing.JFileChooser.FILES_ONLY);
 		configPanel.add(engineExecutable);
 
 		final ChangeListener enableOkay = new ChangeListener() {
