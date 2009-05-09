@@ -14,17 +14,18 @@ import de.haukerehfeld.quakeinjector.ChangeListenerList;
  * A Panel to input paths
  */
 public class JPathPanel extends JPanel {
-	private ArrayList<ErrorListener> errorListeners = new ArrayList<ErrorListener>();
+	private final ArrayList<ErrorListener> errorListeners = new ArrayList<ErrorListener>();
+	private final ChangeListenerList changeListeners = new ChangeListenerList();
 
-	private ChangeListenerList changeListeners = new ChangeListenerList();
+	private final int inputLength = 32;
 
-	private int inputLength = 32;
+	private File basePath;
 
-	private JTextField path;
+	private final JTextField path;
+	private final JLabel errorLabel;
 
-	private final File basePath;
 
-	private Verifier check;
+	private final Verifier check;
 
 	public JPathPanel(Verifier check, String defaultPath) {
 		this(check, defaultPath, null);
@@ -41,17 +42,61 @@ public class JPathPanel extends JPanel {
 		this.path = new JTextField(defaultPath, inputLength);
 		PathVerifier verifier = new PathVerifier();
 		path.setInputVerifier(verifier);
-		path.addActionListener(verifier);
+		path.getDocument().addDocumentListener(verifier);
 		add(path);
 
-		
+		this.errorLabel = new JLabel();
+		add(errorLabel);
 	}
 
-	public File getPath() {
-		return getPath(this.path.getText());
+	/**
+	 * Just checks if the current path is valid without notifying listeners
+	 */
+	public boolean verifies() {
+		return check();
+	}
+
+	/**
+	 * Check if current path is valid and notify listeners
+	 */
+	public boolean verify() {
+		if (!check()) {
+			notifyErrorListeners();
+			return false;
+		}
+		else {
+			notifyChangeListeners();
+			return true;
+		}
+	}
+
+
+	private boolean check() {
+		File f = getPath();
+		errorLabel.setText(check.errorMessage(f));
+		return this.check.verify(f);
 	}
 	
-	private File getPath(String path) {
+	public void setBasePath(File basePath) {
+		this.basePath = basePath;
+		verify();
+	}
+
+	/**
+	 * get a file representing what this pathpanel is pointing to
+	 */
+	public File getPath() {
+		if (this.path == null) {
+			System.out.println("wtf");
+		}
+		/*
+		 * Build a file object from - if set - the basepath and the textfield content
+		 */
+		String path = this.path.getText();
+		if (path == null) {
+			path = "";
+		}
+
 		File file;
 		if (basePath != null) {
 			file = new File(basePath.getAbsolutePath() + File.separator + path);
@@ -62,20 +107,6 @@ public class JPathPanel extends JPanel {
 		return file;
 	}
 
-	private boolean verifyBla(String path) {
-		if (path == null) {
-			return false;
-		}
-
-		return this.check.verify(getPath(path));
-	}
-
-	private String getPathString(JComponent input) {
-		if (!(input instanceof JTextField)) {
-			return null;
-		}
-		return ((JTextField) input).getText();
-	}
 
 	public void addErrorListener(ErrorListener e) {
 		errorListeners.add(e);
@@ -96,39 +127,42 @@ public class JPathPanel extends JPanel {
 		changeListeners.notifyChangeListeners(this);
 	}
 
+	/**
+	 * Hack: Because i can't call verify() from the inner class that has @Override verify(Stuff s);
+	 */
+	private boolean verify_() {
+		return verify();
+	}
+	
+	
+
 	public interface Verifier {
 		public boolean verify(File file);
+		public String errorMessage(File file);
 	}
 
 
-	private class PathVerifier extends InputVerifier implements ActionListener {
+	private class PathVerifier extends InputVerifier implements DocumentListener {
 		@Override
-		public void actionPerformed(ActionEvent e) {
-			JTextField source = (JTextField)e.getSource();
-			shouldYieldFocus(source);
-			source.selectAll();
+		public void insertUpdate(DocumentEvent e) {
+			verify_();
 		}
-
+		@Override
+		public void removeUpdate(DocumentEvent e) {
+			verify_();
+		}
+		@Override
+		public void changedUpdate(DocumentEvent e) {
+			verify_();
+		}
 		@Override
 		public boolean verify(JComponent input) {
-			return verifyBla(getPathString(input));
+			return verify_();
 		}
-
 		@Override
 		public boolean shouldYieldFocus(JComponent input) {
-			String path = getPathString(input);
-
-			if (verifyBla(path)) {
-				notifyChangeListeners();
-				return true;
-			}
-
-			notifyErrorListeners();
-
-			//Reinstall the input verifier.
-			input.setInputVerifier(this);
-
-			return false;
+			verify_();
+			return true;
 		}
 	}
 }

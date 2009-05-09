@@ -8,6 +8,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.TableRowSorter;
 
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ public class QuakeInjector {
 		configM.add(engine);
 		engine.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					EngineConfigDialog d = new EngineConfigDialog(frame,
+					final EngineConfigDialog d = new EngineConfigDialog(frame,
 																  config.getEnginePath(),
 																  config.getEngineExecutable(),
 																  config.getEngineCommandline());
@@ -104,13 +106,8 @@ public class QuakeInjector {
 		final MapList maplist = new MapList();
 		
 		//create a table
-		final JTable table = new JTable(maplist);
-		final TableRowSorter<MapList> sorter = new TableRowSorter<MapList>(maplist);
-		table.setRowSorter(sorter);
-		
-		table.setPreferredScrollableViewportSize(new Dimension(500, 600));
-		table.setFillsViewportHeight(true);
-		table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+		final PackageTable table =  new PackageTable(maplist);
+
 
 		{
 			JPanel filterPanel = new JPanel(new SpringLayout());
@@ -126,7 +123,7 @@ public class QuakeInjector {
                     public void removeUpdate(DocumentEvent e) { filter(); }
 
 					private void filter() {
-						maplist.filter(sorter, filter.getText());
+						maplist.filter(table.getRowSorter(), filter.getText());
 					}
                 });
 			filterText.setLabelFor(filter);
@@ -135,6 +132,7 @@ public class QuakeInjector {
 			mainPanel.add(filterPanel);
 
 		}
+		
 
 		//Create the scroll pane and add the table to it.
 		JScrollPane scrollPane = new JScrollPane(table);

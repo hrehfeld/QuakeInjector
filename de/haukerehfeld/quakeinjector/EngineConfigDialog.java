@@ -3,25 +3,24 @@ package de.haukerehfeld.quakeinjector;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import de.haukerehfeld.quakeinjector.gui.*;
 
 import java.io.*;
 
 public class EngineConfigDialog extends JDialog {
-	private File enginePath;
-	private File engineExecutable;
-	private String engineCommandline;
+	private final ChangeListenerList listeners = new ChangeListenerList();
+	private final JPathPanel enginePath;
+	private final JPathPanel engineExecutable;
+	private final JTextField engineCommandline;
 	
 	public EngineConfigDialog(final JFrame frame,
 							  String enginePathDefault,
 							  String engineExeDefault,
 							  String cmdlineDefault) {
 		super(frame, "Engine Configuration", true);
-
-		this.enginePath = new File(enginePathDefault);
-		this.engineExecutable = new File(enginePathDefault + File.separator + engineExeDefault);
-		this.engineCommandline = cmdlineDefault;
 
 		JLabel description = new JLabel("Configure engine specifics", SwingConstants.CENTER);
 		description.setLabelFor(this);
@@ -32,36 +31,41 @@ public class EngineConfigDialog extends JDialog {
 		configPanel.setLayout(new BoxLayout(configPanel, BoxLayout.PAGE_AXIS));
 		add(configPanel, BorderLayout.CENTER);
 
-		final JTextField cmdline;
-		//grid panel for input/label
-		cmdline = new JTextField(cmdlineDefault, 40);
-		LabelFieldPanel cmdlinePanel = new LabelFieldPanel("Quake commandline options",
-														   cmdline);
-		configPanel.add(cmdlinePanel);
+		final JButton okay = new JButton("Save Changes");
+		final JButton cancel = new JButton("Cancel");
 
+		{
+			this.engineCommandline = new JTextField(cmdlineDefault, 40);
+			LabelFieldPanel cmdlinePanel = new LabelFieldPanel("Quake commandline options",
+															   engineCommandline);
+			configPanel.add(cmdlinePanel);
+		}
 		//"Path to quake directory",
-		final JPathPanel enginePathPanel = new JPathPanel(new JPathPanel.Verifier() {
+		enginePath = new JPathPanel(new JPathPanel.Verifier() {
 				public boolean verify(File f) {
 					return (f.exists()
 							&& f.isDirectory()
 							&& f.canRead()
 							&& f.canWrite());
 				}
+				public String errorMessage(File f) {
+					if (!f.exists()) {
+						return "Doesn't exist!";
+					}
+					else if (!f.isDirectory()) {
+						return "Is not a directory!";
+					}
+					else if (!f.canWrite()) {
+						return "Cannot be written to!";
+					}
+					return null;
+				}
 			},
 			enginePathDefault);
-		enginePathPanel.addErrorListener(new ErrorListener() {
-				public void errorOccured(ErrorEvent e) {
-					String msg = ((JPathPanel) e.getSource()).getPath()
-						+ " is not a valid directory that I can write to!";
-					String title = "Invalid Path";
-
-					warningDialogue(title, msg);
-				}
-			});
-		configPanel.add(enginePathPanel);
-
+		configPanel.add(enginePath);
+		
 		//"Quake Executable",
-		final JPathPanel engineExePanel = new JPathPanel(
+		engineExecutable = new JPathPanel(
 			new JPathPanel.Verifier() {
 				public boolean verify(File exe) {
 					return (exe.exists()
@@ -69,32 +73,76 @@ public class EngineConfigDialog extends JDialog {
 							&& exe.canRead()
 							&& exe.canExecute());
 				}
+				public String errorMessage(File f) {
+					if (!f.exists()) {
+						return "Doesn't exist!";
+					}
+					else if (f.isDirectory()) {
+						return "Must be an executable file!";
+					}
+					else if (!f.canExecute()) {
+						return "Cannot be executed!";
+					}
+					return null;
+				}
 			},
 			engineExeDefault,
 			new File(enginePathDefault));
-				
-		engineExePanel.addErrorListener(new ErrorListener() {
-				public void errorOccured(ErrorEvent e) {
-					String msg = ((JPathPanel) e.getSource()).getPath()
-						+ " is not a valid file that I can execute!";
-					String title = "Invalid Path";
+		configPanel.add(engineExecutable);
 
-					warningDialogue(title, msg);
+		final ChangeListener enableOkay = new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					if (enginePath.verifies() && engineExecutable.verifies()) {
+						okay.setEnabled(true);
+					}
+				}
+			};
+
+		{
+			enginePath.addErrorListener(new ErrorListener() {
+					public void errorOccured(ErrorEvent e) {
+						okay.setEnabled(false);
+					}
+				});
+			//change basepath of the exe when quakedir changes
+			enginePath.addChangeListener(new ChangeListener() {
+					public void stateChanged(ChangeEvent e) {
+						engineExecutable.setBasePath(enginePath.getPath());
+
+						enableOkay.stateChanged(e);
+					}
+				});
+		}
+		{
+			engineExecutable.addErrorListener(new ErrorListener() {
+					public void errorOccured(ErrorEvent e) {
+						okay.setEnabled(false);
+					}
+				});
+			engineExecutable.addChangeListener(enableOkay);
+		}
+
+		enginePath.verify();
+		engineExecutable.verify();
+
+		okay.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					listeners.notifyChangeListeners(this);
+
+					setVisible(false);
+					dispose();
 
 				}
 			});
-		configPanel.add(engineExePanel);
-
+		cancel.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					setVisible(false);
+					dispose();
+				}
+			});
+		configPanel.add(okay);
+		configPanel.add(cancel);
 		
-		add(new ClosePanel(this,
-						   new ActionListener() {
-							   public void actionPerformed(ActionEvent e) {
-								   enginePath = enginePathPanel.getPath();
-								   engineExecutable = engineExePanel.getPath();
-								   engineCommandline = cmdline.getText();
-							  }
-						   }),
-			BorderLayout.PAGE_END);
 
 		pack();
 		setVisible(true);
@@ -108,13 +156,16 @@ public class EngineConfigDialog extends JDialog {
 	}
 
 	public File getEnginePath() {
-		return enginePath;
+		return enginePath.getPath();
 	}
 	public File getEngineExecutable() {
-		return engineExecutable;
+		return engineExecutable.getPath();
 	}
 	public String getCommandline() {
-		return engineCommandline;
+		return engineCommandline.getText();
 	}
 
+	public void addChangeListener(ChangeListener l) {
+		listeners.addChangeListener(l);
+	}
 }
