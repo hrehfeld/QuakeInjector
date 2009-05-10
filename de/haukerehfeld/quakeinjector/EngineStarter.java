@@ -20,7 +20,7 @@ public class EngineStarter {
 	public void start(String mapCmdline, String startmap) throws java.io.IOException {
 		ArrayList<String> cmd = new ArrayList<String>(5);
 
-		cmd.add(quakeExe.getAbsolutePath());
+		cmd.add(quakeExe.getCanonicalPath());
 		//processbuilder doesn't like arguments with spaces
 		if (quakeCmdline != null) {
 			for (String s: quakeCmdline.split(" ")) { cmd.add(s); }

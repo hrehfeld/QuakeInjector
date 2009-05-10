@@ -28,11 +28,13 @@ public class QuakeInjector {
 
 	private final EngineStarter starter;
 
+	private MapInfoPanel interactionPanel;
+
 	public QuakeInjector() {
 		config = new Configuration();
 
-		paths = new Paths(config.get("repositoryBase"),
-						  config.get("enginePath"));
+		paths = new Paths(config.get("repositoryBase"));
+		
 		/** @todo 2009-05-04 14:48 hrehfeld    check if the paths still exist at startup */
 		starter = new EngineStarter(new File(config.getEnginePath()),
 									new File(config.getEnginePath()
@@ -89,8 +91,7 @@ public class QuakeInjector {
 								  String commandline) {
 		setEngineConfig(enginePath, engineExecutable, commandline);
 
-		config.setEnginePath(enginePath.getAbsolutePath());
-		System.out.println(enginePath + ", " + engineExecutable);
+		config.setEnginePath(enginePath.getCanonicalPath());
 		config.setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable));
 		config.setEngineCommandline(commandline);
 		
@@ -103,6 +104,8 @@ public class QuakeInjector {
 		starter.setQuakeDirectory(enginePath);
 		starter.setQuakeExecutable(engineExecutable);
 		starter.setQuakeCommandline(commandline);
+
+		interactionPanel.setInstallDirectory(enginePath.getCanonicalPath());
 	}
 	
 
@@ -150,7 +153,10 @@ public class QuakeInjector {
 
 		final InstalledMaps installedMaps = new InstalledMaps();
 
-		MapInfoPanel interactionPanel = new MapInfoPanel(paths, installedMaps, starter);
+		this.interactionPanel = new MapInfoPanel(config.getEnginePath(),
+												 paths,
+												 installedMaps,
+												 starter);
 		maplist.addChangeListener(interactionPanel);
 		panel.add(interactionPanel);
 		ShowMapInfoSelectionHandler selectionHandler

@@ -20,6 +20,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	private static final String playText = "Play";
 	
 	private EngineStarter starter;
+	private String installDirectory;
 	private final Paths paths;
 	private InstalledMaps installed;
 
@@ -35,8 +36,12 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	private MapInfo selectedMap = null;
 
 	
-	public MapInfoPanel(Paths paths, InstalledMaps installed, EngineStarter starter) {
+	public MapInfoPanel(String installDirectory,
+						Paths paths,
+						InstalledMaps installed,
+						EngineStarter starter) {
 		this.paths = paths;
+		this.installDirectory = installDirectory;
 		this.installed = installed;
 		this.starter = starter;
 		
@@ -98,7 +103,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		
 		final Installer installer = new Installer(selectedMap,
 												  paths.getRepositoryUrl(selectedMap.getId()),
-												  paths.getQuakeBase());
+												  installDirectory);
 		installer.execute();
 
 		installButton.setEnabled(false);
@@ -142,7 +147,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		final MapFileList files = installed.get(selectedMap.getId());
 		Uninstaller uninstall = new Uninstaller(selectedMap,
 												files,
-												paths.getQuakeBase());
+												installDirectory);
 		uninstall.execute();
 		uninstallButton.setEnabled(false);
 
@@ -218,5 +223,9 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 
 	public void stateChanged(ChangeEvent e) {
 		refreshUi();
+	}
+
+	public void setInstallDirectory(String installDirectory) {
+		this.installDirectory = installDirectory;
 	}
 }
