@@ -146,8 +146,9 @@ public class EngineConfigDialog extends JDialog {
 			});
 		configPanel.add(okay);
 		configPanel.add(cancel);
-		
+	}
 
+	public void packAndShow() {
 		pack();
 		setVisible(true);
 	}

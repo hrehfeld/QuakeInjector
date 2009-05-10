@@ -140,9 +140,6 @@ public class JPathPanel extends JPanel {
 	 * get a file representing what this pathpanel is pointing to
 	 */
 	public File getPath() {
-		if (this.path == null) {
-			System.out.println("wtf");
-		}
 		/*
 		 * Build a file object from - if set - the basepath and the textfield content
 		 */

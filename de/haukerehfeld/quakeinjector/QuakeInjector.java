@@ -70,9 +70,15 @@ public class QuakeInjector {
 																  config.getEnginePath(),
 																  config.getEngineExecutable(),
 																  config.getEngineCommandline());
-					saveEngineConfig(d.getEnginePath(),
-									 d.getEngineExecutable(),
-									 d.getCommandline());
+					d.addChangeListener(new ChangeListener() {
+							public void stateChanged(ChangeEvent e) {
+								saveEngineConfig(d.getEnginePath(),
+												 d.getEngineExecutable(),
+												 d.getCommandline());
+							}
+						});
+
+					d.packAndShow();
 					
 				}});
 	}
@@ -84,6 +90,7 @@ public class QuakeInjector {
 		setEngineConfig(enginePath, engineExecutable, commandline);
 
 		config.setEnginePath(enginePath.getAbsolutePath());
+		System.out.println(enginePath + ", " + engineExecutable);
 		config.setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable));
 		config.setEngineCommandline(commandline);
 		
@@ -123,7 +130,7 @@ public class QuakeInjector {
                     public void removeUpdate(DocumentEvent e) { filter(); }
 
 					private void filter() {
-						maplist.filter(table.getRowSorter(), filter.getText());
+						table.getRowSorter().setRowFilter(maplist.filter(filter.getText()));
 					}
                 });
 			filterText.setLabelFor(filter);

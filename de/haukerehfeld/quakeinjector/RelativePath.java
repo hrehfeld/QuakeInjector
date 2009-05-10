@@ -43,10 +43,9 @@ reverse order
 	private static String matchPathLists(List<String> home, List<String> file) {
 		int i;
 		int j;
-		String result;
+		String result = "";
 		// start at the beginning of the lists
 		// iterate while both lists are equal
-		result = "";
 		i = home.size()-1;
 		j = file.size()-1;
 
@@ -66,8 +65,10 @@ reverse order
 			result += file.get(j) + File.separator;
 		}
 
-		// file name doesn't need separator at the end
-		result += file.get(j);
+		if (j >= 0) {
+			// file name doesn't need separator at the end
+			result += file.get(j);
+		}
 		return result;
 	}
 
@@ -89,6 +90,7 @@ make sense
 
 		homelist = getPathList(home);
 		filelist = getPathList(f);
+
 		s = matchPathLists(homelist,filelist);
 
 		return s;

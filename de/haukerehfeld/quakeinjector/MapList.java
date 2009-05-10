@@ -89,13 +89,25 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 		}
 	}
 
+    public Class getColumnClass(int c) {
+		switch (c) {
+		case name: return String.class;
+		case title: return String.class;
+		case author: return String.class;
+		case releasedate: return Date.class;
+		case installed: return Boolean.class;
+		case requirements: return String.class;
+			/*
+			 * Should never be used
+			 */
+		default: throw new RuntimeException("This should never happen: check the switch statement above");
+		}
+    }
+
     public Object getValueAt(int row, int col) {
         return getColumnData(col, data.get(row));
     }
 
-    public Class getColumnClass(int c) {
-        return getValueAt(0, c).getClass();
-    }
 
     public boolean isCellEditable(int row, int col) {
 		return false;
@@ -122,7 +134,7 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 	 * Update the row filter regular expression from the expression in
 	 * the text box.
 	 */
-	public void filter(TableRowSorter<MapList> sorter, final String filterText) {
+	public RowFilter<MapList, Integer> filter(final String filterText) {
 		final int[] columnsToCheck = { name, title, author, releasedate };
 
 		String[] filterTexts = filterText.split(" ");
@@ -154,7 +166,8 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 				return true;
 			}
 		};
-		sorter.setRowFilter(rf);
+
+		return rf;
 	}					
 	
 
