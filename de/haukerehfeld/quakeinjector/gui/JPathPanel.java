@@ -115,8 +115,9 @@ public class JPathPanel extends JPanel {
 	
 	public void setBasePath(File basePath) {
 		File oldFile = getPath();
+		boolean verifies = verifies();
 		this.basePath = basePath;
-		if (oldFile.exists()) {
+		if (verifies) {
 			this.path.setText(RelativePath.getRelativePath(basePath, oldFile));
 		}
 		verify();
