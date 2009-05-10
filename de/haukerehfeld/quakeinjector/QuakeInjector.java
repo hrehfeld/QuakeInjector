@@ -91,7 +91,7 @@ public class QuakeInjector {
 								  String commandline) {
 		setEngineConfig(enginePath, engineExecutable, commandline);
 
-		config.setEnginePath(enginePath.getCanonicalPath());
+		config.setEnginePath(enginePath.getAbsolutePath());
 		config.setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable));
 		config.setEngineCommandline(commandline);
 		
@@ -105,7 +105,7 @@ public class QuakeInjector {
 		starter.setQuakeExecutable(engineExecutable);
 		starter.setQuakeCommandline(commandline);
 
-		interactionPanel.setInstallDirectory(enginePath.getCanonicalPath());
+		interactionPanel.setInstallDirectory(enginePath.getAbsolutePath());
 	}
 	
 

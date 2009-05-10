@@ -114,9 +114,11 @@ public class JPathPanel extends JPanel {
 	}
 	
 	public void setBasePath(File basePath) {
-		File oldExe = getPath();
+		File oldFile = getPath();
 		this.basePath = basePath;
-		this.path.setText(RelativePath.getRelativePath(basePath, oldExe));
+		if (oldFile.exists()) {
+			this.path.setText(RelativePath.getRelativePath(basePath, oldFile));
+		}
 		verify();
 	}
 
