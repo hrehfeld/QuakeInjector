@@ -12,7 +12,7 @@ public class PackageTable extends JTable {
 		final TableRowSorter<MapList> sorter = new TableRowSorter<MapList>(maplist);
 		setRowSorter(sorter);
 		
-		setPreferredScrollableViewportSize(new Dimension(500, 99999));
+		setPreferredScrollableViewportSize(new Dimension(500, 500));
 		setFillsViewportHeight(true);
 		setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 	}
