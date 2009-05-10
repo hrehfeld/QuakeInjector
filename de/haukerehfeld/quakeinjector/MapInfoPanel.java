@@ -35,6 +35,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	 */
 	private MapInfo selectedMap = null;
 
+	private final Installer installer;
 	
 	public MapInfoPanel(String installDirectory,
 						Paths paths,
@@ -44,7 +45,9 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		this.installDirectory = installDirectory;
 		this.installed = installed;
 		this.starter = starter;
-		
+
+		this.installer = new Installer();
+
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
 		
@@ -83,8 +86,14 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	public void installRequirements(MapInfo map) {
 		for (MapInfo requirement: map.getRequirements()) {
 			String id = requirement.getId();
-			if (installed.get(id) != null) {
-				System.out.print("Required package " + id + " already installed.");
+			
+			MapFileList isInstalled;
+			synchronized (installed) {
+				isInstalled = installed.get(id);
+			}
+
+			if (isInstalled != null) {
+					System.out.print("Required package " + id + " already installed.");
 			}
 			else {
 				System.out.print("Required package " + id + " not installed. Installing...");
@@ -100,40 +109,13 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	public void install(MapInfo selectedMap) {
 		installRequirements(selectedMap);
 		
-		
-		final Installer installer = new Installer(selectedMap,
-												  paths.getRepositoryUrl(selectedMap.getId()),
-												  installDirectory);
-		installer.execute();
+		installer.install(selectedMap,
+						  paths.getRepositoryUrl(selectedMap.getId()),
+						  installDirectory,
+						  installed);
 
 		installButton.setEnabled(false);
 
-		SwingWorker<Void,Void> saveInstalled = new SwingWorker<Void,Void>() {
-			@Override
-			public Void doInBackground() {
-				MapFileList files;
-				try {
-				files = installer.get();
-				}
-				catch (java.lang.InterruptedException e) {
-					throw new RuntimeException("Couldn't get installed file list!" + e.getMessage());
-				}
-				catch (java.util.concurrent.ExecutionException e) {
-					throw new RuntimeException("Couldn't get installed file list!" + e.getMessage());
-				}
-
-				installed.add(files);
-
-				try {
-					installed.write();
-				}
-				catch (java.io.IOException e) {
-					System.out.println("Couldn't write installed Maps file!" + e.getMessage());
-				}
-				return null;
-			}
-		};
-		saveInstalled.execute();
 
 // 	@Override
 //     public void done() {
@@ -144,7 +126,11 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	}
 
 	public void uninstall() {
-		final MapFileList files = installed.get(selectedMap.getId());
+		final MapFileList files;
+
+		synchronized (installed) {
+			files = installed.get(selectedMap.getId());
+		}
 		Uninstaller uninstall = new Uninstaller(selectedMap,
 												files,
 												installDirectory);
@@ -154,13 +140,15 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		SwingWorker<Void,Void> saveInstalled = new SwingWorker<Void,Void>() {
 			@Override
 			public Void doInBackground() {
-				installed.remove(files);
+				synchronized (installed) {
+					installed.remove(files);
 
-				try {
-					installed.write();
-				}
-				catch (java.io.IOException e) {
-					System.out.println("Couldn't write installed Maps file!" + e.getMessage());
+					try {
+						installed.write();
+					}
+					catch (java.io.IOException e) {
+						System.out.println("Couldn't write installed Maps file!" + e.getMessage());
+					}
 				}
 				return null;
 			}
