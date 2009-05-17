@@ -30,19 +30,50 @@ public class EngineConfigDialog extends JDialog {
 		add(description, BorderLayout.PAGE_START);
 
 		JPanel configPanel = new JPanel();
-		configPanel.setLayout(new BoxLayout(configPanel, BoxLayout.PAGE_AXIS));
+		configPanel.setLayout(new GridBagLayout());
 		add(configPanel, BorderLayout.CENTER);
 
 		final JButton okay = new JButton("Save Changes");
 		final JButton cancel = new JButton("Cancel");
 
 		{
+			JLabel cmdlineLabel = new JLabel("Quake commandline options");
+			configPanel.add(cmdlineLabel, new GridBagConstraints() {{
+				anchor = LINE_START;
+				fill = NONE;
+				gridx = 0;
+				gridy = 0;
+				gridwidth = 1;
+				gridheight = 1;
+				weightx = 0;
+				weighty = 0;
+				
+			}});
 			this.engineCommandline = new JTextField(cmdlineDefault, 40);
-			LabelFieldPanel cmdlinePanel = new LabelFieldPanel("Quake commandline options",
-															   engineCommandline);
-			configPanel.add(cmdlinePanel);
+			configPanel.add(engineCommandline, new GridBagConstraints() {{
+				anchor = LINE_END;
+				fill = HORIZONTAL;
+				gridx = 1;
+				gridy = 0;
+				gridwidth = 1;
+				gridheight = 1;
+				weightx = 1;
+				weighty = 0;
+			}});
 		}
 		//"Path to quake directory",
+		JLabel enginePathLabel = new JLabel("Quake Directory");
+		configPanel.add(enginePathLabel, new GridBagConstraints() {{
+			anchor = LINE_START;
+			fill = NONE;
+			gridx = 0;
+			gridy = 1;
+			gridwidth = 1;
+			gridheight = 1;
+			weightx = 0;
+			weighty = 0;
+				
+		}});
 		enginePath = new JPathPanel(new JPathPanel.Verifier() {
 				public boolean verify(File f) {
 					return (f.exists()
@@ -65,9 +96,30 @@ public class EngineConfigDialog extends JDialog {
 			},
 			enginePathDefault,
 			javax.swing.JFileChooser.DIRECTORIES_ONLY);
-		configPanel.add(enginePath);
+		configPanel.add(enginePath, new GridBagConstraints() {{
+			anchor = LINE_END;
+			fill = HORIZONTAL;
+			gridx = 1;
+			gridy = 1;
+			gridwidth = 1;
+			gridheight = 1;
+			weightx = 1;
+			weighty = 0;
+		}});
 		
 		//"Quake Executable",
+		JLabel engineExeLabel = new JLabel("Quake Executable");
+		configPanel.add(engineExeLabel, new GridBagConstraints() {{
+			anchor = LINE_START;
+			fill = NONE;
+			gridx = 0;
+			gridy = 2;
+			gridwidth = 1;
+			gridheight = 1;
+			weightx = 0;
+			weighty = 0;
+				
+		}});
 		engineExecutable = new JPathPanel(
 			new JPathPanel.Verifier() {
 				public boolean verify(File exe) {
@@ -92,7 +144,16 @@ public class EngineConfigDialog extends JDialog {
 			engineExeDefault,
 			new File(enginePathDefault),
 			javax.swing.JFileChooser.FILES_ONLY);
-		configPanel.add(engineExecutable);
+		configPanel.add(engineExecutable, new GridBagConstraints() {{
+			anchor = LINE_END;
+			fill = HORIZONTAL;
+			gridx = 1;
+			gridy = 2;
+			gridwidth = 1;
+			gridheight = 1;
+			weightx = 1;
+			weighty = 0;
+		}});
 
 		final ChangeListener enableOkay = new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
@@ -129,6 +190,8 @@ public class EngineConfigDialog extends JDialog {
 		enginePath.verify();
 		engineExecutable.verify();
 
+		
+
 		okay.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					listeners.notifyChangeListeners(this);
@@ -144,8 +207,19 @@ public class EngineConfigDialog extends JDialog {
 					dispose();
 				}
 			});
-		configPanel.add(okay);
-		configPanel.add(cancel);
+
+		{
+			JPanel okayCancelPanel = new JPanel();
+			okayCancelPanel.setLayout(new BoxLayout(okayCancelPanel, BoxLayout.LINE_AXIS));
+			okayCancelPanel.add(Box.createHorizontalGlue());
+			okayCancelPanel.add(okay);
+			okayCancelPanel.add(Box.createRigidArea(new Dimension(10,0)));
+			okayCancelPanel.add(cancel);
+			okayCancelPanel.add(Box.createHorizontalGlue());
+			
+			add(okayCancelPanel, BorderLayout.PAGE_END);
+		}
+		
 	}
 
 	public void packAndShow() {
