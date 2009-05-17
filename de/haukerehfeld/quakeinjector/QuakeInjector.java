@@ -1,6 +1,8 @@
 package de.haukerehfeld.quakeinjector;
 
 //import java.awt.*;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.Container;
 import java.awt.Dimension;
 
@@ -111,7 +113,7 @@ public class QuakeInjector {
 
 	private void addMainPane(Container panel) {
 		JPanel mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
+		mainPanel.setLayout(new GridBagLayout());
 
 		final MapList maplist = new MapList();
 		
@@ -139,7 +141,16 @@ public class QuakeInjector {
 			filterText.setLabelFor(filter);
 			filterPanel.add(filter);
 
-			mainPanel.add(filterPanel);
+			mainPanel.add(filterPanel, new GridBagConstraints() {{
+				anchor = LINE_START;
+				fill = HORIZONTAL;
+				gridx = 0;
+				gridy = 0;
+				gridwidth = 1;
+				gridheight = 1;
+				weightx = 1;
+				weighty = 0;
+			}});
 
 		}
 		
@@ -148,7 +159,15 @@ public class QuakeInjector {
 		JScrollPane scrollPane = new JScrollPane(table);
 
 
-		mainPanel.add(scrollPane);
+		mainPanel.add(scrollPane, new GridBagConstraints() {{
+				anchor = CENTER;
+				fill = BOTH;
+				gridx = 0;
+				gridy = 1;
+				gridwidth = 1;
+				gridheight = 1;
+				weightx = weighty = 1;
+			}});
 		panel.add(mainPanel);
 
 		final InstalledMaps installedMaps = new InstalledMaps();
