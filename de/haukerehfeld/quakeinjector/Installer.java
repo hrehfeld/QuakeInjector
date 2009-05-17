@@ -3,13 +3,19 @@ package de.haukerehfeld.quakeinjector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.swing.*;
+import java.beans.PropertyChangeListener;
 
 import java.io.IOException;
+
+import java.util.Map;
+import java.util.HashMap;
 
 public class Installer {
 	private static final int simultanousDownloads = 1;
 	
 	private ExecutorService pool;
+
+	private Map<MapInfo,InstallMapInfo> installers = new HashMap<MapInfo,InstallMapInfo>();
 
 	public Installer() {
 		pool = Executors.newFixedThreadPool(simultanousDownloads);
@@ -19,8 +25,11 @@ public class Installer {
 						final String url,
 						final String installDirectory,
 						final InstalledMaps installed,
-						final InstallErrorHandler errorHandler) {
+						final InstallErrorHandler errorHandler,
+						final PropertyChangeListener propertyListener) {
 		final InstallMapInfo installer = new InstallMapInfo(selectedMap, url, installDirectory);
+		installers.put(selectedMap, installer);
+		installer.addPropertyChangeListener(propertyListener);
 
 		pool.submit(installer);
 
@@ -58,18 +67,33 @@ public class Installer {
 					else if (t instanceof IOException) {
 						errorHandler.handle((IOException) t, files);
 					}
+					else if (t instanceof CanceledException) {
+						errorHandler.handle((CanceledException) t, files);
+					}
 				}
 				return null;
+			}
+
+			@Override
+			public void done() {
+				installers.remove(selectedMap);
 			}
 		};
 		saveInstalled.execute();
 		
 	}
 
+	public void cancel(MapInfo installerMap) {
+		installers.get(installerMap).cancel(true);
+	}
+
 	public interface InstallErrorHandler {
 		public void handle(OnlineFileNotFoundException error);
 		public void handle(FileNotWritableException error, MapFileList alreadyInstalledFiles);
 		public void handle(IOException error, MapFileList alreadyInstalledFiles);
+		public void handle(CanceledException error, MapFileList alreadyInstalledFiles);
 	}
+
+	public static class CanceledException extends Exception {}
 
 }

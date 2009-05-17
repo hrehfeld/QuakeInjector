@@ -7,6 +7,8 @@ import javax.swing.table.*;
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
 
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
@@ -24,11 +26,21 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	private final Paths paths;
 	private InstalledMaps installed;
 
-	private JButton uninstallButton = new JButton(uninstallText);
-	private JButton installButton = new JButton(installText);
-	private JButton playButton = new JButton(playText);
+	private JButton uninstallButton;
+	private JButton installButton;
+	private JButton playButton;
 
 	private JComboBox startmaps;
+
+	private JProgressBar progress = new JProgressBar();
+	private PropertyChangeListener progressListener = new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				if ("progress" == evt.getPropertyName()) {
+					int p = (Integer) evt.getNewValue();
+					progress.setValue(p);
+				} 
+			}
+		};
 	
     /**
 	 * Currently selected map
@@ -41,6 +53,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 						Paths paths,
 						InstalledMaps installed,
 						EngineStarter starter) {
+		super(new GridBagLayout());
 		this.paths = paths;
 		this.installDirectory = installDirectory;
 		this.installed = installed;
@@ -48,9 +61,6 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 
 		this.installer = new Installer();
 
-		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-
-		
 		uninstallButton = new JButton(uninstallText);
 		uninstallButton.setEnabled(false);
 		uninstallButton.addActionListener(new ActionListener() {
@@ -58,7 +68,10 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 					uninstall();
 				}
 			});
-		add(uninstallButton);
+		add(uninstallButton, new GridBagConstraints() {{
+			gridx = 0;
+			gridy = 0;
+		}});
 
 		installButton = new JButton(installText);
 		installButton.setEnabled(false);
@@ -67,7 +80,10 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 					install();
 				}
 			});
-		add(installButton);
+		add(installButton, new GridBagConstraints() {{
+			gridx = 1;
+			gridy = 0;
+		}});
 
 		playButton = new JButton(playText);
 		playButton.setEnabled(false);
@@ -76,10 +92,29 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 					start();
 				}
 			});
-		add(playButton);
+		add(playButton, new GridBagConstraints() {{
+			gridx = 2;
+			gridy = 0;
+		}});
 
 		startmaps = new JComboBox();
-		add(startmaps);
+		add(startmaps, new GridBagConstraints() {{
+			gridx = 3;
+			gridy = 0;
+			fill = HORIZONTAL;
+			weightx = 1;
+		}});
+
+		progress.setValue(0);
+		progress.setStringPainted(true);
+		add(progress, new GridBagConstraints() {{
+			gridx = 1;
+			gridy = 1;
+			gridwidth = 3;
+			fill = HORIZONTAL;
+			weightx = 1;
+		}});
+		
 	}
 
 
@@ -122,9 +157,11 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 							  public void handle(java.io.IOException error, MapFileList alreadyInstalledFiles) {
 								  uninstall(alreadyInstalledFiles);
 							  }
-
-							  
-						  });
+							  public void handle(Installer.CanceledException error, MapFileList alreadyInstalledFiles) {
+								  uninstall(alreadyInstalledFiles);
+							  }
+						  },
+						  progressListener);
 
 		installButton.setEnabled(false);
 

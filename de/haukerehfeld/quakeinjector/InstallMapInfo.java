@@ -36,9 +36,7 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 	}
 
 	@Override
-	public MapFileList doInBackground() throws java.io.IOException, java.io.FileNotFoundException,
-		java.io.IOException,
-		java.io.FileNotFoundException {
+	public MapFileList doInBackground() throws IOException, FileNotFoundException, Installer.CanceledException {
 		System.out.println("Installing " + map.getId());
 		
 		MapFileList files = download(url);
@@ -50,7 +48,7 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
     public void done() {
 	}
 
-	public MapFileList download(String urlString) throws java.io.IOException {
+	public MapFileList download(String urlString) throws java.io.IOException, Installer.CanceledException {
 		URL url;
 		try {
 			url = new URL(urlString);
@@ -83,7 +81,7 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 	public MapFileList unzip(InputStream in,
 							 String basedir,
 							 String unzipdir,
-							 String mapid) throws java.io.IOException, java.io.FileNotFoundException {
+							 String mapid) throws IOException, FileNotFoundException, Installer.CanceledException {
 		files = new MapFileList(mapid);
 
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
@@ -145,12 +143,12 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 	}
 
 	private void writeFile(InputStream in, File file, WriteToDownloadProgress progress)
-		throws FileNotFoundException, IOException {
+		throws FileNotFoundException, IOException, Installer.CanceledException {
 		writeFile(in, file, 2048, progress);
 	}
 		
 	private void writeFile(InputStream in, File file, int BUFFERSIZE, WriteToDownloadProgress progress)
-		throws FileNotFoundException, IOException {
+		throws FileNotFoundException, IOException, Installer.CanceledException {
 		byte data[] = new byte[BUFFERSIZE];
 		BufferedOutputStream dest = new BufferedOutputStream(new FileOutputStream(file),
 															 BUFFERSIZE);
@@ -175,19 +173,30 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 			}
 		}
 
-		public void publish(int writtenBytes) {
+		public void publish(int writtenBytes) throws Installer.CanceledException {
 			long downloaded = downloadSize * writtenBytes / writeSize;
 			addDownloaded(downloaded);
 		}
 	}
 	
-	private void addDownloaded(long read) {
+	private void addDownloaded(long read) throws Installer.CanceledException {
+		//we do this here because this is the most frequently called portion
+		checkCancelled();
+		
 		downloaded += read;
 		int progress = (int) (100 * downloaded / downloadSize);
 		//System.out.println("Progress(%): " + progress);
 		if (progress <= 100) {
 			setProgress(progress);
 		}
+	}
+
+	private void checkCancelled() throws Installer.CanceledException {
+		if (!isCancelled()) {
+			return;
+		}
+
+		throw new Installer.CanceledException();
 	}
 
 	public MapFileList getInstalledFiles() {
