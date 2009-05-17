@@ -22,6 +22,11 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 	private String baseDirectory;
 	private MapInfo map;
 
+	private long downloadSize = 0;
+	private long downloaded = 0;
+
+	private MapFileList files;
+
 	public InstallMapInfo(MapInfo map,
 					 String url,
 					 String baseDirectory) {
@@ -31,25 +36,18 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 	}
 
 	@Override
-	public MapFileList doInBackground() {
-		try {
-			System.out.println("Installing " + map.getId());
-
-			MapFileList files = download(url);
-
-			return files;
-		}
-		catch (java.io.IOException e) {
-			/** 2009-03-29 17:38 hrehfeld    display error message */
-			System.out.println("failed to download map " + e.getMessage());
-		}
-		return null;
+	public MapFileList doInBackground() throws java.io.IOException, java.io.FileNotFoundException,
+		java.io.IOException,
+		java.io.FileNotFoundException {
+		System.out.println("Installing " + map.getId());
+		
+		MapFileList files = download(url);
+		map.setInstalled(true);
+		return files;
 	}
 
 	@Override
     public void done() {
-		map.setInstalled(true);
-		
 	}
 
 	public MapFileList download(String urlString) throws java.io.IOException {
@@ -61,13 +59,16 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 			throw new RuntimeException("Something is wrong with the way we construct URLs");
 		}
 
-		URLConnection con = url.openConnection();
-		InputStream in = (InputStream) url.getContent();
-
-		ProgressMonitorInputStream progress = new ProgressMonitorInputStream(null,
-																			 "Downloading " + map.getId(),
-																			 in);
-		progress.getProgressMonitor().setMaximum(con.getContentLength());
+		URLConnection con;
+		InputStream in;
+		try {
+			con = url.openConnection();
+			this.downloadSize = con.getContentLength();
+			in = (InputStream) url.getContent();
+		}
+		catch (FileNotFoundException e) {
+			throw new OnlineFileNotFoundException(e.getMessage());
+		}
 
 
 		String relativedir = map.getRelativeBaseDir();
@@ -76,41 +77,46 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 			unzipdir += File.separator + relativedir;
 		}
 		
-		return unzip(progress, this.baseDirectory, unzipdir, map.getId());
+		return unzip(in, this.baseDirectory, unzipdir, map.getId());
 	}
 
 	public MapFileList unzip(InputStream in,
 							 String basedir,
 							 String unzipdir,
-							 String mapid) {
-		MapFileList files = new MapFileList(mapid);
-		try {
-			ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
-			ZipEntry entry;
-			while((entry = zis.getNextEntry()) != null) {
-				File f = new File(unzipdir + File.separator + entry.getName());
-				//System.out.println("Processing " + f);
+							 String mapid) throws java.io.IOException, java.io.FileNotFoundException {
+		files = new MapFileList(mapid);
 
-				ArrayList<File> createdDirs = mkdirs(f);
-				for (File dirname: createdDirs) {
-					String relative = RelativePath.getRelativePath(new File(basedir), dirname);
-					//System.out.println("adding to installpaths: " + relative);
-					files.add(relative);
-				}
+		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
+		ZipEntry entry;
 
-				if (entry.isDirectory()) {
-					continue;
-				}
+		while((entry = zis.getNextEntry()) != null) {
+			File f = new File(unzipdir + File.separator + entry.getName());
+			//System.out.println("Processing " + f);
 
-				files.add(RelativePath.getRelativePath(new File(basedir), f));
-//				System.out.println("adding to installpaths: " + RelativePath.getRelativePath(new File(basedir), f));
-				System.out.println("Writing " + f);
-				writeFile(zis, f);
+			ArrayList<File> createdDirs = mkdirs(f);
+			for (File dirname: createdDirs) {
+				String relative = RelativePath.getRelativePath(new File(basedir), dirname);
+				//System.out.println("adding to installpaths: " + relative);
+				files.add(relative);
 			}
-			zis.close();
-		} catch(Exception e) {
-			e.printStackTrace();
+
+			if (entry.isDirectory()) {
+				continue;
+			}
+
+			files.add(RelativePath.getRelativePath(new File(basedir), f));
+			System.out.println("Writing " + f + " (" + entry.getCompressedSize() + "b)");
+			try {
+				writeFile(zis, f,
+						  new WriteToDownloadProgress(entry.getCompressedSize(), entry.getSize()));
+			}
+			catch (FileNotFoundException e) {
+				throw new FileNotWritableException(e.getMessage());
+			}
+			
 		}
+		//save the mapfile list so we can uninstall
+		zis.close();
 
 		return files;
 	}
@@ -138,22 +144,53 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 		return files;
 	}
 
-	private static void writeFile(InputStream in, File file) throws FileNotFoundException, IOException {
-		writeFile(in, file, 2048);
+	private void writeFile(InputStream in, File file, WriteToDownloadProgress progress)
+		throws FileNotFoundException, IOException {
+		writeFile(in, file, 2048, progress);
 	}
 		
-	private static void writeFile(InputStream in, File file, int BUFFERSIZE)
+	private void writeFile(InputStream in, File file, int BUFFERSIZE, WriteToDownloadProgress progress)
 		throws FileNotFoundException, IOException {
 		byte data[] = new byte[BUFFERSIZE];
 		BufferedOutputStream dest = new BufferedOutputStream(new FileOutputStream(file),
 															 BUFFERSIZE);
 		int readcount;
 		while ((readcount = in.read(data, 0, BUFFERSIZE)) != -1) {
+			progress.publish(readcount);
 			dest.write(data, 0, readcount);
 		}
 		dest.flush();
 		dest.close();
 	}
-	
 
+	private class WriteToDownloadProgress {
+		private long downloadSize;
+		private long writeSize;
+
+		public WriteToDownloadProgress(long downloadSize, long writeSize) {
+			this.downloadSize = downloadSize;
+			this.writeSize = writeSize;
+			if (writeSize <= 0) {
+				System.out.println("writeSize " + writeSize);
+			}
+		}
+
+		public void publish(int writtenBytes) {
+			long downloaded = downloadSize * writtenBytes / writeSize;
+			addDownloaded(downloaded);
+		}
+	}
+	
+	private void addDownloaded(long read) {
+		downloaded += read;
+		int progress = (int) (100 * downloaded / downloadSize);
+		//System.out.println("Progress(%): " + progress);
+		if (progress <= 100) {
+			setProgress(progress);
+		}
+	}
+
+	public MapFileList getInstalledFiles() {
+		return files;
+	}
 }

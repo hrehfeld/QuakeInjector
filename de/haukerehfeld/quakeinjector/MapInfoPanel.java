@@ -112,7 +112,19 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		installer.install(selectedMap,
 						  paths.getRepositoryUrl(selectedMap.getId()),
 						  installDirectory,
-						  installed);
+						  installed,
+						  new Installer.InstallErrorHandler() {
+							  public void handle(OnlineFileNotFoundException error) {
+							  }
+							  public void handle(FileNotWritableException error, MapFileList alreadyInstalledFiles) {
+								  uninstall(alreadyInstalledFiles);
+							  }
+							  public void handle(java.io.IOException error, MapFileList alreadyInstalledFiles) {
+								  uninstall(alreadyInstalledFiles);
+							  }
+
+							  
+						  });
 
 		installButton.setEnabled(false);
 
@@ -131,10 +143,8 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		synchronized (installed) {
 			files = installed.get(selectedMap.getId());
 		}
-		Uninstaller uninstall = new Uninstaller(selectedMap,
-												files,
-												installDirectory);
-		uninstall.execute();
+
+		uninstall(files);
 		uninstallButton.setEnabled(false);
 
 		SwingWorker<Void,Void> saveInstalled = new SwingWorker<Void,Void>() {
@@ -155,6 +165,13 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		};
 		saveInstalled.execute();
 		
+	}
+
+	private void uninstall(MapFileList files) {
+		Uninstaller uninstall = new Uninstaller(selectedMap,
+												files,
+												installDirectory);
+		uninstall.execute();
 	}
 
 	public void start() {
