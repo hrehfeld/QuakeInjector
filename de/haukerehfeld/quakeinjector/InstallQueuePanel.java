@@ -4,6 +4,7 @@ import java.util.Queue;
 import java.util.ArrayDeque;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 import javax.swing.JProgressBar;
@@ -18,6 +19,7 @@ import java.awt.GridBagConstraints;
 
 public class InstallQueuePanel extends JPanel {
 	private final static int size = 5;
+	private final static int rowHeight = 20;
 
 	private GridBagLayout layout = new GridBagLayout();
 	
@@ -25,6 +27,7 @@ public class InstallQueuePanel extends JPanel {
 	
 	public InstallQueuePanel() {
 		setLayout(layout);
+		setPreferredSize(new Dimension(0, size * rowHeight));
 	}
 
 
@@ -32,26 +35,26 @@ public class InstallQueuePanel extends JPanel {
 	 * @return PropertyChangeListener that listens on "progress" for the progressbar
 	 */
 	public Job addJob(String description, ActionListener cancelAction) {
-		JButton cancelButton;
-		cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(cancelAction);
-		add(cancelButton, new GridBagConstraints() {{
-			anchor = PAGE_START;
-			fill = HORIZONTAL;
-			gridx = 0;
-		}});
-		
 		final JProgressBar progress = new JProgressBar();
 		progress.setString(progressString(description, 0));
 		progress.setValue(0);
 		progress.setStringPainted(true);
 		add(progress, new GridBagConstraints() {{
-			anchor = PAGE_START;
-			gridx = 1;
-			gridwidth = 1;
-			fill = HORIZONTAL;
+			anchor = CENTER;
+			gridx = 0;
+			fill = BOTH;
 			weightx = 1;
 		}});
+
+		JButton cancelButton;
+		cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(cancelAction);
+		add(cancelButton, new GridBagConstraints() {{
+			anchor = CENTER;
+			fill = BOTH;
+			gridx = 1;
+		}});
+		
 
 
 		Job progressListener
@@ -78,11 +81,11 @@ public class InstallQueuePanel extends JPanel {
 			}
 		}
 
-		int row = jobs.size();
+		int row = 0;
 		for (Job j: jobs) {
-			row--;
 			replaceToRow(j.progressBar, row);
 			replaceToRow(j.cancelButton, row);
+			row++;
 		}
 		revalidate();
 		repaint();

@@ -194,17 +194,14 @@ public class QuakeInjector {
 		infoPanel.add(interactionPanel, new GridBagConstraints() {{
 			anchor = PAGE_START;
 			fill = VERTICAL;
-			weightx = 0.5;
 			weighty = 1;
 		}});
 
 		JScrollPane queueScroll = new JScrollPane(installQueue);
-		queueScroll.setPreferredSize(new Dimension(0, 150));
 		infoPanel.add(queueScroll, new GridBagConstraints() {{
 			anchor = PAGE_END;
-			fill = HORIZONTAL;
+			fill = BOTH;
 			gridy = 1;
-			weightx = 0.5;
 		}});
 
 		panel.add(infoPanel, new GridBagConstraints() {{
