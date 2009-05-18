@@ -1,14 +1,13 @@
 package de.haukerehfeld.quakeinjector;
 
+import java.beans.PropertyChangeListener;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.swing.*;
-import java.beans.PropertyChangeListener;
 
-import java.io.IOException;
-
-import java.util.Map;
-import java.util.HashMap;
+import javax.swing.SwingWorker;
 
 public class Installer {
 	private static final int simultanousDownloads = 1;

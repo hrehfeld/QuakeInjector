@@ -1,19 +1,16 @@
 package de.haukerehfeld.quakeinjector;
 
-import javax.xml.parsers.*;
-import org.w3c.dom.*;
-
-import java.io.*;
-
-import java.lang.RuntimeException;
-
-import java.util.GregorianCalendar;
-import java.util.Date;
-
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 public class PackageDatabaseParser implements java.io.Serializable {
 	/**

@@ -1,10 +1,10 @@
 package de.haukerehfeld.quakeinjector.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-
-import java.io.File;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 /**
  * A Panel with a label and a field

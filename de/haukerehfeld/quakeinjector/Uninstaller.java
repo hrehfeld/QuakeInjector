@@ -1,16 +1,10 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.net.*;
-import java.io.*;
-import java.util.zip.*;
-
-import de.haukerehfeld.quakeinjector.gui.ProgressListener;
-import java.awt.*;
-import javax.swing.*;
-import java.lang.RuntimeException;
-
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import javax.swing.SwingWorker;
 
 
 /**

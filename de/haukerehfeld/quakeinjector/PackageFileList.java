@@ -1,9 +1,7 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.util.TreeSet;
-
-import java.lang.Iterable;
 import java.util.Iterator;
+import java.util.TreeSet;
 
 public class PackageFileList implements Iterable<String> {
 	/**

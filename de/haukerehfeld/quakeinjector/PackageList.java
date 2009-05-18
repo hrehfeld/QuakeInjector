@@ -1,18 +1,15 @@
 package de.haukerehfeld.quakeinjector;
 
-import javax.swing.JTable;
-import javax.swing.table.TableRowSorter;
-import javax.swing.RowFilter;
-import javax.swing.table.AbstractTableModel;
-
-import java.util.GregorianCalendar;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.regex.Pattern;
 
-import javax.swing.event.ChangeListener;
+import javax.swing.RowFilter;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
 
 public class PackageList extends AbstractTableModel implements ChangeListener {
 	private static final int name = 0;
@@ -89,7 +86,7 @@ public class PackageList extends AbstractTableModel implements ChangeListener {
 		}
 	}
 
-    public Class getColumnClass(int c) {
+    public Class<? extends Object> getColumnClass(int c) {
 		switch (c) {
 		case name: return String.class;
 		case title: return String.class;

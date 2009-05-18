@@ -1,13 +1,9 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.awt.*;
-import java.awt.event.*;
-
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
-
-import java.util.*;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 class PackageListSelectionHandler implements ListSelectionListener {
 	private PackageInteractionPanel panel;

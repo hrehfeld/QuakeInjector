@@ -1,13 +1,9 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
-
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 public class Package {
 

@@ -1,20 +1,18 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.util.Queue;
-import java.util.ArrayDeque;
-
 import java.awt.Component;
 import java.awt.Dimension;
-import javax.swing.JPanel;
-import javax.swing.JButton;
-import javax.swing.JProgressBar;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayDeque;
+import java.util.Queue;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 
 
 public class InstallQueuePanel extends JPanel {

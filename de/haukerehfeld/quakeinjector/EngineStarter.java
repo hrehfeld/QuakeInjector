@@ -1,9 +1,6 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.lang.ProcessBuilder;
-
 import java.io.File;
-
 import java.util.ArrayList;
 
 public class EngineStarter {

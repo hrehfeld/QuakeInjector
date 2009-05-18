@@ -1,8 +1,9 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.Properties;
-import java.lang.RuntimeException;
 
 /**
  * Handle the config/properties file and allow access to properties

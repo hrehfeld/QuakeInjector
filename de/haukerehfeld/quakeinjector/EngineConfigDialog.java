@@ -1,14 +1,29 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import de.haukerehfeld.quakeinjector.gui.*;
-
-import java.io.*;
+import de.haukerehfeld.quakeinjector.gui.ErrorEvent;
+import de.haukerehfeld.quakeinjector.gui.ErrorListener;
+import de.haukerehfeld.quakeinjector.gui.JPathPanel;
 
 public class EngineConfigDialog extends JDialog {
 	private final static String windowTitle = "Engine Configuration";

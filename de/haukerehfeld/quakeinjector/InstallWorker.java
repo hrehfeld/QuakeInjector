@@ -1,23 +1,25 @@
 package de.haukerehfeld.quakeinjector;
 
-import java.net.*;
-import java.io.*;
-import java.util.zip.*;
-
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
-import de.haukerehfeld.quakeinjector.gui.ProgressListener;
-import java.awt.*;
-import javax.swing.*;
-import java.lang.RuntimeException;
+import javax.swing.SwingWorker;
 
 /**
  * Install maps in a worker thread
  * Init once and let swing start it - don't reuse
  */
 public class InstallWorker extends SwingWorker<PackageFileList, Void> {
-	private final int READSIZE = 40960;
-
 	private String url;
 	private String baseDirectory;
 	private Package map;

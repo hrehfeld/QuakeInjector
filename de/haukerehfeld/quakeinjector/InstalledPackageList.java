@@ -1,21 +1,21 @@
 package de.haukerehfeld.quakeinjector;
 
+import java.io.File;
 import java.util.HashMap;
-
-import java.util.ArrayList;
 import java.util.List;
 
-import java.io.File;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
-import java.io.*;
-
-import org.w3c.dom.*;
-
-import javax.xml.parsers.*;
-
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class InstalledPackageList extends HashMap<String, PackageFileList> {
 	private final static String filename = "installedMaps.xml";
