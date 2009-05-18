@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -164,6 +165,18 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 						  paths.getRepositoryUrl(selectedMap.getId()),
 						  installDirectory,
 						  new Installer.InstallErrorHandler() {
+							  public void handle(OnlineFileNotFoundException error) {
+								  installQueue.finished(progressListener,
+														"File not found");
+								  
+								  refreshUi();
+								  String msg = "The file couldn't be found in the online"
+									  + " repository";
+								  JOptionPane.showMessageDialog(PackageInteractionPanel.this,
+																msg,
+																"File not found (404)",
+																JOptionPane.WARNING_MESSAGE);
+							  }
 							  public void success(PackageFileList installedFiles) {
 								  synchronized (installed) {
 									  installed.add(installedFiles);
@@ -176,28 +189,42 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 									  }
 								  }
 
-								  installQueue.finished(progressListener);
+								  installQueue.finished(progressListener, "Success");
 								  
-							  }
-							  public void handle(OnlineFileNotFoundException error) {
 							  }
 							  public void handle(FileNotWritableException error,
 												 PackageFileList alreadyInstalledFiles) {
-								  System.out.println("Cleaning up...");
-								  uninstall(alreadyInstalledFiles);
-								  installQueue.finished(progressListener);
+								  cleanup(alreadyInstalledFiles,
+										  "Couldn't write");
+
+								  String msg = "Couldn't write to harddisk! "
+									  + error.getMessage();
+								  JOptionPane.showMessageDialog(PackageInteractionPanel.this,
+																msg,
+																"Couldn't write to harddisk",
+																JOptionPane.ERROR_MESSAGE);
 							  }
 							  public void handle(java.io.IOException error,
 												 PackageFileList alreadyInstalledFiles) {
-								  System.out.println("Cleaning up...");
-								  uninstall(alreadyInstalledFiles);
-								  installQueue.finished(progressListener);
+								  cleanup(alreadyInstalledFiles, "Connection failed");
+
+								  String msg = "Couldn't connect to the online repository! "
+									  + error.getMessage();
+								  JOptionPane.showMessageDialog(PackageInteractionPanel.this,
+																msg,
+																"Couldn't connect to repository",
+																JOptionPane.ERROR_MESSAGE);
 							  }
 							  public void handle(Installer.CancelledException error,
 												 PackageFileList alreadyInstalledFiles) {
+								  cleanup(alreadyInstalledFiles, "Canceled");
+							  }
+
+							  private void cleanup(PackageFileList alreadyInstalledFiles,
+								  String message) {
 								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
-								  installQueue.finished(progressListener);
+								  installQueue.finished(progressListener, message);
 							  }
 						  },
 						  progressListener);

@@ -82,7 +82,9 @@ public class InstallQueuePanel extends JPanel {
 		int row = 0;
 		for (Job j: jobs) {
 			replaceToRow(j.progressBar, row);
-			replaceToRow(j.cancelButton, row);
+			if (!j.finished) {
+				replaceToRow(j.cancelButton, row);
+			}
 			row++;
 		}
 		revalidate();
@@ -95,12 +97,18 @@ public class InstallQueuePanel extends JPanel {
 		layout.setConstraints(c, con);
 	}
 
-	public void finished(Job j) {
-		j.finished = true;
+	private void spanRow(Component c) {
+		GridBagConstraints con = layout.getConstraints(c);
+		con.gridwidth++;
+		layout.setConstraints(c, con);
+	}
+	
+	public void finished(Job j, String message) {
+		j.finish(message);
 
-		j.progressBar.setEnabled(false);
-		j.cancelButton.setEnabled(false);
-
+		remove(j.cancelButton);
+		spanRow(j.progressBar);
+		
 		replaceComponents();
 
 	}
@@ -127,9 +135,21 @@ public class InstallQueuePanel extends JPanel {
 				progressBar.setValue(p);
 			} 
 		}
+
+		private void finish(String message) {
+			finished = true;
+			
+			progressBar.setEnabled(false);
+
+			progressBar.setString(progressString(description, message));
+		}
+	}
+
+	public static String progressString(String description, String status) {
+		return description + ": " + status;
 	}
 
 	public static String progressString(String description, int progress) {
-		return description + ": " + progress + "%";
+		return progressString(description, progress + "%");
 	}
 }
