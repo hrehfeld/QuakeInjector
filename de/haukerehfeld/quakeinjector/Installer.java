@@ -21,12 +21,19 @@ public class Installer {
 		pool = Executors.newFixedThreadPool(simultanousDownloads);
 	}
 
+	public boolean alreadyInstalling(final MapInfo map) {
+		return installers.get(map) != null;
+	}
+
 	public void install(final MapInfo selectedMap,
 						final String url,
 						final String installDirectory,
-						final InstalledMaps installed,
 						final InstallErrorHandler errorHandler,
 						final PropertyChangeListener propertyListener) {
+		//map already in the instalation queue
+		if (alreadyInstalling(selectedMap)) {
+			return;
+		}
 		final InstallMapInfo installer = new InstallMapInfo(selectedMap, url, installDirectory);
 		installers.put(selectedMap, installer);
 		installer.addPropertyChangeListener(propertyListener);
@@ -41,16 +48,6 @@ public class Installer {
 				MapFileList files;
 				try {
 					files = installer.get();
-
-					synchronized (installed) {
-						installed.add(files);
-						try {
-							installed.write();
-						}
-						catch (java.io.IOException e) {
-							System.out.println("Couldn't write installed Maps file!" + e.getMessage());
-						}
-					}
 				}
 				catch (java.util.concurrent.ExecutionException e) {
 					error = e.getCause();
@@ -83,6 +80,9 @@ public class Installer {
 					System.out.println("CancelledException!");
 					errorHandler.handle(new CancelledException(), files);
 				}
+				else {
+					errorHandler.success(files);
+				}
 
 				System.out.println("Done saving installedmaps");
 				installers.remove(selectedMap);
@@ -97,6 +97,7 @@ public class Installer {
 	}
 
 	public interface InstallErrorHandler {
+		public void success(MapFileList installedFiles);
 		public void handle(OnlineFileNotFoundException error);
 		public void handle(FileNotWritableException error, MapFileList alreadyInstalledFiles);
 		public void handle(IOException error, MapFileList alreadyInstalledFiles);

@@ -112,6 +112,8 @@ public class QuakeInjector {
 	
 
 	private void addMainPane(Container panel) {
+		panel.setLayout(new GridBagLayout());
+
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
 
@@ -168,16 +170,51 @@ public class QuakeInjector {
 				gridheight = 1;
 				weightx = weighty = 1;
 			}});
-		panel.add(mainPanel);
+
+		panel.add(mainPanel, new GridBagConstraints() {{
+			gridx = 0;
+			gridy = 0;
+			weightx = weighty = 1;
+			fill = BOTH;
+		}});
 
 		final InstalledMaps installedMaps = new InstalledMaps();
+
+		final InstallQueuePanel installQueue = new InstallQueuePanel();
 
 		this.interactionPanel = new MapInfoPanel(config.getEnginePath(),
 												 paths,
 												 installedMaps,
-												 starter);
+												 starter,
+												 installQueue);
 		maplist.addChangeListener(interactionPanel);
-		panel.add(interactionPanel);
+
+		JPanel infoPanel = new JPanel(new GridBagLayout());
+
+		infoPanel.add(interactionPanel, new GridBagConstraints() {{
+			anchor = PAGE_START;
+			fill = VERTICAL;
+			weightx = 0.5;
+			weighty = 1;
+		}});
+
+		JScrollPane queueScroll = new JScrollPane(installQueue);
+		queueScroll.setPreferredSize(new Dimension(0, 150));
+		infoPanel.add(queueScroll, new GridBagConstraints() {{
+			anchor = PAGE_END;
+			fill = HORIZONTAL;
+			gridy = 1;
+			weightx = 0.5;
+		}});
+
+		panel.add(infoPanel, new GridBagConstraints() {{
+			gridx = 1;
+			gridy = 0;
+			weightx = 0;
+			weighty = 1;
+			fill = BOTH;
+		}});
+		
 		ShowMapInfoSelectionHandler selectionHandler
 			= new ShowMapInfoSelectionHandler(interactionPanel,
 											  maplist,

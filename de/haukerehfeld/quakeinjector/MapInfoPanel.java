@@ -20,12 +20,12 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	private static final String uninstallText = "Uninstall";
 	private static final String installText = "Install";
 	private static final String playText = "Play";
-	private static final String cancelText = "Cancel";
 	
 	private EngineStarter starter;
 	private String installDirectory;
 	private final Paths paths;
 	private InstalledMaps installed;
+	private InstallQueuePanel installQueue;
 
 	private JButton uninstallButton;
 	private JButton installButton;
@@ -33,17 +33,6 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 
 	private JComboBox startmaps;
 
-	private JButton cancelButton;
-	private JProgressBar progress = new JProgressBar();
-	private PropertyChangeListener progressListener = new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				if ("progress" == evt.getPropertyName()) {
-					int p = (Integer) evt.getNewValue();
-					progress.setValue(p);
-				} 
-			}
-		};
-	
     /**
 	 * Currently selected map
 	 */
@@ -54,7 +43,8 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	public MapInfoPanel(String installDirectory,
 						Paths paths,
 						InstalledMaps installed,
-						EngineStarter starter) {
+						EngineStarter starter,
+						InstallQueuePanel installQueue) {
 		super(new GridBagLayout());
 		this.paths = paths;
 		this.installDirectory = installDirectory;
@@ -62,6 +52,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		this.starter = starter;
 
 		this.installer = new Installer();
+		this.installQueue = installQueue;
 
 		uninstallButton = new JButton(uninstallText);
 		uninstallButton.setEnabled(false);
@@ -110,28 +101,6 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 			weightx = 1;
 		}});
 
-		cancelButton = new JButton(cancelText);
-		cancelButton.setEnabled(false);
-		cancelButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					cancel();
-				}
-			});
-		add(cancelButton, new GridBagConstraints() {{
-			fill = HORIZONTAL;
-			gridx = 0;
-			gridy = 1;
-		}});
-		
-		progress.setValue(0);
-		progress.setStringPainted(true);
-		add(progress, new GridBagConstraints() {{
-			gridx = 1;
-			gridy = 1;
-			gridwidth = 3;
-			fill = HORIZONTAL;
-			weightx = 1;
-		}});
 		
 	}
 
@@ -150,57 +119,82 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 			}
 			else {
 				System.out.print("Required package " + id + " not installed. Installing...");
-				install(requirement);
+				install(requirement, true);
 			}
 		}
 	}
 
 	public void install() {
-		install(selectedMap);
+		install(selectedMap, false);
 	}
 
-	public void install(MapInfo selectedMap) {
+	public void install(final MapInfo selectedMap, boolean becauseRequired) {
+		if (installer.alreadyInstalling(selectedMap)) {
+			return;
+		}
 		installRequirements(selectedMap);
+
+
+		String description = "Installing ";
+		if (becauseRequired) {
+			description += "prerequisite ";
+		}
+		description += selectedMap.getId();
 		
+		final InstallQueuePanel.Job progressListener
+			= installQueue.addJob(description,
+								  new ActionListener() {
+									  public void actionPerformed(ActionEvent e) {
+										  installer.cancel(selectedMap);
+									  }
+								  });
+		
+
 		installer.install(selectedMap,
 						  paths.getRepositoryUrl(selectedMap.getId()),
 						  installDirectory,
-						  installed,
 						  new Installer.InstallErrorHandler() {
+							  public void success(MapFileList installedFiles) {
+								  synchronized (installed) {
+									  installed.add(installedFiles);
+									  try {
+										  installed.write();
+									  }
+									  catch (java.io.IOException e) {
+										  System.out.println("Couldn't write installed Maps file!"
+															 + e.getMessage());
+									  }
+								  }
+
+								  installQueue.finished(progressListener);
+								  
+							  }
 							  public void handle(OnlineFileNotFoundException error) {
 							  }
-							  public void handle(FileNotWritableException error, MapFileList alreadyInstalledFiles) {
+							  public void handle(FileNotWritableException error,
+												 MapFileList alreadyInstalledFiles) {
 								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
+								  installQueue.finished(progressListener);
 							  }
-							  public void handle(java.io.IOException error, MapFileList alreadyInstalledFiles) {
+							  public void handle(java.io.IOException error,
+												 MapFileList alreadyInstalledFiles) {
 								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
+								  installQueue.finished(progressListener);
 							  }
-							  public void handle(Installer.CancelledException error, MapFileList alreadyInstalledFiles) {
+							  public void handle(Installer.CancelledException error,
+												 MapFileList alreadyInstalledFiles) {
 								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
+								  installQueue.finished(progressListener);
 							  }
 						  },
 						  progressListener);
 
 		installButton.setEnabled(false);
-		cancelButton.setEnabled(true);
-
-
-// 	@Override
-//     public void done() {
-// 		map.setInstalled(true);
-		
-// 	}
-			
 	}
 
-	public void cancel() {
-		installer.cancel(selectedMap);
-		cancelButton.setEnabled(false);
-		progress.setValue(0);
-	}
 	public void uninstall() {
 		final MapFileList files;
 
