@@ -36,19 +36,22 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 	}
 
 	@Override
-	public MapFileList doInBackground() throws IOException, FileNotFoundException, Installer.CanceledException {
+	public MapFileList doInBackground() throws IOException, FileNotFoundException, Installer.CancelledException {
 		System.out.println("Installing " + map.getId());
-		
-		MapFileList files = download(url);
+
+		try {
+			MapFileList files = download(url);
+		}
+		catch (Installer.CancelledException e) {
+			System.out.println("cancelled exception!");
+			//throw e;
+			throw new OnlineFileNotFoundException();
+		}
 		map.setInstalled(true);
 		return files;
 	}
 
-	@Override
-    public void done() {
-	}
-
-	public MapFileList download(String urlString) throws java.io.IOException, Installer.CanceledException {
+	public MapFileList download(String urlString) throws java.io.IOException, Installer.CancelledException {
 		URL url;
 		try {
 			url = new URL(urlString);
@@ -81,7 +84,8 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 	public MapFileList unzip(InputStream in,
 							 String basedir,
 							 String unzipdir,
-							 String mapid) throws IOException, FileNotFoundException, Installer.CanceledException {
+							 String mapid)
+		throws IOException, FileNotFoundException, Installer.CancelledException {
 		files = new MapFileList(mapid);
 
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
@@ -143,12 +147,12 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 	}
 
 	private void writeFile(InputStream in, File file, WriteToDownloadProgress progress)
-		throws FileNotFoundException, IOException, Installer.CanceledException {
+		throws FileNotFoundException, IOException, Installer.CancelledException {
 		writeFile(in, file, 2048, progress);
 	}
 		
 	private void writeFile(InputStream in, File file, int BUFFERSIZE, WriteToDownloadProgress progress)
-		throws FileNotFoundException, IOException, Installer.CanceledException {
+		throws FileNotFoundException, IOException, Installer.CancelledException {
 		byte data[] = new byte[BUFFERSIZE];
 		BufferedOutputStream dest = new BufferedOutputStream(new FileOutputStream(file),
 															 BUFFERSIZE);
@@ -173,13 +177,13 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 			}
 		}
 
-		public void publish(int writtenBytes) throws Installer.CanceledException {
+		public void publish(int writtenBytes) throws Installer.CancelledException {
 			long downloaded = downloadSize * writtenBytes / writeSize;
 			addDownloaded(downloaded);
 		}
 	}
 	
-	private void addDownloaded(long read) throws Installer.CanceledException {
+	private void addDownloaded(long read) throws Installer.CancelledException {
 		//we do this here because this is the most frequently called portion
 		checkCancelled();
 		
@@ -191,12 +195,11 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 		}
 	}
 
-	private void checkCancelled() throws Installer.CanceledException {
-		if (!isCancelled()) {
-			return;
+	private void checkCancelled() throws Installer.CancelledException {
+		if (isCancelled()) {
+			System.out.println("canceling...");
+			throw new Installer.CancelledException();
 		}
-
-		throw new Installer.CanceledException();
 	}
 
 	public MapFileList getInstalledFiles() {

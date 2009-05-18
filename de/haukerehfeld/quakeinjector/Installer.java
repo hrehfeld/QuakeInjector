@@ -34,6 +34,8 @@ public class Installer {
 		pool.submit(installer);
 
 		SwingWorker<Void,Void> saveInstalled = new SwingWorker<Void,Void>() {
+			private Throwable error;
+			
 			@Override
 			public Void doInBackground() {
 				MapFileList files;
@@ -50,32 +52,39 @@ public class Installer {
 						}
 					}
 				}
-				catch (java.lang.InterruptedException e) {
-					System.out.println(e);
-				}
 				catch (java.util.concurrent.ExecutionException e) {
-					Throwable t = e.getCause();
-
-					files = installer.getInstalledFiles();
-
-					if (t instanceof OnlineFileNotFoundException) {
-						errorHandler.handle((OnlineFileNotFoundException) t);
-					}
-					else if (t instanceof FileNotWritableException) {
-						errorHandler.handle((FileNotWritableException) t, files);
-					}
-					else if (t instanceof IOException) {
-						errorHandler.handle((IOException) t, files);
-					}
-					else if (t instanceof CanceledException) {
-						errorHandler.handle((CanceledException) t, files);
-					}
+					error = e.getCause();
 				}
+				catch (java.lang.InterruptedException e) {
+					System.out.println("Interrupted: " + e);
+				}
+
 				return null;
 			}
 
 			@Override
 			public void done() {
+				MapFileList files = installer.getInstalledFiles();
+				
+				if (error != null) {
+					System.out.println("exception from install worker");
+
+					if (error instanceof OnlineFileNotFoundException) {
+						errorHandler.handle((OnlineFileNotFoundException) error);
+					}
+					else if (error instanceof FileNotWritableException) {
+						errorHandler.handle((FileNotWritableException) error, files);
+					}
+					else if (error instanceof IOException) {
+						errorHandler.handle((IOException) error, files);
+					}
+				}
+				else if (installer.isCancelled()) {
+					System.out.println("CancelledException!");
+					errorHandler.handle(new CancelledException(), files);
+				}
+
+				System.out.println("Done saving installedmaps");
 				installers.remove(selectedMap);
 			}
 		};
@@ -91,9 +100,9 @@ public class Installer {
 		public void handle(OnlineFileNotFoundException error);
 		public void handle(FileNotWritableException error, MapFileList alreadyInstalledFiles);
 		public void handle(IOException error, MapFileList alreadyInstalledFiles);
-		public void handle(CanceledException error, MapFileList alreadyInstalledFiles);
+		public void handle(CancelledException error, MapFileList alreadyInstalledFiles);
 	}
 
-	public static class CanceledException extends Exception {}
+	public static class CancelledException extends Exception {}
 
 }

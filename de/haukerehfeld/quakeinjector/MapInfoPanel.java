@@ -20,6 +20,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 	private static final String uninstallText = "Uninstall";
 	private static final String installText = "Install";
 	private static final String playText = "Play";
+	private static final String cancelText = "Cancel";
 	
 	private EngineStarter starter;
 	private String installDirectory;
@@ -32,6 +33,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 
 	private JComboBox startmaps;
 
+	private JButton cancelButton;
 	private JProgressBar progress = new JProgressBar();
 	private PropertyChangeListener progressListener = new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
@@ -71,6 +73,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		add(uninstallButton, new GridBagConstraints() {{
 			gridx = 0;
 			gridy = 0;
+			fill = HORIZONTAL;
 		}});
 
 		installButton = new JButton(installText);
@@ -83,6 +86,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		add(installButton, new GridBagConstraints() {{
 			gridx = 1;
 			gridy = 0;
+			fill = HORIZONTAL;
 		}});
 
 		playButton = new JButton(playText);
@@ -95,6 +99,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 		add(playButton, new GridBagConstraints() {{
 			gridx = 2;
 			gridy = 0;
+			fill = HORIZONTAL;
 		}});
 
 		startmaps = new JComboBox();
@@ -105,6 +110,19 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 			weightx = 1;
 		}});
 
+		cancelButton = new JButton(cancelText);
+		cancelButton.setEnabled(false);
+		cancelButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					cancel();
+				}
+			});
+		add(cancelButton, new GridBagConstraints() {{
+			fill = HORIZONTAL;
+			gridx = 0;
+			gridy = 1;
+		}});
+		
 		progress.setValue(0);
 		progress.setStringPainted(true);
 		add(progress, new GridBagConstraints() {{
@@ -152,18 +170,22 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 							  public void handle(OnlineFileNotFoundException error) {
 							  }
 							  public void handle(FileNotWritableException error, MapFileList alreadyInstalledFiles) {
+								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
 							  }
 							  public void handle(java.io.IOException error, MapFileList alreadyInstalledFiles) {
+								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
 							  }
-							  public void handle(Installer.CanceledException error, MapFileList alreadyInstalledFiles) {
+							  public void handle(Installer.CancelledException error, MapFileList alreadyInstalledFiles) {
+								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
 							  }
 						  },
 						  progressListener);
 
 		installButton.setEnabled(false);
+		cancelButton.setEnabled(true);
 
 
 // 	@Override
@@ -174,6 +196,11 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 			
 	}
 
+	public void cancel() {
+		installer.cancel(selectedMap);
+		cancelButton.setEnabled(false);
+		progress.setValue(0);
+	}
 	public void uninstall() {
 		final MapFileList files;
 
