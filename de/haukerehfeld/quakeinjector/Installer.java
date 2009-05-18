@@ -15,7 +15,7 @@ public class Installer {
 	
 	private ExecutorService pool;
 
-	private Map<Package,InstallMapInfo> installers = new HashMap<Package,InstallMapInfo>();
+	private Map<Package,InstallWorker> installers = new HashMap<Package,InstallWorker>();
 
 	public Installer() {
 		pool = Executors.newFixedThreadPool(simultanousDownloads);
@@ -34,7 +34,7 @@ public class Installer {
 		if (alreadyInstalling(selectedMap)) {
 			return;
 		}
-		final InstallMapInfo installer = new InstallMapInfo(selectedMap, url, installDirectory);
+		final InstallWorker installer = new InstallWorker(selectedMap, url, installDirectory);
 		installers.put(selectedMap, installer);
 		installer.addPropertyChangeListener(propertyListener);
 

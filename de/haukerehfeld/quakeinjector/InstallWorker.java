@@ -15,7 +15,7 @@ import java.lang.RuntimeException;
  * Install maps in a worker thread
  * Init once and let swing start it - don't reuse
  */
-public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
+public class InstallWorker extends SwingWorker<MapFileList, Void> {
 	private final int READSIZE = 40960;
 
 	private String url;
@@ -27,7 +27,7 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 
 	private MapFileList files;
 
-	public InstallMapInfo(Package map,
+	public InstallWorker(Package map,
 					 String url,
 					 String baseDirectory) {
 		this.map = map;
