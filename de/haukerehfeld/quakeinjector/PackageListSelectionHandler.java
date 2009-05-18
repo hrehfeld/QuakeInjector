@@ -9,14 +9,14 @@ import javax.swing.table.*;
 
 import java.util.*;
 
-class ShowMapInfoSelectionHandler implements ListSelectionListener {
+class PackageListSelectionHandler implements ListSelectionListener {
 	private PackageInteractionPanel panel;
 
 	private PackageList list;
 
 	private JTable table;
 
-	public ShowMapInfoSelectionHandler(PackageInteractionPanel panel, PackageList list, JTable table) {
+	public PackageListSelectionHandler(PackageInteractionPanel panel, PackageList list, JTable table) {
 		this.panel = panel;
 		this.list = list;
 		this.table = table;

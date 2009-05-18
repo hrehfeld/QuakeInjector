@@ -219,8 +219,8 @@ public class QuakeInjector {
 			fill = BOTH;
 		}});
 		
-		ShowMapInfoSelectionHandler selectionHandler
-			= new ShowMapInfoSelectionHandler(interactionPanel,
+		PackageListSelectionHandler selectionHandler
+			= new PackageListSelectionHandler(interactionPanel,
 											  maplist,
 											  table);
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
