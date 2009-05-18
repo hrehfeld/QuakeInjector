@@ -6,10 +6,10 @@ import java.awt.Dimension;
 
 public class PackageTable extends JTable {
 
-	public PackageTable(MapList maplist) {
+	public PackageTable(PackageList maplist) {
 		super(maplist);
 		
-		final TableRowSorter<MapList> sorter = new TableRowSorter<MapList>(maplist);
+		final TableRowSorter<PackageList> sorter = new TableRowSorter<PackageList>(maplist);
 		setRowSorter(sorter);
 		
 		setPreferredScrollableViewportSize(new Dimension(500, 500));
@@ -17,7 +17,7 @@ public class PackageTable extends JTable {
 		setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 	}
 
-	public TableRowSorter<MapList> getRowSorter() {
-		return (TableRowSorter<MapList>) super.getRowSorter();
+	public TableRowSorter<PackageList> getRowSorter() {
+		return (TableRowSorter<PackageList>) super.getRowSorter();
 	}
 }

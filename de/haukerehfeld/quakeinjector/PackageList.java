@@ -14,7 +14,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
 
-public class MapList extends AbstractTableModel implements ChangeListener {
+public class PackageList extends AbstractTableModel implements ChangeListener {
 	private static final int name = 0;
 	private static final int title = 1;
 	private static final int author = 2;
@@ -34,11 +34,11 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 	private List<Package> data;
 
 
-	public MapList() {
+	public PackageList() {
 		data = new ArrayList<Package>();
 	}
 
-	public MapList(List<Package> data) {
+	public PackageList(List<Package> data) {
 		setMapList(data);
 	}
 
@@ -134,7 +134,7 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 	 * Update the row filter regular expression from the expression in
 	 * the text box.
 	 */
-	public RowFilter<MapList, Integer> filter(final String filterText) {
+	public RowFilter<PackageList, Integer> filter(final String filterText) {
 		final int[] columnsToCheck = { name, title, author, releasedate };
 
 		String[] filterTexts = filterText.split(" ");
@@ -149,8 +149,8 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 			}
 		}
 
-		RowFilter<MapList, Integer> rf = new RowFilter<MapList,Integer>() {
-			public boolean include(Entry<? extends MapList, ? extends Integer> entry) {
+		RowFilter<PackageList, Integer> rf = new RowFilter<PackageList,Integer>() {
+			public boolean include(Entry<? extends PackageList, ? extends Integer> entry) {
 				//match all patters in at least one column
 				for (Pattern pattern: patterns) {
 					boolean matches = false;

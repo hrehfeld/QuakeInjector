@@ -12,11 +12,11 @@ import java.util.*;
 class ShowMapInfoSelectionHandler implements ListSelectionListener {
 	private PackageInteractionPanel panel;
 
-	private MapList list;
+	private PackageList list;
 
 	private JTable table;
 
-	public ShowMapInfoSelectionHandler(PackageInteractionPanel panel, MapList list, JTable table) {
+	public ShowMapInfoSelectionHandler(PackageInteractionPanel panel, PackageList list, JTable table) {
 		this.panel = panel;
 		this.list = list;
 		this.table = table;

@@ -117,7 +117,7 @@ public class QuakeInjector {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
 
-		final MapList maplist = new MapList();
+		final PackageList maplist = new PackageList();
 		
 		//create a table
 		final PackageTable table =  new PackageTable(maplist);
