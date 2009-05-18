@@ -9,7 +9,7 @@ import java.util.GregorianCalendar;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
-public class MapInfo {
+public class Package {
 
 	/**
 	 * easily have change listeners
@@ -39,9 +39,9 @@ public class MapInfo {
 	private String commandline;
 
 	private List<String> startmaps;
-	private List<MapInfo> requirements;
+	private List<Package> requirements;
 
-	public MapInfo(String id,
+	public Package(String id,
 				   String author,
 				   String title,
 				   int size,
@@ -50,7 +50,7 @@ public class MapInfo {
 		this(id, author, title, size, date, isInstalled, null, null, null, null);
 	}
 
-	public MapInfo(String id,
+	public Package(String id,
 				   String author,
 				   String title,
 				   int size,
@@ -59,7 +59,7 @@ public class MapInfo {
 				   String relativeBaseDir,
 				   String commandline,
 				   List<String> startmaps,
-				   List<MapInfo> requirements) {
+				   List<Package> requirements) {
 		this.id = id;
 		this.author = author;
 		this.title = title;
@@ -116,11 +116,11 @@ public class MapInfo {
 		listeners.notifyChangeListeners(this);
 	}
 
-	public void setRequirements(List<MapInfo> requirements) {
+	public void setRequirements(List<Package> requirements) {
 		this.requirements = requirements;
 	}
 
-	public List<MapInfo> getRequirements() {
+	public List<Package> getRequirements() {
 		return this.requirements;
 	}
 

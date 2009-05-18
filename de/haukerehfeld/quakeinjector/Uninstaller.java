@@ -20,9 +20,9 @@ import java.util.Iterator;
 public class Uninstaller extends SwingWorker<Void, Void> {
 	private String baseDirectory;
 	private MapFileList files;
-	private MapInfo map;
+	private Package map;
 
-	public Uninstaller(MapInfo map, MapFileList files, String baseDirectory) {
+	public Uninstaller(Package map, MapFileList files, String baseDirectory) {
 		this.map = map;
 		this.files = files;
 		this.baseDirectory = baseDirectory;

@@ -15,17 +15,17 @@ public class Installer {
 	
 	private ExecutorService pool;
 
-	private Map<MapInfo,InstallMapInfo> installers = new HashMap<MapInfo,InstallMapInfo>();
+	private Map<Package,InstallMapInfo> installers = new HashMap<Package,InstallMapInfo>();
 
 	public Installer() {
 		pool = Executors.newFixedThreadPool(simultanousDownloads);
 	}
 
-	public boolean alreadyInstalling(final MapInfo map) {
+	public boolean alreadyInstalling(final Package map) {
 		return installers.get(map) != null;
 	}
 
-	public void install(final MapInfo selectedMap,
+	public void install(final Package selectedMap,
 						final String url,
 						final String installDirectory,
 						final InstallErrorHandler errorHandler,
@@ -92,7 +92,7 @@ public class Installer {
 		
 	}
 
-	public void cancel(MapInfo installerMap) {
+	public void cancel(Package installerMap) {
 		installers.get(installerMap).cancel(true);
 	}
 

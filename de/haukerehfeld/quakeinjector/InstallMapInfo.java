@@ -20,14 +20,14 @@ public class InstallMapInfo extends SwingWorker<MapFileList, Void> {
 
 	private String url;
 	private String baseDirectory;
-	private MapInfo map;
+	private Package map;
 
 	private long downloadSize = 0;
 	private long downloaded = 0;
 
 	private MapFileList files;
 
-	public InstallMapInfo(MapInfo map,
+	public InstallMapInfo(Package map,
 					 String url,
 					 String baseDirectory) {
 		this.map = map;

@@ -36,7 +36,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
     /**
 	 * Currently selected map
 	 */
-	private MapInfo selectedMap = null;
+	private Package selectedMap = null;
 
 	private final Installer installer;
 	
@@ -115,8 +115,8 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	}
 
 
-	public void installRequirements(MapInfo map) {
-		for (MapInfo requirement: map.getRequirements()) {
+	public void installRequirements(Package map) {
+		for (Package requirement: map.getRequirements()) {
 			String id = requirement.getId();
 			
 			MapFileList isInstalled;
@@ -138,7 +138,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 		install(selectedMap, false);
 	}
 
-	public void install(final MapInfo selectedMap, boolean becauseRequired) {
+	public void install(final Package selectedMap, boolean becauseRequired) {
 		if (installer.alreadyInstalling(selectedMap)) {
 			return;
 		}
@@ -255,7 +255,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 		}
 	}
 
-	public void setMapInfo(MapInfo map) {
+	public void setMapInfo(Package map) {
 		this.selectedMap = map;
 
 		refreshUi();

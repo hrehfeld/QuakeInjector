@@ -19,10 +19,10 @@ public class MapInfoParser implements java.io.Serializable {
 	/**
 	 * Parse the complete document
 	 */
-	public List<MapInfo> parse() {
-		HashMap<String,MapInfo> mapinfos = new HashMap<String,MapInfo>();
-		Map<MapInfo,List<String>> requirements = new HashMap<MapInfo,List<String>>();
-		List<MapInfo> mapList = new ArrayList<MapInfo>(mapinfos.size());
+	public List<Package> parse() {
+		HashMap<String,Package> mapinfos = new HashMap<String,Package>();
+		Map<Package,List<String>> requirements = new HashMap<Package,List<String>>();
+		List<Package> mapList = new ArrayList<Package>(mapinfos.size());
 
 		try {
 			Document document = XmlUtils.getDocument(
@@ -34,7 +34,7 @@ public class MapInfoParser implements java.io.Serializable {
 
 			for (Node file: XmlUtils.iterate(files.getChildNodes())) {
 				if (XmlUtils.isElement(file)) {
-					MapInfo mapinfo = parseMapInfo((Element) file, requirements);
+					Package mapinfo = parseMapInfo((Element) file, requirements);
 					mapinfos.put(mapinfo.getId(), mapinfo);
 
 					//add to final list
@@ -55,12 +55,12 @@ public class MapInfoParser implements java.io.Serializable {
 		}
 
 		// we still need to resolve requirements
-		for (MapInfo currentMap: mapList) {
+		for (Package currentMap: mapList) {
 			List<String> reqs = requirements.get(currentMap);
 
-			List<MapInfo> resolvedRequirements = new ArrayList<MapInfo>(reqs.size());
+			List<Package> resolvedRequirements = new ArrayList<Package>(reqs.size());
 			for (String s: reqs) {
-				MapInfo requiredMapInfo = mapinfos.get(s);
+				Package requiredMapInfo = mapinfos.get(s);
 				if (requiredMapInfo == null) {
 					System.out.println("Warning: requirement " + s
 									   + " couldn't be found in the package list. "
@@ -76,9 +76,9 @@ public class MapInfoParser implements java.io.Serializable {
 	}
 
 	/**
-	 * Parse a single MapInfo/file entry
+	 * Parse a single Package/file entry
 	 */
-	private MapInfo parseMapInfo(Element file, Map<MapInfo,List<String>> reqResolve) {
+	private Package parseMapInfo(Element file, Map<Package,List<String>> reqResolve) {
 		String id = file.getAttribute("id");
 
 		String title = XmlUtils.getFirstElement(file, "title").getTextContent().trim();
@@ -139,7 +139,7 @@ public class MapInfoParser implements java.io.Serializable {
 			startmaps.add(id);
 		}
 
-		MapInfo result = new MapInfo(id,
+		Package result = new Package(id,
 									 author,
 									 title,
 									 size,

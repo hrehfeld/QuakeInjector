@@ -87,8 +87,8 @@ public class InstalledMaps extends HashMap<String, MapFileList> {
 		remove(files.getId());
 	}
 
-	public void set(List<MapInfo> maps) {
-		for (MapInfo m: maps) {
+	public void set(List<Package> maps) {
+		for (Package m: maps) {
 			if (containsKey(m.getId())) {
 				m.setInstalled(true);
 			}

@@ -226,9 +226,9 @@ public class QuakeInjector {
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
 
 		final MapInfoParser parser = new MapInfoParser();
-		SwingWorker<List<MapInfo>,Void> parse = new SwingWorker<List<MapInfo>, Void>() {
+		SwingWorker<List<Package>,Void> parse = new SwingWorker<List<Package>, Void>() {
 			@Override
-			public List<MapInfo> doInBackground() {
+			public List<Package> doInBackground() {
 				try {
 					installedMaps.read();
 				}
@@ -236,7 +236,7 @@ public class QuakeInjector {
 					/** @todo 2009-04-28 19:00 hrehfeld    better error reporting? */
 					System.out.println(e.getMessage());
 				}
-				java.util.List<MapInfo> maps = parser.parse();
+				java.util.List<Package> maps = parser.parse();
 				installedMaps.set(maps);
 				return maps;
 			}

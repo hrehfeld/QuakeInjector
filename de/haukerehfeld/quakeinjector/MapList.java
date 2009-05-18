@@ -31,22 +31,22 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 
 	private ChangeListenerList listeners = new ChangeListenerList();
 	
-	private List<MapInfo> data;
+	private List<Package> data;
 
 
 	public MapList() {
-		data = new ArrayList<MapInfo>();
+		data = new ArrayList<Package>();
 	}
 
-	public MapList(List<MapInfo> data) {
+	public MapList(List<Package> data) {
 		setMapList(data);
 	}
 
 
-	public void setMapList(List<MapInfo> data) {
+	public void setMapList(List<Package> data) {
 		this.data = data;
 
-		for (MapInfo m: data) {
+		for (Package m: data) {
 			m.addChangeListener(this);
 		}
 
@@ -69,7 +69,7 @@ public class MapList extends AbstractTableModel implements ChangeListener {
         return data.size();
     }
 
-	public Object getColumnData(int col, MapInfo info) {
+	public Object getColumnData(int col, Package info) {
 		switch (col) {
 		case name: return info.getId();
 		case title: return info.getTitle();
@@ -78,7 +78,7 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 		case installed: return new Boolean(info.isInstalled());
 		case requirements:
 			String result = "";
-			for (MapInfo m: info.getRequirements()) {
+			for (Package m: info.getRequirements()) {
 				result += m.getId() + ", ";
 			}
 			return result;
@@ -113,7 +113,7 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 		return false;
     }
 
-	public MapInfo getMapInfo(int row) {
+	public Package getMapInfo(int row) {
 		return data.get(row);
 	}
 
@@ -124,7 +124,7 @@ public class MapList extends AbstractTableModel implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		listeners.notifyChangeListeners(e.getSource());
 
-		int i = data.indexOf((MapInfo) e.getSource());
+		int i = data.indexOf((Package) e.getSource());
 		super.fireTableRowsUpdated(i, i);
 		
 	}
