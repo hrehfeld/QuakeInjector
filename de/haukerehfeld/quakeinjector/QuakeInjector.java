@@ -30,7 +30,7 @@ public class QuakeInjector {
 
 	private final EngineStarter starter;
 
-	private MapInfoPanel interactionPanel;
+	private PackageInteractionPanel interactionPanel;
 
 	public QuakeInjector() {
 		config = new Configuration();
@@ -183,7 +183,7 @@ public class QuakeInjector {
 
 		final InstallQueuePanel installQueue = new InstallQueuePanel();
 
-		this.interactionPanel = new MapInfoPanel(config.getEnginePath(),
+		this.interactionPanel = new PackageInteractionPanel(config.getEnginePath(),
 												 paths,
 												 installedMaps,
 												 starter,

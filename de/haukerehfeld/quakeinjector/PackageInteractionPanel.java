@@ -16,7 +16,7 @@ import javax.swing.event.ChangeEvent;
 /**
  * the panel that shows Info about the selected map
  */
-class MapInfoPanel extends JPanel implements ChangeListener {
+class PackageInteractionPanel extends JPanel implements ChangeListener {
 	private static final String uninstallText = "Uninstall";
 	private static final String installText = "Install";
 	private static final String playText = "Play";
@@ -40,7 +40,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 
 	private final Installer installer;
 	
-	public MapInfoPanel(String installDirectory,
+	public PackageInteractionPanel(String installDirectory,
 						Paths paths,
 						InstalledMaps installed,
 						EngineStarter starter,

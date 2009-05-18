@@ -10,13 +10,13 @@ import javax.swing.table.*;
 import java.util.*;
 
 class ShowMapInfoSelectionHandler implements ListSelectionListener {
-	private MapInfoPanel panel;
+	private PackageInteractionPanel panel;
 
 	private MapList list;
 
 	private JTable table;
 
-	public ShowMapInfoSelectionHandler(MapInfoPanel panel, MapList list, JTable table) {
+	public ShowMapInfoSelectionHandler(PackageInteractionPanel panel, MapList list, JTable table) {
 		this.panel = panel;
 		this.list = list;
 		this.table = table;
