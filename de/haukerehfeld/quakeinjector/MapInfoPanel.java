@@ -61,14 +61,19 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 					uninstall();
 				}
 			});
+
 		add(uninstallButton, new GridBagConstraints() {{
-			gridx = 0;
-			gridy = 0;
 			fill = HORIZONTAL;
 		}});
 
 		installButton = new JButton(installText);
 		installButton.setEnabled(false);
+		int preferredHeight = (int) installButton.getPreferredSize().getHeight();
+		{
+			Dimension maxSize = new Dimension(150, preferredHeight);
+			installButton.setMinimumSize(maxSize);
+			installButton.setPreferredSize(maxSize);
+		}
 		installButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					install();
@@ -88,15 +93,20 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 				}
 			});
 		add(playButton, new GridBagConstraints() {{
-			gridx = 2;
-			gridy = 0;
+			gridx = 0;
+			gridy = 1;
 			fill = HORIZONTAL;
 		}});
 
 		startmaps = new JComboBox();
+		{
+			Dimension maxSize = new Dimension(100, preferredHeight);
+			startmaps.setPreferredSize(maxSize);
+			startmaps.setMinimumSize(maxSize);
+		}
 		add(startmaps, new GridBagConstraints() {{
-			gridx = 3;
-			gridy = 0;
+			gridx = 1;
+			gridy = 1;
 			fill = HORIZONTAL;
 			weightx = 1;
 		}});
@@ -284,6 +294,7 @@ class MapInfoPanel extends JPanel implements ChangeListener {
 
 	}
 
+	@Override
 	public void stateChanged(ChangeEvent e) {
 		refreshUi();
 	}

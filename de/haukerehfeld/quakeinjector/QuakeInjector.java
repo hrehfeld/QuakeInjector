@@ -121,6 +121,7 @@ public class QuakeInjector {
 		
 		//create a table
 		final PackageTable table =  new PackageTable(maplist);
+		table.setMinimumSize(new Dimension(450, 300));
 
 
 		{
@@ -191,17 +192,23 @@ public class QuakeInjector {
 
 		JPanel infoPanel = new JPanel(new GridBagLayout());
 
-		infoPanel.add(interactionPanel, new GridBagConstraints() {{
+		infoPanel.add(Box.createVerticalGlue(), new GridBagConstraints() {{
 			anchor = PAGE_START;
 			fill = VERTICAL;
+			weightx = 0;
 			weighty = 1;
+		}});
+
+		infoPanel.add(interactionPanel, new GridBagConstraints() {{
+			gridy = 1;
+			fill = BOTH;
 		}});
 
 		JScrollPane queueScroll = new JScrollPane(installQueue);
 		infoPanel.add(queueScroll, new GridBagConstraints() {{
 			anchor = PAGE_END;
 			fill = BOTH;
-			gridy = 1;
+			gridy = 2;
 		}});
 
 		panel.add(infoPanel, new GridBagConstraints() {{
