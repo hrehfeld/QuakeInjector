@@ -19,10 +19,10 @@ import java.util.Iterator;
  */
 public class Uninstaller extends SwingWorker<Void, Void> {
 	private String baseDirectory;
-	private MapFileList files;
+	private PackageFileList files;
 	private Package map;
 
-	public Uninstaller(Package map, MapFileList files, String baseDirectory) {
+	public Uninstaller(Package map, PackageFileList files, String baseDirectory) {
 		this.map = map;
 		this.files = files;
 		this.baseDirectory = baseDirectory;
@@ -35,7 +35,7 @@ public class Uninstaller extends SwingWorker<Void, Void> {
 		return null;
 	}
 
-	public void uninstall(MapFileList files) {
+	public void uninstall(PackageFileList files) {
 		ArrayList<File> deleteLater = new ArrayList<File>();
 
 		//we rely on the descending order of paths in the file list here!

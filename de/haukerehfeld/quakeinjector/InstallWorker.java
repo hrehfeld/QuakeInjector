@@ -15,7 +15,7 @@ import java.lang.RuntimeException;
  * Install maps in a worker thread
  * Init once and let swing start it - don't reuse
  */
-public class InstallWorker extends SwingWorker<MapFileList, Void> {
+public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 	private final int READSIZE = 40960;
 
 	private String url;
@@ -25,7 +25,7 @@ public class InstallWorker extends SwingWorker<MapFileList, Void> {
 	private long downloadSize = 0;
 	private long downloaded = 0;
 
-	private MapFileList files;
+	private PackageFileList files;
 
 	public InstallWorker(Package map,
 					 String url,
@@ -36,11 +36,11 @@ public class InstallWorker extends SwingWorker<MapFileList, Void> {
 	}
 
 	@Override
-	public MapFileList doInBackground() throws IOException, FileNotFoundException, Installer.CancelledException {
+	public PackageFileList doInBackground() throws IOException, FileNotFoundException, Installer.CancelledException {
 		System.out.println("Installing " + map.getId());
 
 		try {
-			MapFileList files = download(url);
+			PackageFileList files = download(url);
 		}
 		catch (Installer.CancelledException e) {
 			System.out.println("cancelled exception!");
@@ -51,7 +51,7 @@ public class InstallWorker extends SwingWorker<MapFileList, Void> {
 		return files;
 	}
 
-	public MapFileList download(String urlString) throws java.io.IOException, Installer.CancelledException {
+	public PackageFileList download(String urlString) throws java.io.IOException, Installer.CancelledException {
 		URL url;
 		try {
 			url = new URL(urlString);
@@ -81,12 +81,12 @@ public class InstallWorker extends SwingWorker<MapFileList, Void> {
 		return unzip(in, this.baseDirectory, unzipdir, map.getId());
 	}
 
-	public MapFileList unzip(InputStream in,
+	public PackageFileList unzip(InputStream in,
 							 String basedir,
 							 String unzipdir,
 							 String mapid)
 		throws IOException, FileNotFoundException, Installer.CancelledException {
-		files = new MapFileList(mapid);
+		files = new PackageFileList(mapid);
 
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
 		ZipEntry entry;
@@ -202,7 +202,7 @@ public class InstallWorker extends SwingWorker<MapFileList, Void> {
 		}
 	}
 
-	public MapFileList getInstalledFiles() {
+	public PackageFileList getInstalledFiles() {
 		return files;
 	}
 }

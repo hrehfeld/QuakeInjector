@@ -45,7 +45,7 @@ public class Installer {
 			
 			@Override
 			public Void doInBackground() {
-				MapFileList files;
+				PackageFileList files;
 				try {
 					files = installer.get();
 				}
@@ -61,7 +61,7 @@ public class Installer {
 
 			@Override
 			public void done() {
-				MapFileList files = installer.getInstalledFiles();
+				PackageFileList files = installer.getInstalledFiles();
 				
 				if (error != null) {
 					System.out.println("exception from install worker");
@@ -97,11 +97,11 @@ public class Installer {
 	}
 
 	public interface InstallErrorHandler {
-		public void success(MapFileList installedFiles);
+		public void success(PackageFileList installedFiles);
 		public void handle(OnlineFileNotFoundException error);
-		public void handle(FileNotWritableException error, MapFileList alreadyInstalledFiles);
-		public void handle(IOException error, MapFileList alreadyInstalledFiles);
-		public void handle(CancelledException error, MapFileList alreadyInstalledFiles);
+		public void handle(FileNotWritableException error, PackageFileList alreadyInstalledFiles);
+		public void handle(IOException error, PackageFileList alreadyInstalledFiles);
+		public void handle(CancelledException error, PackageFileList alreadyInstalledFiles);
 	}
 
 	public static class CancelledException extends Exception {}

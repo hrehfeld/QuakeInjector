@@ -17,7 +17,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 
-public class InstalledMaps extends HashMap<String, MapFileList> {
+public class InstalledMaps extends HashMap<String, PackageFileList> {
 	private final static String filename = "installedMaps.xml";
 	private final File file = new File(filename);
 	
@@ -40,7 +40,7 @@ public class InstalledMaps extends HashMap<String, MapFileList> {
 			Element root = doc.createElement("installedmaps");
 			doc.appendChild(root);
 
-			for (MapFileList l: this.values()) {
+			for (PackageFileList l: this.values()) {
 				Element mapNode = doc.createElement("map");
 				mapNode.setAttribute("id", l.getId());
 				root.appendChild(mapNode);
@@ -79,11 +79,11 @@ public class InstalledMaps extends HashMap<String, MapFileList> {
 		parse(file);
 	}
 
-	public void add(MapFileList files) {
+	public void add(PackageFileList files) {
 		put(files.getId(), files);
 	}
 
-	public void remove(MapFileList files) {
+	public void remove(PackageFileList files) {
 		remove(files.getId());
 	}
 
@@ -129,9 +129,9 @@ public class InstalledMaps extends HashMap<String, MapFileList> {
 		}
 	}
 
-	private MapFileList parseMapFileList(Element map) {
+	private PackageFileList parseMapFileList(Element map) {
 		String id = map.getAttribute("id");
-		MapFileList fileList = new MapFileList(id);
+		PackageFileList fileList = new PackageFileList(id);
 
 		NodeList files = map.getChildNodes();
 

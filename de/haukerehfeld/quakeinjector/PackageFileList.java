@@ -5,7 +5,7 @@ import java.util.TreeSet;
 import java.lang.Iterable;
 import java.util.Iterator;
 
-public class MapFileList implements Iterable<String> {
+public class PackageFileList implements Iterable<String> {
 	/**
 	 * other classes rely on the sorted iteration this provides
 	 */
@@ -13,7 +13,7 @@ public class MapFileList implements Iterable<String> {
 
 	private String id;
 
-	public MapFileList(String id) {
+	public PackageFileList(String id) {
 		this.id = id;
 	}
 

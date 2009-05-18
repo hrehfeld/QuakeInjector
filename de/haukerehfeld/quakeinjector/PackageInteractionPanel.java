@@ -119,7 +119,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 		for (Package requirement: map.getRequirements()) {
 			String id = requirement.getId();
 			
-			MapFileList isInstalled;
+			PackageFileList isInstalled;
 			synchronized (installed) {
 				isInstalled = installed.get(id);
 			}
@@ -164,7 +164,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 						  paths.getRepositoryUrl(selectedMap.getId()),
 						  installDirectory,
 						  new Installer.InstallErrorHandler() {
-							  public void success(MapFileList installedFiles) {
+							  public void success(PackageFileList installedFiles) {
 								  synchronized (installed) {
 									  installed.add(installedFiles);
 									  try {
@@ -182,19 +182,19 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 							  public void handle(OnlineFileNotFoundException error) {
 							  }
 							  public void handle(FileNotWritableException error,
-												 MapFileList alreadyInstalledFiles) {
+												 PackageFileList alreadyInstalledFiles) {
 								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
 								  installQueue.finished(progressListener);
 							  }
 							  public void handle(java.io.IOException error,
-												 MapFileList alreadyInstalledFiles) {
+												 PackageFileList alreadyInstalledFiles) {
 								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
 								  installQueue.finished(progressListener);
 							  }
 							  public void handle(Installer.CancelledException error,
-												 MapFileList alreadyInstalledFiles) {
+												 PackageFileList alreadyInstalledFiles) {
 								  System.out.println("Cleaning up...");
 								  uninstall(alreadyInstalledFiles);
 								  installQueue.finished(progressListener);
@@ -206,7 +206,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	}
 
 	public void uninstall() {
-		final MapFileList files;
+		final PackageFileList files;
 
 		synchronized (installed) {
 			files = installed.get(selectedMap.getId());
@@ -235,7 +235,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 		
 	}
 
-	private void uninstall(MapFileList files) {
+	private void uninstall(PackageFileList files) {
 		Uninstaller uninstall = new Uninstaller(selectedMap,
 												files,
 												installDirectory);
