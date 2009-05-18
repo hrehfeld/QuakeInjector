@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-public class MapInfoParser implements java.io.Serializable {
+public class PackageDatabaseParser implements java.io.Serializable {
 	/**
 	 * Parse the complete document
 	 */
@@ -143,7 +143,7 @@ public class MapInfoParser implements java.io.Serializable {
 									 author,
 									 title,
 									 size,
-									 MapInfoParser.parseDate(date),
+									 PackageDatabaseParser.parseDate(date),
 									 false,
 									 relativeBaseDir,
 									 cmdline,

@@ -225,7 +225,7 @@ public class QuakeInjector {
 											  table);
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
 
-		final MapInfoParser parser = new MapInfoParser();
+		final PackageDatabaseParser parser = new PackageDatabaseParser();
 		SwingWorker<List<Package>,Void> parse = new SwingWorker<List<Package>, Void>() {
 			@Override
 			public List<Package> doInBackground() {
