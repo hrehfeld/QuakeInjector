@@ -44,9 +44,8 @@ public class Installer {
 			
 			@Override
 			public Void doInBackground() {
-				PackageFileList files;
 				try {
-					files = installer.get();
+					installer.get();
 				}
 				catch (java.util.concurrent.ExecutionException e) {
 					error = e.getCause();

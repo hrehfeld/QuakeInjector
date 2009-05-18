@@ -14,7 +14,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -240,13 +239,6 @@ public class EngineConfigDialog extends JDialog {
 	public void packAndShow() {
 		pack();
 		setVisible(true);
-	}
-
-	private void warningDialogue(String title, String msg) {
-		JOptionPane.showMessageDialog(this, //no owner frame
-									  msg,
-									  title,
-									  JOptionPane.WARNING_MESSAGE);
 	}
 
 	public File getEnginePath() {

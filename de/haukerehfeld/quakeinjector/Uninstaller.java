@@ -30,7 +30,7 @@ public class Uninstaller extends SwingWorker<Void, Void> {
 	}
 
 	public void uninstall(PackageFileList files) {
-		ArrayList<File> deleteLater = new ArrayList<File>();
+		//ArrayList<File> deleteLater = new ArrayList<File>();
 
 		//we rely on the descending order of paths in the file list here!
 		//otherwise, dirs wouldn't get deleted last

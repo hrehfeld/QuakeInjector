@@ -18,6 +18,7 @@ public class PackageTable extends JTable {
 		setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 	}
 
+	@SuppressWarnings("unchecked")
 	public TableRowSorter<PackageList> getRowSorter() {
 		return (TableRowSorter<PackageList>) super.getRowSorter();
 	}

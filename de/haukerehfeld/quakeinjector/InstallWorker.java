@@ -42,7 +42,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 		System.out.println("Installing " + map.getId());
 
 		try {
-			PackageFileList files = download(url);
+			files = download(url);
 		}
 		catch (Installer.CancelledException e) {
 			System.out.println("cancelled exception!");

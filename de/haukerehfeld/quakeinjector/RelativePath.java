@@ -85,7 +85,6 @@ make sense
 	 * @return path from home to f as a string
 	 */
 	public static String getRelativePath(File home, File f){
-		File r;
 		List<String> homelist;
 		List<String> filelist;
 		String s;
