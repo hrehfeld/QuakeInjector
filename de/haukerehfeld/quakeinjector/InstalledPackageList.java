@@ -17,7 +17,7 @@ import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 
-public class InstalledMaps extends HashMap<String, PackageFileList> {
+public class InstalledPackageList extends HashMap<String, PackageFileList> {
 	private final static String filename = "installedMaps.xml";
 	private final File file = new File(filename);
 	

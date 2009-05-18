@@ -24,7 +24,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	private EngineStarter starter;
 	private String installDirectory;
 	private final Paths paths;
-	private InstalledMaps installed;
+	private InstalledPackageList installed;
 	private InstallQueuePanel installQueue;
 
 	private JButton uninstallButton;
@@ -42,7 +42,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	
 	public PackageInteractionPanel(String installDirectory,
 						Paths paths,
-						InstalledMaps installed,
+						InstalledPackageList installed,
 						EngineStarter starter,
 						InstallQueuePanel installQueue) {
 		super(new GridBagLayout());

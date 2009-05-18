@@ -179,7 +179,7 @@ public class QuakeInjector {
 			fill = BOTH;
 		}});
 
-		final InstalledMaps installedMaps = new InstalledMaps();
+		final InstalledPackageList installedMaps = new InstalledPackageList();
 
 		final InstallQueuePanel installQueue = new InstallQueuePanel();
 
