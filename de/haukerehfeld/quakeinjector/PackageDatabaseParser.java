@@ -17,9 +17,9 @@ public class PackageDatabaseParser implements java.io.Serializable {
 	 * Parse the complete document
 	 */
 	public List<Package> parse() {
-		HashMap<String,Package> mapinfos = new HashMap<String,Package>();
-		Map<Package,List<String>> requirements = new HashMap<Package,List<String>>();
-		List<Package> mapList = new ArrayList<Package>(mapinfos.size());
+		HashMap<String,Package> packages = new HashMap<String,Package>();
+		Map<Package,List<String>> unresolvedRequirements = new HashMap<Package,List<String>>();
+		List<Package> packageList = new ArrayList<Package>(packages.size());
 
 		try {
 			Document document = XmlUtils.getDocument(
@@ -31,11 +31,11 @@ public class PackageDatabaseParser implements java.io.Serializable {
 
 			for (Node file: XmlUtils.iterate(files.getChildNodes())) {
 				if (XmlUtils.isElement(file)) {
-					Package mapinfo = parseMapInfo((Element) file, requirements);
-					mapinfos.put(mapinfo.getId(), mapinfo);
+					Package currentPackage = parsePackage((Element) file, unresolvedRequirements);
+					packages.put(currentPackage.getId(), currentPackage);
 
 					//add to final list
-					mapList.add(mapinfo);
+					packageList.add(currentPackage);
 				}
 				/** @todo 2009-03-29 01:36 hrehfeld    find out why this happens */
 				else {
@@ -52,30 +52,30 @@ public class PackageDatabaseParser implements java.io.Serializable {
 		}
 
 		// we still need to resolve requirements
-		for (Package currentMap: mapList) {
-			List<String> reqs = requirements.get(currentMap);
+		for (Package current: packageList) {
+			List<String> reqs = unresolvedRequirements.get(current);
 
 			List<Package> resolvedRequirements = new ArrayList<Package>(reqs.size());
 			for (String s: reqs) {
-				Package requiredMapInfo = mapinfos.get(s);
-				if (requiredMapInfo == null) {
+				Package requiredPackage = packages.get(s);
+				if (requiredPackage == null) {
 					System.out.println("Warning: requirement " + s
 									   + " couldn't be found in the package list. "
-									   + currentMap.getId() + " requires it and may not work correctly");
+									   + current.getId() + " requires it and may not work correctly");
 					continue;
 				}
-				resolvedRequirements.add(requiredMapInfo);
+				resolvedRequirements.add(requiredPackage);
 			}
-			currentMap.setRequirements(resolvedRequirements);
+			current.setRequirements(resolvedRequirements);
 		}
 
-		return mapList;
+		return packageList;
 	}
 
 	/**
 	 * Parse a single Package/file entry
 	 */
-	private Package parseMapInfo(Element file, Map<Package,List<String>> reqResolve) {
+	private Package parsePackage(Element file, Map<Package,List<String>> reqResolve) {
 		String id = file.getAttribute("id");
 
 		String title = XmlUtils.getFirstElement(file, "title").getTextContent().trim();

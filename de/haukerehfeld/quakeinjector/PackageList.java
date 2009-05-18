@@ -110,7 +110,7 @@ public class PackageList extends AbstractTableModel implements ChangeListener {
 		return false;
     }
 
-	public Package getMapInfo(int row) {
+	public Package getPackage(int row) {
 		return data.get(row);
 	}
 

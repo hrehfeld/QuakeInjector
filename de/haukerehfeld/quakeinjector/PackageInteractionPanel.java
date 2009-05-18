@@ -255,7 +255,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 		}
 	}
 
-	public void setMapInfo(Package map) {
+	public void setSelection(Package map) {
 		this.selectedMap = map;
 
 		refreshUi();

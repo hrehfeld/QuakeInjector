@@ -26,15 +26,15 @@ class PackageListSelectionHandler implements ListSelectionListener {
 
 		if (!lsm.isSelectionEmpty()) {
 			int selection = table.convertRowIndexToModel(getSelection(lsm));
-			setMapInfo(selection);
+			setPackage(selection);
 		}
 	}
 
 	/**
 	 * Tell everyone about the selection change
 	 */
-	private void setMapInfo(int selection) {
-		panel.setMapInfo(list.getMapInfo(selection));
+	private void setPackage(int selection) {
+		panel.setSelection(list.getPackage(selection));
 	}
 
 	/**
