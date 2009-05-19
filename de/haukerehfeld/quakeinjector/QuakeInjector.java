@@ -31,7 +31,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-public class QuakeInjector {
+public class QuakeInjector extends JFrame {
 	/**
 	 * Window title
 	 */
@@ -45,6 +45,12 @@ public class QuakeInjector {
 	private PackageInteractionPanel interactionPanel;
 
 	public QuakeInjector() {
+		super(applicationName);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		setLayout(new BoxLayout(getContentPane(),
+								BoxLayout.PAGE_AXIS));
+
 		config = new Configuration();
 
 		paths = new Paths(config.get("repositoryBase"));
@@ -55,6 +61,9 @@ public class QuakeInjector {
 											 + File.separator
 											 + config.getEngineExecutable()),
 									config.getEngineCommandline());
+
+		createMenu(this);
+		addMainPane(getContentPane());
 	}
 
 	private void createMenu(final JFrame frame) {
@@ -237,37 +246,21 @@ public class QuakeInjector {
 											  table);
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
 
-		final PackageDatabaseParser parser = new PackageDatabaseParser();
-
-		parse(parser, installedMaps, maplist, panel);
+		parse(installedMaps, maplist, panel);
 
 	}
 
 	
-	private void createAndShowGUI() {
-		//Create and set up the window.
-		JFrame frame = new JFrame(applicationName);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		frame.getContentPane()
-			.setLayout(new BoxLayout(frame.getContentPane(),
-									 BoxLayout.PAGE_AXIS));
-
-		createMenu(frame);
-
-
-		//Add the scroll pane to this panel.
-		addMainPane(frame.getContentPane());
-
-		//Display the window.
-		frame.pack();
-		frame.setVisible(true);
+	private void display() {
+		pack();
+		setVisible(true);
 	}
 
-	private void parse(final PackageDatabaseParser parser,
-					   final InstalledPackageList installedMaps,
+	private void parse(final InstalledPackageList installedMaps,
 					   final PackageList maplist,
 					   final Container panel) {
+		final PackageDatabaseParser parser = new PackageDatabaseParser();
+
 		SwingWorker<List<Package>,Void> parse = new SwingWorker<List<Package>, Void>() {
 			@Override
 			public List<Package> doInBackground() throws java.io.IOException,
@@ -306,7 +299,7 @@ public class QuakeInjector {
 														 options,
 														 options[1]);
 						if (tryAgain == 0) {
-							parse(parser, installedMaps, maplist, panel);
+							parse(installedMaps, maplist, panel);
 						}
 						else {
 							return;
@@ -331,7 +324,7 @@ public class QuakeInjector {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					QuakeInjector qs = new QuakeInjector();
-					qs.createAndShowGUI();
+					qs.display();
 				}
 			});
 
