@@ -141,18 +141,14 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 		install(selectedMap, false);
 	}
 
-	public void install(final Package selectedMap, boolean becauseRequired) {
-		if (installer.alreadyInstalling(selectedMap)) {
-			return;
-		}
-
+	private boolean checkInstallRequirements(Package selectedMap) {
 		List<String> unmet = selectedMap.getUnmetRequirements();
 		if (!unmet.isEmpty()) {
 			String msg = "The following prerequisites to play "
 				+ selectedMap.getId()
-				+ " can't be installed automatically: \n"
-				+ "-" + Utils.join(unmet, "\n- ")
-				+ "\n";
+				+ " can't be installed automatically:\n"
+				+ Utils.join(unmet, ",\n")
+				+ ".\n";
 			Object[] options = {"Install anyways",
 								"Cancel Install"};
 			int install =
@@ -165,8 +161,45 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 											 options,
 											 options[1]);
 			if (install != 0) {
-				return;
+				return false;
 			}
+		}
+		return true;
+	}
+
+	private boolean checkPlayRequirements(Package selectedMap) {
+		List<String> unmet = selectedMap.getUnmetRequirements();
+		if (!unmet.isEmpty()) {
+			String msg = "The following prerequisites to play "
+				+ selectedMap.getId()
+				+ " don't seem to be installed: \n"
+				+ Utils.join(unmet, ",\n ")
+				+ ".\nYou probably can't play this package.";
+			Object[] options = {"Start anyways",
+								"Cancel Start"};
+			int install =
+				JOptionPane.showOptionDialog(this,
+											 msg,
+											 "Prerequisites not installed",
+											 JOptionPane.YES_NO_OPTION,
+											 JOptionPane.WARNING_MESSAGE,
+											 null,
+											 options,
+											 options[1]);
+			if (install != 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public void install(final Package selectedMap, boolean becauseRequired) {
+		if (installer.alreadyInstalling(selectedMap)) {
+			return;
+		}
+
+		if (!checkInstallRequirements(selectedMap)) {
+			return;
 		}
 		installRequirements(selectedMap);
 
@@ -288,13 +321,47 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	}
 
 	private void uninstall(PackageFileList files) {
-		Uninstaller uninstall = new Uninstaller(selectedMap,
+		String description = "Uninstalling " + files.getId();
+		
+		final InstallQueuePanel.Job progressListener
+			= installQueue.addJob(description,
+								  new ActionListener() {
+									  public void actionPerformed(ActionEvent e) {
+										  
+									  }
+								  });
+
+		final Uninstaller uninstall = new Uninstaller(selectedMap,
 												files,
 												installDirectory);
+		uninstall.addPropertyChangeListener(progressListener);
+		
 		uninstall.execute();
+		//wait until finished and set finished status
+		new SwingWorker<Void,Void>() {
+			private String message = "Success";
+			
+			@Override
+			public Void doInBackground() {
+				try {
+					uninstall.get();
+				}
+				catch (Exception e) {
+					message = "Failed";
+				}
+				return null;
+			}
+			@Override
+			public void done() {
+				installQueue.finished(progressListener, message);
+			}
+		}.execute();
 	}
 
 	public void start() {
+		if (!checkPlayRequirements(selectedMap)) {
+			return;
+		}
 		String startmap = (String) startmaps.getSelectedItem();
 		System.out.println("startmap: " + startmap);
 

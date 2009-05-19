@@ -23,6 +23,10 @@ public class PackageFileList implements Iterable<String> {
 		files.remove(clean(file));
 	}
 
+	public int size() {
+		return files.size();
+	}
+
 	/**
 	 * iterate the files in ascending order by their filename
 	 */
