@@ -108,13 +108,15 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 				continue;
 			}
 
-			files.add(RelativePath.getRelativePath(new File(basedir), f));
-			System.out.println("Writing " + f + " (" + entry.getCompressedSize() + "b)");
+			String filename = RelativePath.getRelativePath(new File(basedir), f);
+			files.add(filename);
+			System.out.println("Writing " + filename + " (" + entry.getCompressedSize() + "b)");
 			try {
 				writeFile(zis, f,
 						  new WriteToDownloadProgress(entry.getCompressedSize(), entry.getSize()));
 			}
 			catch (FileNotFoundException e) {
+				files.remove(filename);
 				throw new FileNotWritableException(e.getMessage());
 			}
 			

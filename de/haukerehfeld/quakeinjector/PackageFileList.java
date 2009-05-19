@@ -16,7 +16,11 @@ public class PackageFileList implements Iterable<String> {
 	}
 
 	public void add(String file) {
-		files.add(file.replace('\\', '/'));
+		files.add(clean(file));
+	}
+
+	public void remove(String file) {
+		files.remove(clean(file));
 	}
 
 	/**
@@ -32,5 +36,9 @@ public class PackageFileList implements Iterable<String> {
 	
 	public String getId() {
 		return id;
+	}
+
+	public String clean(String file) {
+		return file.replace('\\', '/');		
 	}
 }
