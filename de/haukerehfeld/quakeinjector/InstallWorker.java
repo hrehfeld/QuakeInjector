@@ -35,6 +35,8 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 		this.map = map;
 		this.url = url;
 		this.baseDirectory = baseDirectory;
+		this.files = new PackageFileList(map.getId());
+
 	}
 
 	@Override
@@ -88,7 +90,6 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 							 String unzipdir,
 							 String mapid)
 		throws IOException, FileNotFoundException, Installer.CancelledException {
-		files = new PackageFileList(mapid);
 
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
 		ZipEntry entry;
