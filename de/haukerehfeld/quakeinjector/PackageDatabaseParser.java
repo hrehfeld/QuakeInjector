@@ -51,26 +51,33 @@ public class PackageDatabaseParser implements java.io.Serializable {
 			System.out.println("Couldn't parse xml!");
 		}
 
-		// we still need to resolve requirements
-		for (Package current: packageList) {
-			List<String> reqs = unresolvedRequirements.get(current);
-
-			List<Package> resolvedRequirements = new ArrayList<Package>(reqs.size());
-			for (String s: reqs) {
-				Package requiredPackage = packages.get(s);
-				if (requiredPackage == null) {
-					System.out.println("Warning: requirement " + s
-									   + " couldn't be found in the package list. "
-									   + current.getId() + " requires it and may not work correctly");
-					continue;
-				}
-				resolvedRequirements.add(requiredPackage);
-			}
-			current.setRequirements(resolvedRequirements);
-		}
+		resolveRequirements(packageList, unresolvedRequirements, packages);
 
 		return packageList;
 	}
+
+	private void resolveRequirements(List<Package> packageList,
+									 Map<Package,List<String>> unresolvedRequirements,
+									 Map<String, Package> packages) {
+		for (Package current: packageList) {
+			List<String> reqs = unresolvedRequirements.get(current);
+
+			List<String> unmetRequirements = new ArrayList<String>(1);
+			List<Package> resolvedRequirements = new ArrayList<Package>(reqs.size());
+			for (String id: reqs) {
+				Package resolved = packages.get(id);
+				if (resolved != null) {
+					resolvedRequirements.add(resolved);
+				}
+				else {
+					unmetRequirements.add(id);
+				}
+			}
+			current.setRequirements(resolvedRequirements);
+			current.setUnmetRequirements(unmetRequirements);
+		}
+	}
+
 
 	/**
 	 * Parse a single Package/file entry
@@ -145,6 +152,7 @@ public class PackageDatabaseParser implements java.io.Serializable {
 									 relativeBaseDir,
 									 cmdline,
 									 startmaps,
+									 null,
 									 null);
 		reqResolve.put(result, requirements);
 		return result;

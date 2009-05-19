@@ -78,6 +78,9 @@ public class PackageList extends AbstractTableModel implements ChangeListener {
 			for (Package m: info.getRequirements()) {
 				result += m.getId() + ", ";
 			}
+			for (String m: info.getUnmetRequirements()) {
+				result += m + ", ";
+			}
 			return result;
 			/*
 			 * Should never be used

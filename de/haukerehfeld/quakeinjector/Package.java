@@ -36,6 +36,7 @@ public class Package {
 
 	private List<String> startmaps;
 	private List<Package> requirements;
+	private List<String> unmetRequirements;
 
 	public Package(String id,
 				   String author,
@@ -43,7 +44,7 @@ public class Package {
 				   int size,
 				   Date date,
 				   boolean isInstalled) {
-		this(id, author, title, size, date, isInstalled, null, null, null, null);
+		this(id, author, title, size, date, isInstalled, null, null, null, null, null);
 	}
 
 	public Package(String id,
@@ -55,7 +56,8 @@ public class Package {
 				   String relativeBaseDir,
 				   String commandline,
 				   List<String> startmaps,
-				   List<Package> requirements) {
+				   List<Package> requirements,
+				   List<String> unmetRequirements) {
 		this.id = id;
 		this.author = author;
 		this.title = title;
@@ -66,6 +68,7 @@ public class Package {
 		this.commandline = commandline;
 		this.startmaps = startmaps;
 		this.requirements = requirements;
+		this.unmetRequirements = unmetRequirements;
 	}
 	
 
@@ -120,5 +123,13 @@ public class Package {
 		return this.requirements;
 	}
 
+	public void setUnmetRequirements(List<String> unmetRequirements) {
+		this.unmetRequirements = unmetRequirements;
+	}
+
+	public List<String> getUnmetRequirements() {
+		return this.unmetRequirements;
+	}
+	
 }
 
