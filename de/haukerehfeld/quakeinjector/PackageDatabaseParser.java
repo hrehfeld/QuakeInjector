@@ -16,14 +16,12 @@ public class PackageDatabaseParser implements java.io.Serializable {
 	/**
 	 * Parse the complete document
 	 */
-	public List<Package> parse() {
+	public List<Package> parse(String databaseUrl) throws IOException, org.xml.sax.SAXException {
 		HashMap<String,Package> packages = new HashMap<String,Package>();
 		Map<Package,List<String>> unresolvedRequirements = new HashMap<Package,List<String>>();
 		List<Package> packageList = new ArrayList<Package>(packages.size());
 
-		try {
-			Document document = XmlUtils.getDocument(
-				"http://www.quaddicted.com/reviews/quaddicted_database.xml");
+			Document document = XmlUtils.getDocument(databaseUrl);
 
 			Element files = document.getDocumentElement();
 //			System.out.println(files.getTagName());
@@ -43,13 +41,6 @@ public class PackageDatabaseParser implements java.io.Serializable {
 // 					System.out.println("Whoops, i thought file is an element!");
 				}
 			}
-		}
-		catch (IOException e) {
-			System.out.println("Couldn't open xml file!");
-		}
-		catch (org.xml.sax.SAXException e) {
-			System.out.println("Couldn't parse xml!");
-		}
 
 		resolveRequirements(packageList, unresolvedRequirements, packages);
 

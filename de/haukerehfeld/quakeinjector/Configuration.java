@@ -12,6 +12,7 @@ public class Configuration {
 	private static final String enginePath = "enginePath";
 	private static final String engineExecutable = "engineExecutable";
 	private static final String engineCommandline = "engineCommandline";
+	private static final String repositoryDatabase = "repositoryDatabase";
 
 	
 	private Properties properties;
@@ -97,6 +98,8 @@ public class Configuration {
 		defaults.setProperty("unzipDirectory", "/home/hrehfeld/games/quake/unzip/");
 		
 		defaults.setProperty("repositoryBase", "http://www.quaddicted.com/filebase/");
+		defaults.setProperty(repositoryDatabase,
+							 "http://www.quaddicted.com/reviews/quaddicted_database.xml");
 		defaults.setProperty(enginePath, "");
 		defaults.setProperty(engineExecutable, "");
 		defaults.setProperty(engineCommandline, "");
@@ -128,4 +131,7 @@ public class Configuration {
 		set(this.engineCommandline, engineCommandline);
 	}
 
+	public String getRepositoryDatabase() {
+		return get(repositoryDatabase);
+	}
 }

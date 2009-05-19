@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -237,35 +238,8 @@ public class QuakeInjector {
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
 
 		final PackageDatabaseParser parser = new PackageDatabaseParser();
-		SwingWorker<List<Package>,Void> parse = new SwingWorker<List<Package>, Void>() {
-			@Override
-			public List<Package> doInBackground() {
-				try {
-					installedMaps.read();
-				}
-				catch (java.io.IOException e) {
-					/** @todo 2009-04-28 19:00 hrehfeld    better error reporting? */
-					System.out.println(e.getMessage());
-				}
-				java.util.List<Package> maps = parser.parse();
-				installedMaps.set(maps);
-				return maps;
-			}
 
-			@Override
-			public void done() {
-				try {
-					maplist.setMapList(get());
-				}
-				catch (java.lang.InterruptedException e) {
-					throw new RuntimeException("Couldn't get map list!" + e.getMessage());
-				}
-				catch (java.util.concurrent.ExecutionException e) {
-					throw new RuntimeException("Couldn't get map list!" + e.getMessage());
-				}
-			}
-		};
-		parse.execute();
+		parse(parser, installedMaps, maplist, panel);
 
 	}
 
@@ -288,6 +262,67 @@ public class QuakeInjector {
 		//Display the window.
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	private void parse(final PackageDatabaseParser parser,
+					   final InstalledPackageList installedMaps,
+					   final PackageList maplist,
+					   final Container panel) {
+		SwingWorker<List<Package>,Void> parse = new SwingWorker<List<Package>, Void>() {
+			@Override
+			public List<Package> doInBackground() throws java.io.IOException,
+			org.xml.sax.SAXException {
+				try {
+					installedMaps.read();
+				}
+				catch (java.io.IOException e) {
+					/** @todo 2009-04-28 19:00 hrehfeld    better error reporting? */
+					System.out.println(e.getMessage());
+				}
+				
+				java.util.List<Package> maps = parser.parse(config.getRepositoryDatabase());
+				installedMaps.set(maps);
+				return maps;
+			}
+
+			@Override
+			public void done() {
+				try {
+					maplist.setMapList(get());
+				}
+				catch (java.util.concurrent.ExecutionException t) {
+					Throwable e = t.getCause();
+					if (e instanceof java.io.IOException) {
+						String msg = "Couldn't open database file: " + e.getMessage();
+						Object[] options = {"Try again",
+											"Cancel"};
+						int tryAgain =
+							JOptionPane.showOptionDialog(panel,
+														 msg,
+														 "Could not access database",
+														 JOptionPane.YES_NO_OPTION,
+														 JOptionPane.WARNING_MESSAGE,
+														 null,
+														 options,
+														 options[1]);
+						if (tryAgain == 0) {
+							parse(parser, installedMaps, maplist, panel);
+						}
+						else {
+							return;
+						}
+					}
+					else if (e instanceof org.xml.sax.SAXException) {
+						System.out.println("Couldn't parse xml!");
+					}
+				}
+				catch (java.lang.InterruptedException e) {
+					throw new RuntimeException("Couldn't get map list!" + e.getMessage());
+				}
+			}
+		};
+		parse.execute();
+		
 	}
 
 	public static void main(String[] args) {
