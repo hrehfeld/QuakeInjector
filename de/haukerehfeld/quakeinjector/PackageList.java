@@ -74,13 +74,13 @@ public class PackageList extends AbstractTableModel implements ChangeListener {
 		case releasedate: return info.getDate();
 		case installed: return new Boolean(info.isInstalled());
 		case requirements:
-			String result = "";
-			for (Package m: info.getRequirements()) {
-				result += m.getId() + ", ";
+			String delimiter = ", ";
+			List<String> reqs = new ArrayList<String>(info.getUnavailableRequirements());
+			for (Package r: info.getRequirements()) {
+				reqs.add(r.getId());
 			}
-			for (String m: info.getUnmetRequirements()) {
-				result += m + ", ";
-			}
+			java.util.Collections.sort(reqs);
+			String result = Utils.join(reqs, delimiter);
 			return result;
 			/*
 			 * Should never be used

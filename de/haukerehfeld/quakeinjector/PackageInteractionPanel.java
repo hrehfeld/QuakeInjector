@@ -142,7 +142,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	}
 
 	private boolean checkInstallRequirements(Package selectedMap) {
-		List<String> unmet = selectedMap.getUnmetRequirements();
+		List<String> unmet = selectedMap.getUnavailableRequirements();
 		if (!unmet.isEmpty()) {
 			String msg = "The following prerequisites to play "
 				+ selectedMap.getId()

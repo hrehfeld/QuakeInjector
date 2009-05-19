@@ -2,6 +2,7 @@ package de.haukerehfeld.quakeinjector;
 
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.swing.event.ChangeListener;
 
@@ -36,7 +37,7 @@ public class Package {
 
 	private List<String> startmaps;
 	private List<Package> requirements;
-	private List<String> unmetRequirements;
+	private List<String> unavailableRequirements;
 
 	public Package(String id,
 				   String author,
@@ -57,7 +58,7 @@ public class Package {
 				   String commandline,
 				   List<String> startmaps,
 				   List<Package> requirements,
-				   List<String> unmetRequirements) {
+				   List<String> unavailableRequirements) {
 		this.id = id;
 		this.author = author;
 		this.title = title;
@@ -68,7 +69,7 @@ public class Package {
 		this.commandline = commandline;
 		this.startmaps = startmaps;
 		this.requirements = requirements;
-		this.unmetRequirements = unmetRequirements;
+		this.unavailableRequirements = unavailableRequirements;
 	}
 	
 
@@ -123,13 +124,28 @@ public class Package {
 		return this.requirements;
 	}
 
-	public void setUnmetRequirements(List<String> unmetRequirements) {
-		this.unmetRequirements = unmetRequirements;
+	public void setUnavailableRequirements(List<String> unavailableRequirements) {
+		this.unavailableRequirements = unavailableRequirements;
+	}
+
+	public List<String> getUnavailableRequirements() {
+		return this.unavailableRequirements;
 	}
 
 	public List<String> getUnmetRequirements() {
-		return this.unmetRequirements;
+		List<String> unmet = new ArrayList<String>(this.unavailableRequirements);
+		for (Package requirement: requirements) {
+			if (!requirement.isInstalled()) {
+				unmet.add(requirement.getId());
+			}
+		}
+		
+		return unmet;
 	}
-	
+
+	@Override
+	public String toString() {
+		return id;
+	}
 }
 

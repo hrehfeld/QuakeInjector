@@ -62,19 +62,19 @@ public class PackageDatabaseParser implements java.io.Serializable {
 		for (Package current: packageList) {
 			List<String> reqs = unresolvedRequirements.get(current);
 
-			List<String> unmetRequirements = new ArrayList<String>(1);
+// 			if (reqs.size() > 1) {
+// 				System.out.println(current.getId() + " has more than one requirement");
+// 			}
+
+			List<String> unavailableRequirements = new ArrayList<String>(1);
 			List<Package> resolvedRequirements = new ArrayList<Package>(reqs.size());
 			for (String id: reqs) {
 				Package resolved = packages.get(id);
-				if (resolved != null) {
-					resolvedRequirements.add(resolved);
-				}
-				else {
-					unmetRequirements.add(id);
-				}
+				if (resolved != null) { resolvedRequirements.add(resolved); }
+				else { unavailableRequirements.add(id); }
 			}
 			current.setRequirements(resolvedRequirements);
-			current.setUnmetRequirements(unmetRequirements);
+			current.setUnavailableRequirements(unavailableRequirements);
 		}
 	}
 
