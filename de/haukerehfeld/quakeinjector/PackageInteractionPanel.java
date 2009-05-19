@@ -14,6 +14,8 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import java.util.List;
+
 /**
  * the panel that shows Info about the selected map
  */
@@ -142,6 +144,29 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	public void install(final Package selectedMap, boolean becauseRequired) {
 		if (installer.alreadyInstalling(selectedMap)) {
 			return;
+		}
+
+		List<String> unmet = selectedMap.getUnmetRequirements();
+		if (!unmet.isEmpty()) {
+			String msg = "The following prerequisites to play "
+				+ selectedMap.getId()
+				+ " can't be installed automatically: \n"
+				+ "-" + Utils.join(unmet, "\n- ")
+				+ "\n";
+			Object[] options = {"Install anyways",
+								"Cancel Install"};
+			int install =
+				JOptionPane.showOptionDialog(this,
+											 msg,
+											 "Prerequisites not available for automatic install",
+											 JOptionPane.YES_NO_OPTION,
+											 JOptionPane.WARNING_MESSAGE,
+											 null,
+											 options,
+											 options[1]);
+			if (install != 0) {
+				return;
+			}
 		}
 		installRequirements(selectedMap);
 
