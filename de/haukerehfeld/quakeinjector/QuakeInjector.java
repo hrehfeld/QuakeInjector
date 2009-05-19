@@ -43,6 +43,8 @@ public class QuakeInjector extends JFrame {
 	private final EngineStarter starter;
 
 	private PackageInteractionPanel interactionPanel;
+	private final InstalledPackageList installedMaps;
+	private final PackageList maplist;
 
 	public QuakeInjector() {
 		super(applicationName);
@@ -62,26 +64,35 @@ public class QuakeInjector extends JFrame {
 											 + config.getEngineExecutable()),
 									config.getEngineCommandline());
 
-		createMenu(this);
+		maplist = new PackageList();
+		installedMaps = new InstalledPackageList();
+
+
+		createMenu();
 		addMainPane(getContentPane());
 	}
 
-	private void createMenu(final JFrame frame) {
+	private void createMenu() {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setOpaque(true);
 		menuBar.setPreferredSize(new Dimension(200, 20));
-		frame.setJMenuBar(menuBar);
 
-		JMenu menu = new JMenu("File");
-		menuBar.add(menu);
+		JMenu fileMenu = new JMenu("File");
+		menuBar.add(fileMenu);
 
-		JMenuItem menuItem = new JMenuItem("Quit",
-										   KeyEvent.VK_T);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-													   ActionEvent.ALT_MASK));
-		menuItem.getAccessibleContext().setAccessibleDescription(
-			"This doesn't really do anything");
-		menu.add(menuItem);
+		JMenuItem reparseDatabase = new JMenuItem("Reload database", KeyEvent.VK_R);
+		reparseDatabase.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					parse(installedMaps, maplist);
+				}
+			});
+		fileMenu.add(reparseDatabase);
+		
+
+		JMenuItem quit = new JMenuItem("Quit", KeyEvent.VK_T);
+		quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
+		quit.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
+		fileMenu.add(quit);
 
 
 		JMenu configM = new JMenu("Configuration");
@@ -91,7 +102,7 @@ public class QuakeInjector extends JFrame {
 		configM.add(engine);
 		engine.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					final EngineConfigDialog d = new EngineConfigDialog(frame,
+					final EngineConfigDialog d = new EngineConfigDialog(QuakeInjector.this,
 																  config.getEnginePath(),
 																  config.getEngineExecutable(),
 																  config.getEngineCommandline());
@@ -106,6 +117,8 @@ public class QuakeInjector extends JFrame {
 					d.packAndShow();
 					
 				}});
+
+		setJMenuBar(menuBar);
 	}
 
 
@@ -138,7 +151,6 @@ public class QuakeInjector extends JFrame {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
 
-		final PackageList maplist = new PackageList();
 		
 		//create a table
 		final PackageTable table =  new PackageTable(maplist);
@@ -200,8 +212,6 @@ public class QuakeInjector extends JFrame {
 			fill = BOTH;
 		}});
 
-		final InstalledPackageList installedMaps = new InstalledPackageList();
-
 		final InstallQueuePanel installQueue = new InstallQueuePanel();
 
 		this.interactionPanel = new PackageInteractionPanel(config.getEnginePath(),
@@ -246,7 +256,7 @@ public class QuakeInjector extends JFrame {
 											  table);
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
 
-		parse(installedMaps, maplist, panel);
+		parse(installedMaps, maplist);
 
 	}
 
@@ -257,8 +267,7 @@ public class QuakeInjector extends JFrame {
 	}
 
 	private void parse(final InstalledPackageList installedMaps,
-					   final PackageList maplist,
-					   final Container panel) {
+					   final PackageList maplist) {
 		final PackageDatabaseParser parser = new PackageDatabaseParser();
 
 		SwingWorker<List<Package>,Void> parse = new SwingWorker<List<Package>, Void>() {
@@ -290,7 +299,7 @@ public class QuakeInjector extends JFrame {
 						Object[] options = {"Try again",
 											"Cancel"};
 						int tryAgain =
-							JOptionPane.showOptionDialog(panel,
+							JOptionPane.showOptionDialog(QuakeInjector.this,
 														 msg,
 														 "Could not access database",
 														 JOptionPane.YES_NO_OPTION,
@@ -299,7 +308,7 @@ public class QuakeInjector extends JFrame {
 														 options,
 														 options[1]);
 						if (tryAgain == 0) {
-							parse(installedMaps, maplist, panel);
+							parse(installedMaps, maplist);
 						}
 						else {
 							return;
