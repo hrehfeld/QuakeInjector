@@ -88,14 +88,19 @@ public class InstalledPackageList extends HashMap<String, PackageFileList> {
 	}
 
 	/**
-	 * set installed status to a list of Packages
+	 * set installed status to a list of Requirements
 	 */
-	public void set(List<Package> maps) {
-		for (Package m: maps) {
+	public void set(List<Requirement> maps) {
+		for (Requirement m: maps) {
 			if (containsKey(m.getId())) {
 				m.setInstalled(true);
+				System.out.println("Set " + m + " to installed!");
 			}
 		}
+	}
+
+	public boolean isInstalled(String id) {
+		return (get(id) != null);
 	}
 
 	private void parse(File file) throws java.io.IOException {

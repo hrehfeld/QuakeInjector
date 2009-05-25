@@ -10,6 +10,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -45,6 +48,10 @@ public class QuakeInjector extends JFrame {
 	private PackageInteractionPanel interactionPanel;
 	private final InstalledPackageList installedMaps;
 	private final PackageList maplist;
+
+	private final Map<String,Requirement> unavailableRequirements
+	    = new HashMap<String,Requirement>();
+
 
 	public QuakeInjector() {
 		super(applicationName);
@@ -106,8 +113,8 @@ public class QuakeInjector extends JFrame {
 					                             config.getEnginePath(),
 					                             config.getEngineExecutable(),
 					                             config.getEngineCommandline(),
-					                             config.getRogueInstalled(),
-					                             config.getHipnoticInstalled()
+					                             installedMaps.isInstalled("rogue"),
+					                             installedMaps.isInstalled("hipnotic")
 					        );
 					d.addChangeListener(new ChangeListener() {
 							public void stateChanged(ChangeEvent e) {
@@ -126,19 +133,17 @@ public class QuakeInjector extends JFrame {
 		setJMenuBar(menuBar);
 	}
 
-
 	private void saveEngineConfig(File enginePath,
 								  File engineExecutable,
 	                              String commandline,
 	                              boolean rogueInstalled,
 	                              boolean hipnoticInstalled) {
-		setEngineConfig(enginePath, engineExecutable, commandline, rogueInstalled, hipnoticInstalled);
+		setEngineConfig(enginePath, engineExecutable, commandline,
+		                rogueInstalled, hipnoticInstalled);
 
 		config.setEnginePath(enginePath.getAbsolutePath());
 		config.setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable));
 		config.setEngineCommandline(commandline);
-		config.setRogueInstalled(rogueInstalled);
-		config.setHipnoticInstalled(hipnoticInstalled);
 		
 		config.write();
 	}
@@ -154,11 +159,16 @@ public class QuakeInjector extends JFrame {
 
 		setInstalled("rogue", rogueInstalled);
 		setInstalled("hipnotic", hipnoticInstalled);
-
+		try {
+			installedMaps.write();
+		}
+		catch (java.io.IOException e) {}
+		
 		interactionPanel.setInstallDirectory(enginePath.getAbsolutePath());
 	}
 
 	private void setInstalled(String name, boolean installed) {
+		unavailableRequirements.get(name).setInstalled(installed);
 		if (installed) {
 			installedMaps.put(name, new PackageFileList(name));
 			System.out.println("Setting " + name + " to installed.");
@@ -306,9 +316,19 @@ public class QuakeInjector extends JFrame {
 					System.out.println(e.getMessage());
 				}
 				
-				java.util.List<Package> maps = parser.parse(config.getRepositoryDatabase());
-				installedMaps.set(maps);
-				return maps;
+				java.util.List<Requirement> all = parser.parse(config.getRepositoryDatabase());
+				installedMaps.set(all);
+
+				List<Package> packages = new ArrayList<Package>(all.size());
+				for (Requirement r: all) {
+					if (r instanceof Package) {
+						packages.add((Package) r);
+					}
+					else {
+						unavailableRequirements.put(r.getId(), r);
+					}
+				}
+				return packages;
 			}
 
 			@Override

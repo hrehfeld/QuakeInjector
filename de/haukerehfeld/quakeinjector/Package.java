@@ -119,8 +119,9 @@ public class Package extends SortableRequirement implements Requirement {
 
 	public List<Requirement> getUnavailableRequirements() {
 		List<Requirement> unavails = new ArrayList<Requirement>();
+
 		for (Requirement r: requirements) {
-			if (!(r instanceof Package)) {
+			if (!r.isInstalled() && !(r instanceof Package)) {
 				unavails.add(r);
 			}
 		}

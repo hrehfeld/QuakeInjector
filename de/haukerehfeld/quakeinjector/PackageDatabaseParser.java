@@ -16,40 +16,37 @@ public class PackageDatabaseParser implements java.io.Serializable {
 	/**
 	 * Parse the complete document
 	 */
-	public List<Package> parse(String databaseUrl) throws IOException, org.xml.sax.SAXException {
-		HashMap<String,Package> packages = new HashMap<String,Package>();
+	public List<Requirement> parse(String databaseUrl) throws IOException,
+		org.xml.sax.SAXException {
+		HashMap<String, Requirement> packages = new HashMap<String,Requirement>();
 		Map<Package,List<String>> unresolvedRequirements = new HashMap<Package,List<String>>();
-		List<Package> packageList = new ArrayList<Package>(packages.size());
 
-			Document document = XmlUtils.getDocument(databaseUrl);
+		Document document = XmlUtils.getDocument(databaseUrl);
 
-			Element files = document.getDocumentElement();
-//			System.out.println(files.getTagName());
+		Element files = document.getDocumentElement();
+		//			System.out.println(files.getTagName());
 
 
-			for (Node file: XmlUtils.iterate(files.getChildNodes())) {
-				if (XmlUtils.isElement(file)) {
-					Package currentPackage = parsePackage((Element) file, unresolvedRequirements);
-					packages.put(currentPackage.getId(), currentPackage);
-
-					//add to final list
-					packageList.add(currentPackage);
-				}
-				/** @todo 2009-03-29 01:36 hrehfeld    find out why this happens */
-				else {
+		for (Node file: XmlUtils.iterate(files.getChildNodes())) {
+			if (XmlUtils.isElement(file)) {
+				Package currentPackage = parsePackage((Element) file, unresolvedRequirements);
+				packages.put(currentPackage.getId(), currentPackage);
+			}
+			/** @todo 2009-03-29 01:36 hrehfeld    find out why this happens */
+			else {
 // 					System.out.println("node: " + file.getNodeName());
 // 					System.out.println("Whoops, i thought file is an element!");
-				}
 			}
+		}
 
-		resolveRequirements(packageList, unresolvedRequirements, packages);
+		resolveRequirements(unresolvedRequirements, packages);
 
+		List<Requirement> packageList = new ArrayList<Requirement>(packages.values());
 		return packageList;
 	}
 
-	private void resolveRequirements(List<Package> packageList,
-									 Map<Package,List<String>> unresolvedRequirements,
-									 Map<String, Package> packages) {
+	private void resolveRequirements(Map<Package,List<String>> unresolvedRequirements,
+									 Map<String, Requirement> packages) {
 		for (Map.Entry<Package,List<String>> entry: unresolvedRequirements.entrySet()) {
 			Package current = entry.getKey();
 			List<String> reqs = entry.getValue();
@@ -63,6 +60,7 @@ public class PackageDatabaseParser implements java.io.Serializable {
 				Requirement resolved = packages.get(id);
 				if (resolved == null) {
 					resolved = new UnavailableRequirement(id);
+					packages.put(id, resolved);
 				}
 				resolvedRequirements.add(resolved);
 			}
