@@ -29,8 +29,6 @@ public class Package extends SortableRequirement implements Requirement {
 
 	private Date date;
 
-	private boolean isInstalled;
-
 	private String relativeBaseDir;
 
 	private String commandline;
@@ -58,12 +56,12 @@ public class Package extends SortableRequirement implements Requirement {
 				   String commandline,
 				   List<String> startmaps,
 				   List<Requirement> requirements) {
-		this.id = id;
+		super(id);
 		this.author = author;
 		this.title = title;
 		this.size = size;
 		this.date = date;
-		this.isInstalled = isInstalled;
+		super.setInstalled(isInstalled);
 		this.relativeBaseDir = relativeBaseDir;
 		this.commandline = commandline;
 		this.startmaps = startmaps;
@@ -73,10 +71,6 @@ public class Package extends SortableRequirement implements Requirement {
 
 	public void addChangeListener(ChangeListener l) {
 		listeners.addChangeListener(l);
-	}
-
-	public String getId() {
-		return id;
 	}
 
 	public String getAuthor() {
@@ -103,17 +97,6 @@ public class Package extends SortableRequirement implements Requirement {
 	public List<String> getStartmaps() {
 		return startmaps;
 	}
-
-	public boolean isInstalled() {
-		return isInstalled;
-	}
-
-	public void setInstalled(boolean installed) {
-		isInstalled = installed;
-		
-		listeners.notifyChangeListeners(this);
-	}
-
 
 	public void setRequirements(List<Requirement> requirements) {
 		this.requirements = requirements;
@@ -155,9 +138,8 @@ public class Package extends SortableRequirement implements Requirement {
 		return unmet;
 	}
 
-	@Override
-	public String toString() {
-		return id;
+	protected void notifyChangeListeners() {
+		listeners.notifyChangeListeners(this);
 	}
 }
 
