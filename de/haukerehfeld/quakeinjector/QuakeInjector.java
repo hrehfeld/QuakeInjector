@@ -94,7 +94,6 @@ public class QuakeInjector extends JFrame {
 		quit.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
 		fileMenu.add(quit);
 
-
 		JMenu configM = new JMenu("Configuration");
 		menuBar.add(configM);
 
@@ -102,15 +101,21 @@ public class QuakeInjector extends JFrame {
 		configM.add(engine);
 		engine.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					final EngineConfigDialog d = new EngineConfigDialog(QuakeInjector.this,
-																  config.getEnginePath(),
-																  config.getEngineExecutable(),
-																  config.getEngineCommandline());
+					final EngineConfigDialog d
+					    = new EngineConfigDialog(QuakeInjector.this,
+					                             config.getEnginePath(),
+					                             config.getEngineExecutable(),
+					                             config.getEngineCommandline(),
+					                             config.getRogueInstalled(),
+					                             config.getHipnoticInstalled()
+					        );
 					d.addChangeListener(new ChangeListener() {
 							public void stateChanged(ChangeEvent e) {
 								saveEngineConfig(d.getEnginePath(),
 												 d.getEngineExecutable(),
-												 d.getCommandline());
+								                 d.getCommandline(),
+								                 d.getRogueInstalled(),
+								                 d.getHipnoticInstalled());
 							}
 						});
 
@@ -124,24 +129,43 @@ public class QuakeInjector extends JFrame {
 
 	private void saveEngineConfig(File enginePath,
 								  File engineExecutable,
-								  String commandline) {
-		setEngineConfig(enginePath, engineExecutable, commandline);
+	                              String commandline,
+	                              boolean rogueInstalled,
+	                              boolean hipnoticInstalled) {
+		setEngineConfig(enginePath, engineExecutable, commandline, rogueInstalled, hipnoticInstalled);
 
 		config.setEnginePath(enginePath.getAbsolutePath());
 		config.setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable));
 		config.setEngineCommandline(commandline);
+		config.setRogueInstalled(rogueInstalled);
+		config.setHipnoticInstalled(hipnoticInstalled);
 		
 		config.write();
 	}
 
 	private void setEngineConfig(File enginePath,
 								 File engineExecutable,
-								 String commandline) {
+	                             String commandline,
+	                             boolean rogueInstalled,
+	                             boolean hipnoticInstalled) {
 		starter.setQuakeDirectory(enginePath);
 		starter.setQuakeExecutable(engineExecutable);
 		starter.setQuakeCommandline(commandline);
 
+		setInstalled("rogue", rogueInstalled);
+		setInstalled("hipnotic", hipnoticInstalled);
+
 		interactionPanel.setInstallDirectory(enginePath.getAbsolutePath());
+	}
+
+	private void setInstalled(String name, boolean installed) {
+		if (installed) {
+			installedMaps.put(name, new PackageFileList(name));
+			System.out.println("Setting " + name + " to installed.");
+		}
+		else {
+			installedMaps.remove(name);
+		}
 	}
 	
 

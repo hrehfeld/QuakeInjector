@@ -13,6 +13,8 @@ public class Configuration {
 	private static final String engineExecutable = "engineExecutable";
 	private static final String engineCommandline = "engineCommandline";
 	private static final String repositoryDatabase = "repositoryDatabase";
+	private static final String rogueInstalled = "rogueInstalled";
+	private static final String hipnoticInstalled = "hipnoticInstalled";
 
 	
 	private Properties properties;
@@ -134,4 +136,27 @@ public class Configuration {
 	public String getRepositoryDatabase() {
 		return get(repositoryDatabase);
 	}
+
+	/**
+	 * get rogueInstalled
+	 */
+	public boolean getRogueInstalled() { return Boolean.parseBoolean(get(rogueInstalled)); }
+
+	/**
+	 * set rogueInstalled
+	 */
+	public void setRogueInstalled(boolean rogueInstalled) { set(this.rogueInstalled,
+																Boolean.toString(rogueInstalled)); }
+
+	/**
+	 * get hipnoticInstalled
+	 */
+	public boolean getHipnoticInstalled() { return Boolean.parseBoolean(get(hipnoticInstalled)); }
+
+	/**
+	 * set hipnoticInstalled
+	 */
+	public void setHipnoticInstalled(boolean hipnoticInstalled) { set(this.hipnoticInstalled,
+																	  Boolean.toString(hipnoticInstalled)); }
+	
 }

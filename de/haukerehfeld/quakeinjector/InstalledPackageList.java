@@ -87,6 +87,9 @@ public class InstalledPackageList extends HashMap<String, PackageFileList> {
 		remove(files.getId());
 	}
 
+	/**
+	 * set installed status to a list of Packages
+	 */
 	public void set(List<Package> maps) {
 		for (Package m: maps) {
 			if (containsKey(m.getId())) {

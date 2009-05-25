@@ -39,6 +39,10 @@ public class PackageList extends AbstractTableModel implements ChangeListener {
 		setMapList(data);
 	}
 
+	public List<Package> getPackageList() {
+		return this.data;
+	}
+
 
 	public void setMapList(List<Package> data) {
 		this.data = data;

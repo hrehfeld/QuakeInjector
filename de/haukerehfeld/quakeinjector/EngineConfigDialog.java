@@ -6,11 +6,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -31,11 +33,17 @@ public class EngineConfigDialog extends JDialog {
 	private final JPathPanel enginePath;
 	private final JPathPanel engineExecutable;
 	private final JTextField engineCommandline;
+
+	private final JCheckBox rogue;
+	private final JCheckBox hipnotic;
+	
 	
 	public EngineConfigDialog(final JFrame frame,
 							  String enginePathDefault,
 							  String engineExeDefault,
-							  String cmdlineDefault) {
+	                          String cmdlineDefault,
+	                          boolean rogueInstalled,
+	                          boolean hipnoticInstalled) {
 		super(frame, windowTitle, true);
 
 		JLabel description = new JLabel("Configure engine specifics", SwingConstants.CENTER);
@@ -50,44 +58,35 @@ public class EngineConfigDialog extends JDialog {
 		final JButton okay = new JButton("Save Changes");
 		final JButton cancel = new JButton("Cancel");
 
-		{
-			JLabel cmdlineLabel = new JLabel("Quake commandline options");
-			configPanel.add(cmdlineLabel, new GridBagConstraints() {{
+		class LabelConstraints extends GridBagConstraints {{
 				anchor = LINE_START;
 				fill = NONE;
 				gridx = 0;
-				gridy = 0;
 				gridwidth = 1;
 				gridheight = 1;
 				weightx = 0;
 				weighty = 0;
 				
-			}});
-			this.engineCommandline = new JTextField(cmdlineDefault, 40);
-			configPanel.add(engineCommandline, new GridBagConstraints() {{
+		}};
+		class InputConstraints extends GridBagConstraints {{
 				anchor = LINE_END;
 				fill = HORIZONTAL;
 				gridx = 1;
-				gridy = 0;
-				gridwidth = 1;
+				gridwidth = 2;
 				gridheight = 1;
 				weightx = 1;
 				weighty = 0;
-			}});
+		}};
+		
+		{
+			JLabel cmdlineLabel = new JLabel("Quake commandline options");
+			configPanel.add(cmdlineLabel, new LabelConstraints());
+			this.engineCommandline = new JTextField(cmdlineDefault, 40);
+			configPanel.add(engineCommandline, new InputConstraints());
 		}
 		//"Path to quake directory",
 		JLabel enginePathLabel = new JLabel("Quake Directory");
-		configPanel.add(enginePathLabel, new GridBagConstraints() {{
-			anchor = LINE_START;
-			fill = NONE;
-			gridx = 0;
-			gridy = 1;
-			gridwidth = 1;
-			gridheight = 1;
-			weightx = 0;
-			weighty = 0;
-				
-		}});
+		configPanel.add(enginePathLabel, new LabelConstraints() {{ gridy = 1; }});
 		enginePath = new JPathPanel(new JPathPanel.Verifier() {
 				public boolean verify(File f) {
 					return (f.exists()
@@ -110,30 +109,10 @@ public class EngineConfigDialog extends JDialog {
 			},
 			enginePathDefault,
 			javax.swing.JFileChooser.DIRECTORIES_ONLY);
-		configPanel.add(enginePath, new GridBagConstraints() {{
-			anchor = LINE_END;
-			fill = HORIZONTAL;
-			gridx = 1;
-			gridy = 1;
-			gridwidth = 1;
-			gridheight = 1;
-			weightx = 1;
-			weighty = 0;
-		}});
+		configPanel.add(enginePath, new InputConstraints() {{ gridy = 1; }});
 		
-		//"Quake Executable",
 		JLabel engineExeLabel = new JLabel("Quake Executable");
-		configPanel.add(engineExeLabel, new GridBagConstraints() {{
-			anchor = LINE_START;
-			fill = NONE;
-			gridx = 0;
-			gridy = 2;
-			gridwidth = 1;
-			gridheight = 1;
-			weightx = 0;
-			weighty = 0;
-				
-		}});
+		configPanel.add(engineExeLabel, new LabelConstraints() {{ gridy = 2; }});
 		engineExecutable = new JPathPanel(
 			new JPathPanel.Verifier() {
 				public boolean verify(File exe) {
@@ -158,16 +137,7 @@ public class EngineConfigDialog extends JDialog {
 			engineExeDefault,
 			new File(enginePathDefault),
 			javax.swing.JFileChooser.FILES_ONLY);
-		configPanel.add(engineExecutable, new GridBagConstraints() {{
-			anchor = LINE_END;
-			fill = HORIZONTAL;
-			gridx = 1;
-			gridy = 2;
-			gridwidth = 1;
-			gridheight = 1;
-			weightx = 1;
-			weighty = 0;
-		}});
+		configPanel.add(engineExecutable, new InputConstraints() {{ gridy = 2; }});
 
 		final ChangeListener enableOkay = new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
@@ -204,6 +174,26 @@ public class EngineConfigDialog extends JDialog {
 		enginePath.verify();
 		engineExecutable.verify();
 
+
+		{
+			JLabel expansionsInstalled = new JLabel("Expansion packs installed");
+			configPanel.add(expansionsInstalled, new LabelConstraints() {{ gridy = 3; }});
+
+			rogue = new JCheckBox("rogue");
+			rogue.setMnemonic(KeyEvent.VK_R);
+			rogue.setSelected(rogueInstalled);
+			configPanel.add(rogue, new InputConstraints() {{ gridy = 3; gridwidth = 1; }});
+
+			hipnotic = new JCheckBox("hipnotic");
+			hipnotic.setMnemonic(KeyEvent.VK_H);
+			hipnotic.setSelected(hipnoticInstalled);
+			configPanel.add(hipnotic, new InputConstraints() {{
+				gridy = 3;
+				gridx = 2;
+				gridwidth = 1;
+			}});
+		}
+		
 		
 
 		okay.addActionListener(new ActionListener() {
@@ -251,6 +241,16 @@ public class EngineConfigDialog extends JDialog {
 		return engineCommandline.getText();
 	}
 
+	/**
+	 * get hipnoticInstalled
+	 */
+	public boolean getHipnoticInstalled() { return hipnotic.isSelected(); }
+
+	/**
+	 * get rogueInstalled
+	 */
+	public boolean getRogueInstalled() { return rogue.isSelected(); }
+	
 	public void addChangeListener(ChangeListener l) {
 		listeners.addChangeListener(l);
 	}
