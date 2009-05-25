@@ -119,15 +119,10 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 
 
 	public void installRequirements(Package map) {
-		for (Package requirement: map.getRequirements()) {
+		for (Package requirement: map.getAvailableRequirements()) {
 			String id = requirement.getId();
 			
-			PackageFileList isInstalled;
-			synchronized (installed) {
-				isInstalled = installed.get(id);
-			}
-
-			if (isInstalled != null) {
+			if (requirement.isInstalled()) {
 				System.out.print("Required package " + id + " already installed.");
 			}
 			else {
@@ -149,7 +144,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	}
 
 	private boolean checkInstallRequirements(Package selectedMap) {
-		List<String> unmet = selectedMap.getUnavailableRequirements();
+		List<Requirement> unmet = selectedMap.getUnavailableRequirements();
 		if (!unmet.isEmpty()) {
 			String msg = "The following prerequisites to play "
 			    + selectedMap.getId()
@@ -175,7 +170,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	}
 
 	private boolean checkPlayRequirements(Package selectedMap) {
-		List<String> unmet = selectedMap.getUnmetRequirements();
+		List<Requirement> unmet = selectedMap.getUnmetRequirements();
 		if (!unmet.isEmpty()) {
 			String msg = "The following prerequisites to play "
 			    + selectedMap.getId()

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import javax.swing.event.ChangeListener;
 
-public class Package {
+public class Package extends SortableRequirement implements Requirement {
 
 	/**
 	 * easily have change listeners
@@ -36,8 +36,8 @@ public class Package {
 	private String commandline;
 
 	private List<String> startmaps;
-	private List<Package> requirements;
-	private List<String> unavailableRequirements;
+	
+	private List<Requirement> requirements;
 
 	public Package(String id,
 				   String author,
@@ -45,7 +45,7 @@ public class Package {
 				   int size,
 				   Date date,
 				   boolean isInstalled) {
-		this(id, author, title, size, date, isInstalled, null, null, null, null, null);
+		this(id, author, title, size, date, isInstalled, null, null, null, null);
 	}
 
 	public Package(String id,
@@ -57,8 +57,7 @@ public class Package {
 				   String relativeBaseDir,
 				   String commandline,
 				   List<String> startmaps,
-				   List<Package> requirements,
-				   List<String> unavailableRequirements) {
+				   List<Requirement> requirements) {
 		this.id = id;
 		this.author = author;
 		this.title = title;
@@ -69,7 +68,6 @@ public class Package {
 		this.commandline = commandline;
 		this.startmaps = startmaps;
 		this.requirements = requirements;
-		this.unavailableRequirements = unavailableRequirements;
 	}
 	
 
@@ -116,27 +114,41 @@ public class Package {
 		listeners.notifyChangeListeners(this);
 	}
 
-	public void setRequirements(List<Package> requirements) {
+
+	public void setRequirements(List<Requirement> requirements) {
 		this.requirements = requirements;
 	}
 
-	public List<Package> getRequirements() {
+	public List<Requirement> getRequirements() {
 		return this.requirements;
 	}
 
-	public void setUnavailableRequirements(List<String> unavailableRequirements) {
-		this.unavailableRequirements = unavailableRequirements;
+
+	public List<Package> getAvailableRequirements() {
+		List<Package> avails = new ArrayList<Package>();
+		for (Requirement r: requirements) {
+			if (r instanceof Package) {
+				avails.add((Package) r);
+			}
+		}
+		return avails;
 	}
 
-	public List<String> getUnavailableRequirements() {
-		return this.unavailableRequirements;
+	public List<Requirement> getUnavailableRequirements() {
+		List<Requirement> unavails = new ArrayList<Requirement>();
+		for (Requirement r: requirements) {
+			if (!(r instanceof Package)) {
+				unavails.add(r);
+			}
+		}
+		return unavails;
 	}
 
-	public List<String> getUnmetRequirements() {
-		List<String> unmet = new ArrayList<String>(this.unavailableRequirements);
-		for (Package requirement: requirements) {
+	public List<Requirement> getUnmetRequirements() {
+		List<Requirement> unmet = new ArrayList<Requirement>();
+		for (Requirement requirement: requirements) {
 			if (!requirement.isInstalled()) {
-				unmet.add(requirement.getId());
+				unmet.add(requirement);
 			}
 		}
 		

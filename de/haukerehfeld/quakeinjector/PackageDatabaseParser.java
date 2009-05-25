@@ -50,22 +50,23 @@ public class PackageDatabaseParser implements java.io.Serializable {
 	private void resolveRequirements(List<Package> packageList,
 									 Map<Package,List<String>> unresolvedRequirements,
 									 Map<String, Package> packages) {
-		for (Package current: packageList) {
-			List<String> reqs = unresolvedRequirements.get(current);
+		for (Map.Entry<Package,List<String>> entry: unresolvedRequirements.entrySet()) {
+			Package current = entry.getKey();
+			List<String> reqs = entry.getValue();
 
 // 			if (reqs.size() > 1) {
 // 				System.out.println(current.getId() + " has more than one requirement");
 // 			}
 
-			List<String> unavailableRequirements = new ArrayList<String>(1);
-			List<Package> resolvedRequirements = new ArrayList<Package>(reqs.size());
+			List<Requirement> resolvedRequirements = new ArrayList<Requirement>(reqs.size());
 			for (String id: reqs) {
-				Package resolved = packages.get(id);
-				if (resolved != null) { resolvedRequirements.add(resolved); }
-				else { unavailableRequirements.add(id); }
+				Requirement resolved = packages.get(id);
+				if (resolved == null) {
+					resolved = new UnavailableRequirement(id);
+				}
+				resolvedRequirements.add(resolved);
 			}
 			current.setRequirements(resolvedRequirements);
-			current.setUnavailableRequirements(unavailableRequirements);
 		}
 	}
 
@@ -143,7 +144,6 @@ public class PackageDatabaseParser implements java.io.Serializable {
 									 relativeBaseDir,
 									 cmdline,
 									 startmaps,
-									 null,
 									 null);
 		reqResolve.put(result, requirements);
 		return result;
