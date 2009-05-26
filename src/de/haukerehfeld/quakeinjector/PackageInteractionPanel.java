@@ -309,6 +309,9 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	}
 
 	public void uninstall() {
+		if (!checkInstallDirectory()) {
+			return;
+		}
 		if (!hasCurrentPackage()) { return; }
 
 		uninstall(selectedMap.getFileList());
@@ -362,7 +365,14 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 
 	public void start() {
 		if (!hasCurrentPackage()) { return; }
-		
+
+		if (!starter.checkPaths()) {
+			JOptionPane.showMessageDialog(main,
+			                              "Quake engine paths aren't set correctly, can't start.",
+			                              "Quake engine paths not configured",
+			                              JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		if (!checkPlayRequirements(selectedMap)) {
 			return;
 		}

@@ -47,4 +47,11 @@ public class EngineStarter {
 	public void setQuakeCommandline(String cmdline) {
 		this.quakeCmdline = cmdline;
 	}
+
+	public boolean checkPaths() {
+		return (quakeExe.exists()
+		        && !quakeExe.isDirectory()
+		        && quakeExe.canRead()
+		        && quakeExe.canExecute());
+	}
 }
