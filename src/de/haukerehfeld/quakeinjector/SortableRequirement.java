@@ -2,7 +2,7 @@ package de.haukerehfeld.quakeinjector;
 
 public abstract class SortableRequirement implements Requirement {
 	private final String id;
-	private boolean isInstalled;
+	private boolean isInstalled = false;
 
 
 	public SortableRequirement(String id) {

@@ -26,7 +26,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	
 	private EngineStarter starter;
 	private String installDirectory;
-	private final Paths paths;
+	private Paths paths;
 	private PackageList requirements;
 	private InstallQueuePanel installQueue;
 
@@ -36,6 +36,8 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 
 	private JComboBox startmaps;
 
+	private boolean ready = false;
+
 	/**
 	 * Currently selected map
 	 */
@@ -43,19 +45,11 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 
 	private final Installer installer;
 	
-	public PackageInteractionPanel(String installDirectory,
-	                               Paths paths,
-	                               PackageList requirements,
-	                               EngineStarter starter,
-	                               InstallQueuePanel installQueue) {
+	public PackageInteractionPanel(InstallQueuePanel installQueue) {
 		super(new GridBagLayout());
-		this.paths = paths;
-		this.installDirectory = installDirectory;
-		this.requirements = requirements;
-		this.starter = starter;
 
-		this.installer = new Installer();
 		this.installQueue = installQueue;
+		this.installer = new Installer();
 
 		uninstallButton = new JButton(uninstallText);
 		uninstallButton.setEnabled(false);
@@ -114,9 +108,23 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 			weightx = 1;
 		}});
 
-		
+
+		disableUI();
 	}
 
+
+	public void init(String installDirectory,
+	                 Paths paths,
+	                 PackageList requirements,
+	                 EngineStarter starter) {
+		this.paths = paths;
+		this.installDirectory = installDirectory;
+		this.requirements = requirements;
+		this.starter = starter;
+
+		ready = true;
+		refreshUi();
+	}
 
 	public void installRequirements(Package map) {
 		for (Package requirement: map.getAvailableRequirements()) {
@@ -379,7 +387,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	}
 
 	private void refreshUi() {
-		if (!hasCurrentPackage()) {
+		if (!ready || !hasCurrentPackage()) {
 			installButton.setText(installText);
 			disableUI();
 			return;

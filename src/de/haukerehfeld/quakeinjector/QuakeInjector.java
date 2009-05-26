@@ -40,14 +40,46 @@ public class QuakeInjector extends JFrame {
 	 */
 	private static final String applicationName = "Quake Injector";
 
-	private final Configuration config;
-	private final Paths paths;
+	private Paths paths;
 
-	private final EngineStarter starter;
+	private EngineStarter starter;
 
 	private PackageInteractionPanel interactionPanel;
-	private final PackageList maps;
+	private PackageList maps;
 	private final PackageListModel maplist;
+
+	private final SwingWorker<List<PackageFileList>,Void> parseInstalled
+	    = new SwingWorker<List<PackageFileList>, Void>() {
+		@Override
+		public List<PackageFileList> doInBackground() {
+			List<PackageFileList> files;
+			try {
+				files = new InstalledPackageList().read();
+			}
+			catch (java.io.FileNotFoundException e) {
+				System.out.println("Notice: InstalledMaps xml doesn't exist yet,"
+				                   + " no maps installed?");
+				return new ArrayList<PackageFileList>();
+			}
+			catch (java.io.IOException e) {
+				System.out.println("Error: InstalledMaps xml couldn't be loaded: " + e.getMessage());
+				
+				return new ArrayList<PackageFileList>();
+			}
+				
+			return files;
+		}
+
+			
+	};
+	
+	private final SwingWorker<Configuration,Void> loadConfig
+	    = new SwingWorker<Configuration,Void>() {
+		@Override
+		public Configuration doInBackground() {
+			return new Configuration();
+		}
+	};
 
 	public QuakeInjector() {
 		super(applicationName);
@@ -55,27 +87,6 @@ public class QuakeInjector extends JFrame {
 
 		setLayout(new BoxLayout(getContentPane(),
 								BoxLayout.PAGE_AXIS));
-
-		config = new Configuration();
-
-		paths = new Paths(config.get("repositoryBase"));
-		
-		/** @todo 2009-05-04 14:48 hrehfeld    check if the paths still exist at startup */
-		File enginePath = new File(config.getEnginePath());
-		File engineExe = new File(config.getEnginePath()
-		                          + File.separator
-		                          + config.getEngineExecutable());
-		if (!enginePath.exists() || !engineExe.exists()) {
-			JOptionPane.showMessageDialog(this,
-			                              "Quakepath and/or Executable aren't set correctly. Please set the correct locations in Configuration > Engine Configuration before trying to install/play.",
-			                              "Quakepaths incorrect",
-			                              JOptionPane.ERROR_MESSAGE);
-			//showEngineConfig();
-			
-		}
-		starter = new EngineStarter(enginePath,
-									engineExe,
-									config.getEngineCommandline());
 
 		maplist = new PackageListModel();
 		maps = new PackageList();
@@ -85,6 +96,76 @@ public class QuakeInjector extends JFrame {
 		addMainPane(getContentPane());
 	}
 
+	private void init() {
+		loadConfig.execute();
+		parseInstalled.execute();
+		
+		final DatabaseParser dbParse = new DatabaseParser(maps, maplist);
+		dbParse.execute();
+
+		paths = new Paths(getConfig().get("repositoryBase"));
+		
+		File enginePath = new File(getConfig().getEnginePath());
+		File engineExe = new File(getConfig().getEnginePath()
+		                          + File.separator
+		                          + getConfig().getEngineExecutable());
+		starter = new EngineStarter(enginePath,
+		                            engineExe,
+									getConfig().getEngineCommandline());
+		interactionPanel.init(getConfig().getEnginePath(),
+		                      paths,
+		                      maps,
+		                      starter);
+
+
+		if (!enginePath.exists() || !engineExe.exists()) {
+			String msg = "Quakepath and/or Executable aren't set correctly."
+			    + " The correct locations need to be set before trying to install/play.";
+
+			Object[] options = {"Open Engine Configuration",
+			                    "Ignore for now"};
+			int tryAgain =
+			    JOptionPane.showOptionDialog(QuakeInjector.this,
+			                                 msg,
+			                                 "Quakepaths incorrect",
+			                                 JOptionPane.YES_NO_OPTION,
+			                                 JOptionPane.ERROR_MESSAGE,
+			                                 null,
+			                                 options,
+			                                 options[0]);
+			if (tryAgain == 0) {
+				//wait until maps are finished loading
+				try {
+					dbParse.get();
+				}
+				catch (java.lang.InterruptedException e) {}
+				catch (java.util.concurrent.ExecutionException e) {}
+				showEngineConfig(maps.get("rogue").isInstalled(),
+				                 maps.get("hipnotic").isInstalled());
+			}
+		}
+
+		
+	}
+
+	private synchronized Configuration getConfig() {
+		try {
+			return loadConfig.get();
+		}
+		catch (InterruptedException e) { }
+		catch (java.util.concurrent.ExecutionException e) {}
+		return null;
+	}
+
+	private synchronized List<PackageFileList> getInstalledFileLists() {
+		try {
+			return parseInstalled.get();
+		}
+		catch (InterruptedException e) { }
+		catch (java.util.concurrent.ExecutionException e) {}
+		return new ArrayList<PackageFileList>();
+	}
+	
 	private void createMenu() {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.setOpaque(true);
@@ -96,7 +177,8 @@ public class QuakeInjector extends JFrame {
 		JMenuItem reparseDatabase = new JMenuItem("Reload database", KeyEvent.VK_R);
 		reparseDatabase.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					parse(maps, maplist);
+					new DatabaseParser(maps, maplist)
+					    .execute();
 				}
 			});
 		fileMenu.add(reparseDatabase);
@@ -114,20 +196,21 @@ public class QuakeInjector extends JFrame {
 		configM.add(engine);
 		engine.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					showEngineConfig();
+					showEngineConfig(maps.getRequirement("rogue").isInstalled(),
+		                             maps.getRequirement("hipnotic").isInstalled());
 				}});
 
 		setJMenuBar(menuBar);
 	}
 
-	private void showEngineConfig() {
+private void showEngineConfig(boolean rogueInstalled, boolean hipnoticInstalled) {
 		final EngineConfigDialog d
 		    = new EngineConfigDialog(QuakeInjector.this,
-		                             config.getEnginePath(),
-		                             config.getEngineExecutable(),
-		                             config.getEngineCommandline(),
-		                             maps.get("rogue").isInstalled(),
-		                             maps.get("hipnotic").isInstalled()
+		                             getConfig().getEnginePath(),
+		                             getConfig().getEngineExecutable(),
+		                             getConfig().getEngineCommandline(),
+		                             rogueInstalled,
+		                             hipnoticInstalled
 		        );
 		d.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
@@ -151,11 +234,11 @@ public class QuakeInjector extends JFrame {
 		setEngineConfig(enginePath, engineExecutable, commandline,
 		                rogueInstalled, hipnoticInstalled);
 
-		config.setEnginePath(enginePath.getAbsolutePath());
-		config.setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable));
-		config.setEngineCommandline(commandline);
+		getConfig().setEnginePath(enginePath.getAbsolutePath());
+		getConfig().setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable));
+		getConfig().setEngineCommandline(commandline);
 		
-		config.write();
+		getConfig().write();
 	}
 
 	private void setEngineConfig(File enginePath,
@@ -190,7 +273,7 @@ public class QuakeInjector extends JFrame {
 
 
 		{
-			JPanel filterPanel = new JPanel(new SpringLayout());
+			JPanel filterPanel = new JPanel();
 			filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.LINE_AXIS));
 			JLabel filterText = new JLabel("Filter: ", SwingConstants.TRAILING);
 			filterPanel.add(filterText);
@@ -246,11 +329,7 @@ public class QuakeInjector extends JFrame {
 
 		final InstallQueuePanel installQueue = new InstallQueuePanel();
 
-		this.interactionPanel = new PackageInteractionPanel(config.getEnginePath(),
-												 paths,
-												 maps,
-												 starter,
-												 installQueue);
+		this.interactionPanel = new PackageInteractionPanel(installQueue);
 		maplist.addChangeListener(interactionPanel);
 
 		JPanel infoPanel = new JPanel(new GridBagLayout());
@@ -288,8 +367,6 @@ public class QuakeInjector extends JFrame {
 											  table);
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
 
-		parse(maps, maplist);
-
 	}
 
 	
@@ -298,81 +375,85 @@ public class QuakeInjector extends JFrame {
 		setVisible(true);
 	}
 
-	private void parse(final PackageList installedMaps,
-					   final PackageListModel maplist) {
-		final PackageDatabaseParser parser = new PackageDatabaseParser();
-
-		SwingWorker<List<Package>,Void> parse = new SwingWorker<List<Package>, Void>() {
-			@Override
-			public List<Package> doInBackground() throws java.io.IOException,
-			org.xml.sax.SAXException {
-				java.util.List<Requirement> all = parser.parse(config.getRepositoryDatabase());
-
-				installedMaps.setRequirements(all);
-				try {
-					installedMaps.readInstalled();
-				}
-				catch (java.io.IOException e) {
-					/** @todo 2009-04-28 19:00 hrehfeld    better error reporting? */
-					System.out.println("Couldn't read installedMaps.xml: " + e);
-					e.printStackTrace();
-				}
-				
-
-				List<Package> packages = new ArrayList<Package>(all.size());
-				for (Requirement r: all) {
-					if (r instanceof Package) {
-						packages.add((Package) r);
-					}
-				}
-				return packages;
-			}
-
-			@Override
-			public void done() {
-				try {
-					maplist.setMapList(get());
-				}
-				catch (java.util.concurrent.ExecutionException t) {
-					Throwable e = t.getCause();
-					if (e instanceof java.io.IOException) {
-						String msg = "Couldn't open database file: " + e.getMessage();
-						Object[] options = {"Try again",
-											"Cancel"};
-						int tryAgain =
-							JOptionPane.showOptionDialog(QuakeInjector.this,
-														 msg,
-														 "Could not access database",
-														 JOptionPane.YES_NO_OPTION,
-														 JOptionPane.WARNING_MESSAGE,
-														 null,
-														 options,
-														 options[1]);
-						if (tryAgain == 0) {
-							parse(installedMaps, maplist);
-						}
-						else {
-							return;
-						}
-					}
-					else if (e instanceof org.xml.sax.SAXException) {
-						System.out.println("Couldn't parse xml!");
-					}
-				}
-				catch (java.lang.InterruptedException e) {
-					throw new RuntimeException("Couldn't get map list!" + e.getMessage());
-				}
-			}
-		};
-		parse.execute();
+	public class DatabaseParser extends SwingWorker<List<Package>, Void> {
+		private final PackageList requirementList;
+		private final PackageListModel model;
 		
+		public DatabaseParser(final PackageList requirementList,
+		                      final PackageListModel model) {
+			this.requirementList = requirementList;
+			this.model = model;
+		}
+		
+		@Override
+		    public List<Package> doInBackground() throws java.io.IOException,
+		    org.xml.sax.SAXException {
+			final PackageDatabaseParser parser = new PackageDatabaseParser();
+			List<Requirement> all = parser.parse(getConfig().getRepositoryDatabase());
+
+			requirementList.setRequirements(all);
+			try {
+				requirementList.setInstalled(parseInstalled.get());
+			}
+			catch (java.util.concurrent.ExecutionException e) {}
+			catch (java.lang.InterruptedException e) {
+				System.out.println("Couldn't wait for result of installedMaps parse!" + e);
+			}
+
+			List<Package> packages = new ArrayList<Package>(all.size());
+			for (Requirement r: all) {
+				if (r instanceof Package) {
+					packages.add((Package) r);
+				}
+			}
+			return packages;
+		}
+
+		@Override
+		    public void done() {
+			try {
+				maplist.setMapList(get());
+			}
+			catch (java.util.concurrent.ExecutionException t) {
+				Throwable e = t.getCause();
+				if (e instanceof java.io.IOException) {
+					String msg = "Couldn't open database file: " + e.getMessage();
+					Object[] options = {"Try again",
+					                    "Cancel"};
+					int tryAgain =
+					    JOptionPane.showOptionDialog(QuakeInjector.this,
+					                                 msg,
+					                                 "Could not access database",
+					                                 JOptionPane.YES_NO_OPTION,
+					                                 JOptionPane.WARNING_MESSAGE,
+					                                 null,
+					                                 options,
+					                                 options[1]);
+					if (tryAgain == 0) {
+						new DatabaseParser(requirementList, maplist)
+						    .execute();
+					}
+					else {
+						return;
+					}
+				}
+				else if (e instanceof org.xml.sax.SAXException) {
+					System.out.println("Couldn't parse xml!" + e);
+				}
+			}
+			catch (java.lang.InterruptedException e) {
+				throw new RuntimeException("Couldn't get map list!" + e.getMessage());
+			}
+		}
 	}
+	
 
 	public static void main(String[] args) {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					QuakeInjector qs = new QuakeInjector();
 					qs.display();
+					qs.init();
 				}
 			});
 

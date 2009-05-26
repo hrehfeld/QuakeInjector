@@ -22,16 +22,7 @@ public class PackageList extends HashMap<String, Requirement> implements Iterabl
 		}
 	}
 
-	public void readInstalled() throws java.io.IOException {
-		List<PackageFileList> files;
-		try {
-			files = installedList.read();
-		}
-		catch (java.io.FileNotFoundException e) {
-			System.out.println("Notice: InstalledMaps xml doesn't exist yet, no maps installed?");
-			return;
-		}
-
+	public void setInstalled(List<PackageFileList> files) throws java.io.IOException {
 		for (PackageFileList l: files) {
 			Requirement r = get(l.getId());
 			if (r == null) {
@@ -50,7 +41,11 @@ public class PackageList extends HashMap<String, Requirement> implements Iterabl
 	}
 
 	public Requirement getRequirement(String id) {
-		return get(id);
+		Requirement g = get(id);
+		if (g == null) {
+			return new UnavailableRequirement(id);
+		}
+		return g;
 	}		
 
 
