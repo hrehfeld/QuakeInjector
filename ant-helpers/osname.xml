@@ -1,0 +1,8 @@
+<project name="osname" basedir=".">
+	<condition property="osname" value="win32">
+	  <os family="windows" />
+	</condition>
+	<condition property="osname" value="linux">
+	  <os family="unix"/>
+	</condition>
+</project>
