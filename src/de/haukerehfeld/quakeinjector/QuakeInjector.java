@@ -61,10 +61,20 @@ public class QuakeInjector extends JFrame {
 		paths = new Paths(config.get("repositoryBase"));
 		
 		/** @todo 2009-05-04 14:48 hrehfeld    check if the paths still exist at startup */
-		starter = new EngineStarter(new File(config.getEnginePath()),
-									new File(config.getEnginePath()
-											 + File.separator
-											 + config.getEngineExecutable()),
+		File enginePath = new File(config.getEnginePath());
+		File engineExe = new File(config.getEnginePath()
+		                          + File.separator
+		                          + config.getEngineExecutable());
+		if (!enginePath.exists() || !engineExe.exists()) {
+			JOptionPane.showMessageDialog(this,
+			                              "Quakepath and/or Executable aren't set correctly. Please set the correct locations in Configuration > Engine Configuration before trying to install/play.",
+			                              "Quakepaths incorrect",
+			                              JOptionPane.ERROR_MESSAGE);
+			//showEngineConfig();
+			
+		}
+		starter = new EngineStarter(enginePath,
+									engineExe,
 									config.getEngineCommandline());
 
 		maplist = new PackageListModel();
@@ -104,30 +114,34 @@ public class QuakeInjector extends JFrame {
 		configM.add(engine);
 		engine.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					final EngineConfigDialog d
-					    = new EngineConfigDialog(QuakeInjector.this,
-					                             config.getEnginePath(),
-					                             config.getEngineExecutable(),
-					                             config.getEngineCommandline(),
-					                             maps.get("rogue").isInstalled(),
-					                             maps.get("hipnotic").isInstalled()
-					        );
-					d.addChangeListener(new ChangeListener() {
-							public void stateChanged(ChangeEvent e) {
-								saveEngineConfig(d.getEnginePath(),
-												 d.getEngineExecutable(),
-								                 d.getCommandline(),
-								                 d.getRogueInstalled(),
-								                 d.getHipnoticInstalled());
-							}
-						});
-
-					d.packAndShow();
-					
+					showEngineConfig();
 				}});
 
 		setJMenuBar(menuBar);
 	}
+
+	private void showEngineConfig() {
+		final EngineConfigDialog d
+		    = new EngineConfigDialog(QuakeInjector.this,
+		                             config.getEnginePath(),
+		                             config.getEngineExecutable(),
+		                             config.getEngineCommandline(),
+		                             maps.get("rogue").isInstalled(),
+		                             maps.get("hipnotic").isInstalled()
+		        );
+		d.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+								saveEngineConfig(d.getEnginePath(),
+								                 d.getEngineExecutable(),
+								                 d.getCommandline(),
+								                 d.getRogueInstalled(),
+								                 d.getHipnoticInstalled());
+				}
+			});
+		
+		d.packAndShow();
+	}
+
 
 	private void saveEngineConfig(File enginePath,
 								  File engineExecutable,

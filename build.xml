@@ -111,7 +111,6 @@
     <!-- we need other jars for the manifest classpath, so make sure
 		 they're created above -->
 	<path id="jars">
-      <fileset dir="${engine.dist}" includes="*.jar"/>
       <fileset dir="${quakeinjector.dist}" includes="*.jar"/>
 	</path>
 
