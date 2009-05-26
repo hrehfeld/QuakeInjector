@@ -136,7 +136,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 		}
 
 		File parentDir = f.getParentFile();
-		while (!parentDir.exists()) {
+		while (parentDir != null && !parentDir.exists()) {
 			files.add(parentDir);
 			parentDir = parentDir.getParentFile();
 		}

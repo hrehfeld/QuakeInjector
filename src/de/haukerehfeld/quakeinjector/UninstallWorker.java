@@ -11,12 +11,12 @@ import javax.swing.SwingWorker;
  * Install maps in a worker thread
  * Init once and let swing start it - don't reuse
  */
-public class Uninstaller extends SwingWorker<Void, Void> {
+public class UninstallWorker extends SwingWorker<Void, Void> {
 	private String baseDirectory;
 	private PackageFileList files;
 	private Package map;
 
-	public Uninstaller(Package map, PackageFileList files, String baseDirectory) {
+	public UninstallWorker(Package map, PackageFileList files, String baseDirectory) {
 		this.map = map;
 		this.files = files;
 		this.baseDirectory = baseDirectory;

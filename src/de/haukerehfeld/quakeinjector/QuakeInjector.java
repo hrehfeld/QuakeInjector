@@ -47,6 +47,7 @@ public class QuakeInjector extends JFrame {
 	private PackageInteractionPanel interactionPanel;
 	private PackageList maps;
 	private final PackageListModel maplist;
+	private Installer installer;
 
 	private final SwingWorker<List<PackageFileList>,Void> parseInstalled
 	    = new SwingWorker<List<PackageFileList>, Void>() {
@@ -112,40 +113,31 @@ public class QuakeInjector extends JFrame {
 		starter = new EngineStarter(enginePath,
 		                            engineExe,
 									getConfig().getEngineCommandline());
-		interactionPanel.init(getConfig().getEnginePath(),
+		installer = new Installer();
+		interactionPanel.init(installer,
 		                      paths,
 		                      maps,
 		                      starter);
 
+		installer.setInstallDirectory(getConfig().getEnginePath());
 
-		if (!enginePath.exists() || !engineExe.exists()) {
-			String msg = "Quakepath and/or Executable aren't set correctly."
-			    + " The correct locations need to be set before trying to install/play.";
-
-			Object[] options = {"Open Engine Configuration",
-			                    "Ignore for now"};
-			int tryAgain =
-			    JOptionPane.showOptionDialog(QuakeInjector.this,
-			                                 msg,
-			                                 "Quakepaths incorrect",
-			                                 JOptionPane.YES_NO_OPTION,
-			                                 JOptionPane.ERROR_MESSAGE,
-			                                 null,
-			                                 options,
-			                                 options[0]);
-			if (tryAgain == 0) {
-				//wait until maps are finished loading
-				try {
-					dbParse.get();
+		if (!installer.checkInstallDirectory()) {
+			new SwingWorker<Void,Void>() {
+				@Override
+			    public Void doInBackground() {
+					try {
+						dbParse.get();
+					}
+					catch (java.lang.InterruptedException e) {}
+					catch (java.util.concurrent.ExecutionException e) {}
+					return null;
 				}
-				catch (java.lang.InterruptedException e) {}
-				catch (java.util.concurrent.ExecutionException e) {}
-				showEngineConfig(maps.get("rogue").isInstalled(),
-				                 maps.get("hipnotic").isInstalled());
-			}
+				@Override
+			    public void done() {
+					enginePathNotSetDialogue();
+				}
+			}.execute();
 		}
-
-		
 	}
 
 	private synchronized Configuration getConfig() {
@@ -203,7 +195,7 @@ public class QuakeInjector extends JFrame {
 		setJMenuBar(menuBar);
 	}
 
-private void showEngineConfig(boolean rogueInstalled, boolean hipnoticInstalled) {
+	private void showEngineConfig(boolean rogueInstalled, boolean hipnoticInstalled) {
 		final EngineConfigDialog d
 		    = new EngineConfigDialog(QuakeInjector.this,
 		                             getConfig().getEnginePath(),
@@ -257,7 +249,7 @@ private void showEngineConfig(boolean rogueInstalled, boolean hipnoticInstalled)
 		}
 		catch (java.io.IOException e) {}
 		
-		interactionPanel.setInstallDirectory(enginePath.getAbsolutePath());
+		installer.setInstallDirectory(enginePath.getAbsolutePath());
 	}
 
 	private void addMainPane(Container panel) {
@@ -329,7 +321,7 @@ private void showEngineConfig(boolean rogueInstalled, boolean hipnoticInstalled)
 
 		final InstallQueuePanel installQueue = new InstallQueuePanel();
 
-		this.interactionPanel = new PackageInteractionPanel(installQueue);
+		this.interactionPanel = new PackageInteractionPanel(this, installQueue);
 		maplist.addChangeListener(interactionPanel);
 
 		JPanel infoPanel = new JPanel(new GridBagLayout());
@@ -446,7 +438,36 @@ private void showEngineConfig(boolean rogueInstalled, boolean hipnoticInstalled)
 			}
 		}
 	}
-	
+
+	/**
+	 * @return false if the user didn't open the config dialog
+	 */
+	public boolean enginePathNotSetDialogue() {
+		String msg = "Quakepath isn't set correctly.\n"
+		    + "It  needs to be set before trying to install (or play).";
+
+		Object[] options = {"Open Engine Configuration",
+		                    "Cancel"};
+		int openEngineConfig =
+		    JOptionPane.showOptionDialog(QuakeInjector.this,
+		                                 msg,
+		                                 "Quakepaths incorrect",
+		                                 JOptionPane.YES_NO_OPTION,
+		                                 JOptionPane.ERROR_MESSAGE,
+		                                 null,
+		                                 options,
+		                                 options[0]);
+		if (openEngineConfig == 0) {
+			//wait until maps are finished loading
+			showEngineConfig(maps.get("rogue").isInstalled(),
+			                 maps.get("hipnotic").isInstalled());
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
 
 	public static void main(String[] args) {
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {

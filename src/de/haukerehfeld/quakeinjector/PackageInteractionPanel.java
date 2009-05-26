@@ -23,9 +23,10 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	private static final String uninstallText = "Uninstall";
 	private static final String installText = "Install";
 	private static final String playText = "Play";
+
+	private QuakeInjector main;
 	
 	private EngineStarter starter;
-	private String installDirectory;
 	private Paths paths;
 	private PackageList requirements;
 	private InstallQueuePanel installQueue;
@@ -43,13 +44,13 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	 */
 	private Package selectedMap = null;
 
-	private final Installer installer;
+	private Installer installer;
 	
-	public PackageInteractionPanel(InstallQueuePanel installQueue) {
+	public PackageInteractionPanel(QuakeInjector main, InstallQueuePanel installQueue) {
 		super(new GridBagLayout());
 
+		this.main = main;
 		this.installQueue = installQueue;
-		this.installer = new Installer();
 
 		uninstallButton = new JButton(uninstallText);
 		uninstallButton.setEnabled(false);
@@ -113,14 +114,16 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	}
 
 
-	public void init(String installDirectory,
+	public void init(Installer installer,
 	                 Paths paths,
 	                 PackageList requirements,
 	                 EngineStarter starter) {
 		this.paths = paths;
-		this.installDirectory = installDirectory;
 		this.requirements = requirements;
 		this.starter = starter;
+
+		this.installer = installer;
+		
 
 		ready = true;
 		refreshUi();
@@ -202,13 +205,20 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 		}
 		return true;
 	}
+
+	private boolean checkInstallDirectory() {
+		while (!installer.checkInstallDirectory()) {
+			if (!main.enginePathNotSetDialogue()) {
+				return false;
+			}
+		}
+		return true;
+	}
 	
 	public void install(final Package selectedMap, boolean becauseRequired) {
-		if (installer.alreadyInstalling(selectedMap)) {
-			return;
-		}
-
-		if (!checkInstallRequirements(selectedMap)) {
+		if (!checkInstallDirectory()
+		    || installer.alreadyInstalling(selectedMap)
+		    || !checkInstallRequirements(selectedMap)) {
 			return;
 		}
 		installRequirements(selectedMap);
@@ -231,7 +241,6 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 
 		installer.install(selectedMap,
 						  paths.getRepositoryUrl(selectedMap.getId()),
-						  installDirectory,
 						  new Installer.InstallErrorHandler() {
 							  public void handle(OnlineFileNotFoundException error) {
 								  installQueue.finished(progressListener,
@@ -334,31 +343,21 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 									  }
 								  });
 
-		final Uninstaller uninstall = new Uninstaller(selectedMap,
-								                      files,
-								                      installDirectory);
-		uninstall.addPropertyChangeListener(progressListener);
-		
-		uninstall.execute();
-		//wait until finished and set finished status
-		new SwingWorker<Void,Void>() {
-			private String message = "Success";
-			
-			@Override
-			    public Void doInBackground() {
-				try {
-					uninstall.get();
-				}
-				catch (Exception e) {
-					message = "Failed";
-				}
-				return null;
-			}
-			@Override
-			    public void done() {
-				installQueue.finished(progressListener, message);
-			}
-		}.execute();
+		installer.uninstall(selectedMap,
+		                    new Installer.UninstallErrorHandler() {
+								@Override
+								public void success() {
+									installQueue.finished(progressListener, "success");
+								}
+
+								@Override
+								public void error(Exception e) {
+									installQueue.finished(progressListener, "fail");
+									System.out.println(e.getMessage());
+								}
+							},
+		                    progressListener
+		    );
 	}
 
 	public void start() {
@@ -416,7 +415,10 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 			startmaps.setEnabled(enableList);
 		}
 		else {
-			disableUI();
+			installButton.setEnabled(true);
+			playButton.setEnabled(false);
+			uninstallButton.setEnabled(false);
+			startmaps.setEnabled(false);
 		}
 
 	}
@@ -424,7 +426,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	private void disableUI() {
 		uninstallButton.setEnabled(false);
 		playButton.setEnabled(false);
-		installButton.setEnabled(true);
+		installButton.setEnabled(false);
 		startmaps.setEnabled(false);
 	}
 
@@ -433,8 +435,4 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 		refreshUi();
 	}
 
-	public void setInstallDirectory(String installDirectory) {
-		this.installDirectory = installDirectory;
-	}
-	
 }

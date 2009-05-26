@@ -1,6 +1,7 @@
 package de.haukerehfeld.quakeinjector;
 
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +13,7 @@ import javax.swing.SwingWorker;
 public class Installer {
 	private static final int simultanousDownloads = 1;
 	
+	private String installDirectory;
 	private ExecutorService pool;
 
 	private Map<Package,InstallWorker> installers = new HashMap<Package,InstallWorker>();
@@ -25,8 +27,7 @@ public class Installer {
 	}
 
 	public void install(final Package selectedMap,
-						final String url,
-						final String installDirectory,
+	                    final String url,
 						final InstallErrorHandler errorHandler,
 						final PropertyChangeListener propertyListener) {
 		//map already in the instalation queue
@@ -62,8 +63,6 @@ public class Installer {
 				PackageFileList files = installer.getInstalledFiles();
 				
 				if (error != null) {
-					System.out.println("exception from install worker");
-
 					if (error instanceof OnlineFileNotFoundException) {
 						errorHandler.handle((OnlineFileNotFoundException) error);
 					}
@@ -73,6 +72,9 @@ public class Installer {
 					else if (error instanceof IOException) {
 						errorHandler.handle((IOException) error, files);
 					}
+					System.out.println("unhandled exception from install worker" + error);
+					error.printStackTrace();
+
 				}
 				else if (installer.isCancelled()) {
 					System.out.println("CancelledException!");
@@ -94,6 +96,39 @@ public class Installer {
 		installers.get(installerMap).cancel(true);
 	}
 
+	public void setInstallDirectory(String installDirectory) {
+		this.installDirectory = installDirectory;
+	}
+
+	public boolean checkInstallDirectory() {
+		return new File(installDirectory).canWrite();
+	}
+
+	public void uninstall(Package map,
+	                      final UninstallErrorHandler errorHandler,
+	                      PropertyChangeListener progressListener) {
+		final UninstallWorker uninstall = new UninstallWorker(map,
+		                                                      map.getFileList(),
+		                                                      installDirectory);
+		uninstall.addPropertyChangeListener(progressListener);
+		uninstall.execute();
+
+		//wait until finished and set finished status
+		new SwingWorker<Void,Void>() {
+			@Override
+			    public Void doInBackground() {
+				try {
+					uninstall.get();
+					errorHandler.success();
+				}
+				catch (Exception e) {
+					errorHandler.error(e);
+				}
+				return null;
+			}
+		}.execute();
+	}
+
 	public interface InstallErrorHandler {
 		public void success(PackageFileList installedFiles);
 		public void handle(OnlineFileNotFoundException error);
@@ -102,6 +137,12 @@ public class Installer {
 		public void handle(CancelledException error, PackageFileList alreadyInstalledFiles);
 	}
 
+	public interface UninstallErrorHandler {
+		public void success();
+		public void error(Exception e);
+	}
+
 	public static class CancelledException extends Exception {}
 
+	
 }
