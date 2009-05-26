@@ -37,6 +37,8 @@ public class Package extends SortableRequirement implements Requirement {
 	
 	private List<Requirement> requirements;
 
+	private PackageFileList fileList;
+
 	public Package(String id,
 				   String author,
 				   String title,
@@ -142,5 +144,15 @@ public class Package extends SortableRequirement implements Requirement {
 	protected void notifyChangeListeners() {
 		listeners.notifyChangeListeners(this);
 	}
+
+	/**
+	 * get fileList
+	 */
+	public PackageFileList getFileList() { return fileList; }
+    
+/**
+ * set fileList
+ */
+	public void setFileList(PackageFileList fileList) { this.fileList = fileList; }
 }
 

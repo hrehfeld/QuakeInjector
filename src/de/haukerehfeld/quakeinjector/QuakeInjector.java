@@ -46,12 +46,8 @@ public class QuakeInjector extends JFrame {
 	private final EngineStarter starter;
 
 	private PackageInteractionPanel interactionPanel;
-	private final InstalledPackageList installedMaps;
-	private final PackageList maplist;
-
-	private final Map<String,Requirement> unavailableRequirements
-	    = new HashMap<String,Requirement>();
-
+	private final PackageList maps;
+	private final PackageListModel maplist;
 
 	public QuakeInjector() {
 		super(applicationName);
@@ -71,8 +67,8 @@ public class QuakeInjector extends JFrame {
 											 + config.getEngineExecutable()),
 									config.getEngineCommandline());
 
-		maplist = new PackageList();
-		installedMaps = new InstalledPackageList();
+		maplist = new PackageListModel();
+		maps = new PackageList();
 
 
 		createMenu();
@@ -90,7 +86,7 @@ public class QuakeInjector extends JFrame {
 		JMenuItem reparseDatabase = new JMenuItem("Reload database", KeyEvent.VK_R);
 		reparseDatabase.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					parse(installedMaps, maplist);
+					parse(maps, maplist);
 				}
 			});
 		fileMenu.add(reparseDatabase);
@@ -113,8 +109,8 @@ public class QuakeInjector extends JFrame {
 					                             config.getEnginePath(),
 					                             config.getEngineExecutable(),
 					                             config.getEngineCommandline(),
-					                             installedMaps.isInstalled("rogue"),
-					                             installedMaps.isInstalled("hipnotic")
+					                             maps.get("rogue").isInstalled(),
+					                             maps.get("hipnotic").isInstalled()
 					        );
 					d.addChangeListener(new ChangeListener() {
 							public void stateChanged(ChangeEvent e) {
@@ -157,27 +153,15 @@ public class QuakeInjector extends JFrame {
 		starter.setQuakeExecutable(engineExecutable);
 		starter.setQuakeCommandline(commandline);
 
-		setInstalled("rogue", rogueInstalled);
-		setInstalled("hipnotic", hipnoticInstalled);
+		maps.get("rogue").setInstalled(rogueInstalled);
+		maps.get("hipnotic").setInstalled(hipnoticInstalled);
 		try {
-			installedMaps.write();
+			maps.writeInstalled();
 		}
 		catch (java.io.IOException e) {}
 		
 		interactionPanel.setInstallDirectory(enginePath.getAbsolutePath());
 	}
-
-	private void setInstalled(String name, boolean installed) {
-		unavailableRequirements.get(name).setInstalled(installed);
-		if (installed) {
-			installedMaps.put(name, new PackageFileList(name));
-			System.out.println("Setting " + name + " to installed.");
-		}
-		else {
-			installedMaps.remove(name);
-		}
-	}
-	
 
 	private void addMainPane(Container panel) {
 		panel.setLayout(new GridBagLayout());
@@ -250,7 +234,7 @@ public class QuakeInjector extends JFrame {
 
 		this.interactionPanel = new PackageInteractionPanel(config.getEnginePath(),
 												 paths,
-												 installedMaps,
+												 maps,
 												 starter,
 												 installQueue);
 		maplist.addChangeListener(interactionPanel);
@@ -290,7 +274,7 @@ public class QuakeInjector extends JFrame {
 											  table);
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
 
-		parse(installedMaps, maplist);
+		parse(maps, maplist);
 
 	}
 
@@ -300,32 +284,31 @@ public class QuakeInjector extends JFrame {
 		setVisible(true);
 	}
 
-	private void parse(final InstalledPackageList installedMaps,
-					   final PackageList maplist) {
+	private void parse(final PackageList installedMaps,
+					   final PackageListModel maplist) {
 		final PackageDatabaseParser parser = new PackageDatabaseParser();
 
 		SwingWorker<List<Package>,Void> parse = new SwingWorker<List<Package>, Void>() {
 			@Override
 			public List<Package> doInBackground() throws java.io.IOException,
 			org.xml.sax.SAXException {
+				java.util.List<Requirement> all = parser.parse(config.getRepositoryDatabase());
+
+				installedMaps.setRequirements(all);
 				try {
-					installedMaps.read();
+					installedMaps.readInstalled();
 				}
 				catch (java.io.IOException e) {
 					/** @todo 2009-04-28 19:00 hrehfeld    better error reporting? */
-					System.out.println(e.getMessage());
+					System.out.println("Couldn't read installedMaps.xml: " + e);
+					e.printStackTrace();
 				}
 				
-				java.util.List<Requirement> all = parser.parse(config.getRepositoryDatabase());
-				installedMaps.set(all);
 
 				List<Package> packages = new ArrayList<Package>(all.size());
 				for (Requirement r: all) {
 					if (r instanceof Package) {
 						packages.add((Package) r);
-					}
-					else {
-						unavailableRequirements.put(r.getId(), r);
 					}
 				}
 				return packages;
@@ -372,8 +355,6 @@ public class QuakeInjector extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		//Schedule a job for the event-dispatching thread:
-		//creating and showing this application's GUI.
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					QuakeInjector qs = new QuakeInjector();

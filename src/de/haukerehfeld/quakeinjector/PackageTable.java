@@ -7,10 +7,10 @@ import javax.swing.table.TableRowSorter;
 
 public class PackageTable extends JTable {
 
-	public PackageTable(PackageList maplist) {
+	public PackageTable(PackageListModel maplist) {
 		super(maplist);
 		
-		final TableRowSorter<PackageList> sorter = new TableRowSorter<PackageList>(maplist);
+		final TableRowSorter<PackageListModel> sorter = new TableRowSorter<PackageListModel>(maplist);
 		setRowSorter(sorter);
 		
 		setPreferredScrollableViewportSize(new Dimension(500, 500));
@@ -19,7 +19,7 @@ public class PackageTable extends JTable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public TableRowSorter<PackageList> getRowSorter() {
-		return (TableRowSorter<PackageList>) super.getRowSorter();
+	public TableRowSorter<PackageListModel> getRowSorter() {
+		return (TableRowSorter<PackageListModel>) super.getRowSorter();
 	}
 }

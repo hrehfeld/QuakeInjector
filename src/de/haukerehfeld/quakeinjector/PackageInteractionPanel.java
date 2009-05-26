@@ -27,7 +27,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	private EngineStarter starter;
 	private String installDirectory;
 	private final Paths paths;
-	private InstalledPackageList installed;
+	private PackageList requirements;
 	private InstallQueuePanel installQueue;
 
 	private JButton uninstallButton;
@@ -45,13 +45,13 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	
 	public PackageInteractionPanel(String installDirectory,
 	                               Paths paths,
-	                               InstalledPackageList installed,
+	                               PackageList requirements,
 	                               EngineStarter starter,
 	                               InstallQueuePanel installQueue) {
 		super(new GridBagLayout());
 		this.paths = paths;
 		this.installDirectory = installDirectory;
-		this.installed = installed;
+		this.requirements = requirements;
 		this.starter = starter;
 
 		this.installer = new Installer();
@@ -238,17 +238,16 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 								                                JOptionPane.WARNING_MESSAGE);
 							  }
 							  public void success(PackageFileList installedFiles) {
-								  synchronized (installed) {
-									  installed.add(installedFiles);
-									  try {
-										  installed.write();
-									  }
-									  catch (java.io.IOException e) {
-										  System.out.println("Couldn't write installed Maps file!"
-										                     + e.getMessage());
-									  }
-								  }
+								  Requirement r = requirements.get(installedFiles.getId());
+								  r.setInstalled(true);
 
+								  try {
+									  requirements.writeInstalled();
+								  }
+								  catch (java.io.IOException e) {
+									  System.out.println("Couldn't write installed Maps file!"
+									                     + e.getMessage());
+								  }
 								  installQueue.finished(progressListener, "Success");
 								  
 							  }
@@ -295,27 +294,19 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	public void uninstall() {
 		if (!hasCurrentPackage()) { return; }
 
-		final PackageFileList files;
-
-		synchronized (installed) {
-			files = installed.get(selectedMap.getId());
-		}
-
-		uninstall(files);
+		uninstall(selectedMap.getFileList());
 		uninstallButton.setEnabled(false);
 
 		SwingWorker<Void,Void> saveInstalled = new SwingWorker<Void,Void>() {
 			@Override
 			public Void doInBackground() {
-				synchronized (installed) {
-					installed.remove(files);
-
-					try {
-						installed.write();
-					}
-					catch (java.io.IOException e) {
-						System.out.println("Couldn't write installed Maps file!" + e.getMessage());
-					}
+				selectedMap.setInstalled(false);
+				
+				try {
+					requirements.writeInstalled();
+				}
+				catch (java.io.IOException e) {
+					System.out.println("Couldn't write installed Maps file!" + e.getMessage());
 				}
 				return null;
 			}

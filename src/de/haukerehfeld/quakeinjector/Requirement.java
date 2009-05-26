@@ -11,5 +11,7 @@ public interface Requirement extends java.lang.Comparable {
 	public String getId();
 	public boolean isInstalled();
 	public void setInstalled(boolean installed);
+
+	public PackageFileList getFileList();
 }
 

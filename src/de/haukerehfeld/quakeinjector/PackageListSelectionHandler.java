@@ -8,11 +8,11 @@ import javax.swing.event.ListSelectionListener;
 class PackageListSelectionHandler implements ListSelectionListener {
 	private PackageInteractionPanel panel;
 
-	private PackageList list;
+	private PackageListModel list;
 
 	private JTable table;
 
-	public PackageListSelectionHandler(PackageInteractionPanel panel, PackageList list, JTable table) {
+	public PackageListSelectionHandler(PackageInteractionPanel panel, PackageListModel list, JTable table) {
 		this.panel = panel;
 		this.list = list;
 		this.table = table;

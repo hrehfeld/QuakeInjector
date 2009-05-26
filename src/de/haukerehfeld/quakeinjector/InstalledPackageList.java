@@ -1,8 +1,12 @@
 package de.haukerehfeld.quakeinjector;
 
 import java.io.File;
+import java.lang.Iterable;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,11 +21,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class InstalledPackageList extends HashMap<String, PackageFileList> {
+public class InstalledPackageList {
 	private final static String filename = "installedMaps.xml";
 	private final File file = new File(filename);
 	
-	public void write() throws java.io.IOException {
+	public void write(Iterable<Requirement> list) throws java.io.IOException {
 		System.out.println("Writing " + filename);
 		
 		if (!file.exists()) {
@@ -40,11 +44,18 @@ public class InstalledPackageList extends HashMap<String, PackageFileList> {
 			Element root = doc.createElement("installedmaps");
 			doc.appendChild(root);
 
-			for (PackageFileList l: this.values()) {
+			for (Requirement r: list) {
+				if (!r.isInstalled()) {
+					continue;
+				}
 				Element mapNode = doc.createElement("map");
-				mapNode.setAttribute("id", l.getId());
+				mapNode.setAttribute("id", r.getId());
 				root.appendChild(mapNode);
 
+				PackageFileList l = r.getFileList();
+				if (l == null) {
+					continue;
+				}
 				for (String filename: l) {
 					Element fileNode = doc.createElement("file");
 					fileNode.setAttribute("name", filename);
@@ -70,40 +81,9 @@ public class InstalledPackageList extends HashMap<String, PackageFileList> {
         }
 	}
 
-	public void read() throws java.io.IOException {
+	public List<PackageFileList> read() throws java.io.IOException {
 		System.out.println("Reading " + filename);
-		if (!file.canRead()) {
-			return;
-		}
 
-		parse(file);
-	}
-
-	public void add(PackageFileList files) {
-		put(files.getId(), files);
-	}
-
-	public void remove(PackageFileList files) {
-		remove(files.getId());
-	}
-
-	/**
-	 * set installed status to a list of Requirements
-	 */
-	public void set(List<Requirement> maps) {
-		for (Requirement m: maps) {
-			if (containsKey(m.getId())) {
-				m.setInstalled(true);
-				System.out.println("Set " + m + " to installed!");
-			}
-		}
-	}
-
-	public boolean isInstalled(String id) {
-		return (get(id) != null);
-	}
-
-	private void parse(File file) throws java.io.IOException {
 		Document document;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -117,17 +97,20 @@ public class InstalledPackageList extends HashMap<String, PackageFileList> {
 		catch (org.xml.sax.SAXException e) {
 			throw new java.io.IOException("Couldn't parse installedMaps xml: " + e.getMessage());
 		}
-		
 
 		Element root = document.getDocumentElement();
 
 		NodeList installedMaps = root.getChildNodes();
 
+
+		List<PackageFileList> files = new ArrayList<PackageFileList>(installedMaps.getLength());
+
 		for (int i = 0; i < installedMaps.getLength(); ++i) {
 			Node map = installedMaps.item(i);
 
 			if (map.getNodeType() == Node.ELEMENT_NODE) {
-				add(parseMapFileList((Element) map));
+				PackageFileList l = parseMapFileList((Element) map);
+				files.add(l);
 			}
 			/** @todo 2009-03-29 01:36 hrehfeld    find out why this happens */
 			else {
@@ -135,6 +118,8 @@ public class InstalledPackageList extends HashMap<String, PackageFileList> {
 // 					System.out.println("Whoops, i thought file is an element!");
 			}
 		}
+
+		return files;
 	}
 
 	private PackageFileList parseMapFileList(Element map) {
@@ -145,8 +130,6 @@ public class InstalledPackageList extends HashMap<String, PackageFileList> {
 
 		for (int i = 0; i < files.getLength(); ++i) {
 			Node file = files.item(i);
-			
-			/** @todo 2009-03-29 01:36 hrehfeld    find out why this is necessary */
 			if (file.getNodeType() == Node.ELEMENT_NODE) {
 				fileList.add(((Element) file).getAttribute("name"));
 			}

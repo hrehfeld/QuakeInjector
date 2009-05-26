@@ -12,5 +12,9 @@ public class UnavailableRequirement extends SortableRequirement implements Requi
 	}
 	public void addChangeListener(ChangeListener l) {}
 	protected void notifyChangeListeners() {}
+
+	public PackageFileList getFileList() {
+		return new PackageFileList(getId());
+	}
 }
 
