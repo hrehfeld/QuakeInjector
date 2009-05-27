@@ -74,7 +74,8 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 
 
 	public void setMapList(List<Package> data) {
-		this.data = data;
+		this.data = new ArrayList<Package>(data);
+		java.util.Collections.sort(this.data);
 
 		for (Package m: data) {
 			m.addChangeListener(this);

@@ -195,6 +195,5 @@ public class Package extends SortableRequirement implements Requirement {
 			return description;
 		}
 	}
-		    
 }
 

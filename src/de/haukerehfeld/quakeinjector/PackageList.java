@@ -48,20 +48,6 @@ public class PackageList extends HashMap<String, Requirement> implements Iterabl
 		return g;
 	}		
 
-
-	/**
-	 * Sort/compare requirements alphabetically by id
-	 */
-	private class RequirementIdComparator implements Comparator<Requirement> {
-		public int compare(Requirement lhs, Requirement rhs) {
-			return lhs.getId().compareTo(rhs.getId());
-		}
-
-		public boolean equals(Object o) {
-			return (this == o);
-		}
-	}
-
 	public Iterator<Requirement> iterator() {
 		return values().iterator();
 	}
