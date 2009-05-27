@@ -258,6 +258,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 							  public void success(PackageFileList installedFiles) {
 								  Requirement r = requirements.get(installedFiles.getId());
 								  r.setInstalled(true);
+								  ((Package) r).setFileList(installedFiles);
 
 								  try {
 									  requirements.writeInstalled();
