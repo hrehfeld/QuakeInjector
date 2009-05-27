@@ -472,6 +472,20 @@ public class QuakeInjector extends JFrame {
 
 
 	public static void main(String[] args) {
+		try {
+        // Set System L&F
+			javax.swing.UIManager.setLookAndFeel(
+				javax.swing.UIManager.getSystemLookAndFeelClassName());
+		} 
+		catch (javax.swing.UnsupportedLookAndFeelException e) {
+		}
+		catch (ClassNotFoundException e) {
+		}
+		catch (InstantiationException e) {
+		}
+		catch (IllegalAccessException e) {
+		}
+
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					QuakeInjector qs = new QuakeInjector();
