@@ -59,6 +59,7 @@ reverse order
 
 		//the root isn't identical (common on win32) - just return an absolute path
 		if (!home.get(homeLast).equals(file.get(fileLast))) {
+			System.out.println(home.get(homeLast) + " != " + file.get(fileLast));
 			return file.get(0).getAbsolutePath();
 		}
 		
