@@ -22,6 +22,8 @@ public class Package extends SortableRequirement implements Requirement {
 
 	private String title;
 
+	private Rating rating;
+
 	/**
 	 * Size in kb?
 	 */
@@ -44,8 +46,9 @@ public class Package extends SortableRequirement implements Requirement {
 				   String title,
 				   int size,
 				   Date date,
-				   boolean isInstalled) {
-		this(id, author, title, size, date, isInstalled, null, null, null, null);
+	               boolean isInstalled,
+	               Rating rating) {
+		this(id, author, title, size, date, isInstalled, rating, null, null, null, null);
 	}
 
 	public Package(String id,
@@ -54,6 +57,7 @@ public class Package extends SortableRequirement implements Requirement {
 				   int size,
 				   Date date,
 				   boolean isInstalled,
+	               Rating rating,
 				   String relativeBaseDir,
 				   String commandline,
 				   List<String> startmaps,
@@ -64,6 +68,7 @@ public class Package extends SortableRequirement implements Requirement {
 		this.size = size;
 		this.date = date;
 		super.setInstalled(isInstalled);
+		this.rating = rating;
 		this.relativeBaseDir = relativeBaseDir;
 		this.commandline = commandline;
 		this.startmaps = startmaps;
@@ -87,6 +92,12 @@ public class Package extends SortableRequirement implements Requirement {
 	public Date getDate() {
 		return date;
 	}
+
+	/**
+	 * get rating
+	 */
+	public Rating getRating() { return rating; }
+	
 
 	public String getRelativeBaseDir() {
 		return relativeBaseDir;
@@ -118,6 +129,7 @@ public class Package extends SortableRequirement implements Requirement {
 		}
 		return avails;
 	}
+
 
 	public List<Requirement> getUnavailableRequirements() {
 		List<Requirement> unavails = new ArrayList<Requirement>();
@@ -154,5 +166,24 @@ public class Package extends SortableRequirement implements Requirement {
  * set fileList
  */
 	public void setFileList(PackageFileList fileList) { this.fileList = fileList; }
+
+	public static enum Rating {
+		Unrated("Unrated"),
+		    Crap("Crap"),
+		    Poor("Poor"),
+		    Average("Average"),
+		    Nice("Nice"),
+		    Excellent("Excellent");
+
+		private String description;
+		Rating(String description) {
+			this.description = description;
+		}
+
+		public String toString() {
+			return description;
+		}
+	}
+		    
 }
 

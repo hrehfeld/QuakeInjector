@@ -326,9 +326,10 @@ public class QuakeInjector extends JFrame {
 
 		JPanel infoPanel = new JPanel(new GridBagLayout());
 
-		infoPanel.add(Box.createVerticalGlue(), new GridBagConstraints() {{
+		PackageDetailPanel details = new PackageDetailPanel();
+		infoPanel.add(details, new GridBagConstraints() {{
 			anchor = PAGE_START;
-			fill = VERTICAL;
+			fill = BOTH;
 			weightx = 0;
 			weighty = 1;
 		}});
@@ -354,10 +355,11 @@ public class QuakeInjector extends JFrame {
 		}});
 		
 		PackageListSelectionHandler selectionHandler
-			= new PackageListSelectionHandler(interactionPanel,
-											  maplist,
+			= new PackageListSelectionHandler(maplist,
 											  table);
 		table.getSelectionModel().addListSelectionListener(selectionHandler);
+		selectionHandler.addSelectionListener(interactionPanel);
+		selectionHandler.addSelectionListener(details);
 
 	}
 

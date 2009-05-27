@@ -13,19 +13,23 @@ import javax.swing.table.AbstractTableModel;
 
 public class PackageListModel extends AbstractTableModel implements ChangeListener {
 	private static final int name = 0;
-	private static final int title = 1;
+	private static final int rating = 1;
 	private static final int author = 2;
 	private static final int releasedate = 3;
 	private static final int installed = 4;
 	private static final int requirements = 5;
-	
-	private String[] columnNames = {"Name",
-									"Title",
-									"Author",
-									"Releasedate",
-									"Installed",
-									"Requirements"};
 
+	private static final String[] columnNames = new String[6];
+		static {
+			columnNames[name] = "Name";
+			columnNames[author] = "Author";
+			columnNames[releasedate] = "Releasedate";
+			columnNames[installed] = "Installed";
+			columnNames[requirements] = "Requirements";
+			columnNames[rating] = "Rating";
+		}
+			
+	
 	private ChangeListenerList listeners = new ChangeListenerList();
 	
 	private List<Package> data;
@@ -73,10 +77,10 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	public Object getColumnData(int col, Package info) {
 		switch (col) {
 		case name: return info.getId();
-		case title: return info.getTitle();
 		case author: return info.getAuthor();
 		case releasedate: return info.getDate();
 		case installed: return new Boolean(info.isInstalled());
+		case rating: return info.getRating().toString();
 		case requirements:
 			String delimiter = ", ";
 			List<Requirement> reqs = new ArrayList<Requirement>(info.getRequirements());
@@ -94,7 +98,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
     public Class<? extends Object> getColumnClass(int c) {
 		switch (c) {
 		case name: return String.class;
-		case title: return String.class;
+		case rating: return String.class;
 		case author: return String.class;
 		case releasedate: return Date.class;
 		case installed: return Boolean.class;
@@ -137,7 +141,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	 * the text box.
 	 */
 	public RowFilter<PackageListModel, Integer> filter(final String filterText) {
-		final int[] columnsToCheck = { name, title, author, releasedate };
+		final int[] columnsToCheck = { name, author, releasedate };
 
 		String[] filterTexts = filterText.split(" ");
 

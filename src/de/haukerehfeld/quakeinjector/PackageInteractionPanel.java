@@ -19,7 +19,8 @@ import java.util.List;
 /**
  * the panel that shows Info about the selected map
  */
-class PackageInteractionPanel extends JPanel implements ChangeListener {
+class PackageInteractionPanel extends JPanel implements ChangeListener,
+											 PackageListSelectionHandler.SelectionListener {
 	private static final String uninstallText = "Uninstall";
 	private static final String installText = "Install";
 	private static final String playText = "Play";
@@ -443,6 +444,11 @@ class PackageInteractionPanel extends JPanel implements ChangeListener {
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		refreshUi();
+	}
+
+	@Override
+	public void selectionChanged(Package s) {
+		setSelection(s);
 	}
 
 }

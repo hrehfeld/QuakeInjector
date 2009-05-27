@@ -12,7 +12,18 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import de.haukerehfeld.quakeinjector.Package.Rating;
+
 public class PackageDatabaseParser implements java.io.Serializable {
+	private final static Rating[] ratingTable = { Rating.Unrated,
+	                                              Rating.Crap,
+	                                              Rating.Poor,
+	                                              Rating.Average,
+	                                              Rating.Nice,
+	                                              Rating.Excellent
+	};
+	                                              
+
 	/**
 	 * Parse the complete document
 	 */
@@ -74,6 +85,25 @@ public class PackageDatabaseParser implements java.io.Serializable {
 	 */
 	private Package parsePackage(Element file, Map<Package,List<String>> reqResolve) {
 		String id = file.getAttribute("id");
+		Rating rating;
+		{
+			String ratingString = file.getAttribute("rating");
+			int ratingNumber = 0;
+			if (!ratingString.equals("")) {
+				try {
+					ratingNumber = Integer.parseInt(ratingString);
+
+					if (ratingNumber < 0 || ratingNumber > 5) {
+						System.out.println("Rating of " + id + " is broken");
+						ratingNumber = 0;
+					}
+				}
+				catch (java.lang.NumberFormatException e) {
+					System.out.println("Rating of " + id + " is broken");
+				}
+			}
+			rating = ratingTable[ratingNumber];
+		}
 
 		String title = XmlUtils.getFirstElement(file, "title").getTextContent().trim();
 		String author = XmlUtils.getFirstElement(file, "author").getTextContent().trim();
@@ -139,6 +169,7 @@ public class PackageDatabaseParser implements java.io.Serializable {
 									 size,
 									 PackageDatabaseParser.parseDate(date),
 									 false,
+		                             rating,
 									 relativeBaseDir,
 									 cmdline,
 									 startmaps,

@@ -5,15 +5,17 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-class PackageListSelectionHandler implements ListSelectionListener {
-	private PackageInteractionPanel panel;
+import java.util.ArrayList;
 
+class PackageListSelectionHandler implements ListSelectionListener {
 	private PackageListModel list;
 
 	private JTable table;
 
-	public PackageListSelectionHandler(PackageInteractionPanel panel, PackageListModel list, JTable table) {
-		this.panel = panel;
+	private ArrayList<SelectionListener> listeners = new ArrayList<SelectionListener>();
+
+	public PackageListSelectionHandler(PackageListModel list,
+	                                   JTable table) {
 		this.list = list;
 		this.table = table;
 	}
@@ -21,20 +23,14 @@ class PackageListSelectionHandler implements ListSelectionListener {
 	/**
 	 * Listen on selection changes
 	 */
+	@Override
 	public void valueChanged(ListSelectionEvent e) { 
 		ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 
 		if (!lsm.isSelectionEmpty()) {
 			int selection = table.convertRowIndexToModel(getSelection(lsm));
-			setPackage(selection);
+			notifySelectionListeners(list.getPackage(selection));	
 		}
-	}
-
-	/**
-	 * Tell everyone about the selection change
-	 */
-	private void setPackage(int selection) {
-		panel.setSelection(list.getPackage(selection));
 	}
 
 	/**
@@ -52,6 +48,20 @@ class PackageListSelectionHandler implements ListSelectionListener {
 			}
 		}
 		return selection;
+	}
+
+	public void addSelectionListener(SelectionListener l) {
+		listeners.add(l);
+	}
+
+	private void notifySelectionListeners(Package selection) {
+		for (SelectionListener l: listeners) {
+			l.selectionChanged(selection);
+		}
+	}
+
+	public interface SelectionListener {
+		public void selectionChanged(Package selection);
 	}
 }
 
