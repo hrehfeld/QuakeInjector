@@ -333,11 +333,19 @@ public class QuakeInjector extends JFrame {
 			weightx = 1;
 		}});
 
+// 		JLabel queueLabel = new JLabel("Install Queue");
+// 		infoPanel.add(queueLabel, new GridBagConstraints() {{
+// 			anchor = PAGE_END;
+// 			fill = BOTH;
+// 			gridy = 2;
+// 			weightx = 1;
+// 		}});
+
 		JScrollPane queueScroll = new JScrollPane(installQueue);
 		infoPanel.add(queueScroll, new GridBagConstraints() {{
 			anchor = PAGE_END;
 			fill = BOTH;
-			gridy = 2;
+			gridy = 3;
 			weightx = 1;
 		}});
 

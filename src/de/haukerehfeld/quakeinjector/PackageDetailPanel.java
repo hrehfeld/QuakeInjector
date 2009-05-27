@@ -38,6 +38,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 	private JLabel title;
 	private JLabel size;
 	private JLabel date;
+	private JLabel requirements;
 
 	private JEditorPane description;
 
@@ -47,15 +48,14 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		title = new JLabel();
 // 		panelSize = new Dimension(getSize());
 // 		panelSize.setSize(panelSize.getWidth(), 50);
-// 		title.setPreferredSize(panelSize);
-		
+		title.setPreferredSize(new Dimension((int) getSize().getWidth(), 30));
 		title.setHorizontalAlignment(SwingConstants.CENTER);
  		add(title, new GridBagConstraints() {{
 			gridwidth = 2;
 			weightx = 0;
 			weighty = 0;
 			fill = BOTH;
-			anchor = CENTER;
+			anchor = LINE_START;
 		}});
 
 		description = new JEditorPane("text/html", "");
@@ -75,8 +75,10 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 			anchor = LINE_END;
 		}});
 
+		int detailHeight = 20;
 		date = new JLabel();
-		date.setHorizontalAlignment(SwingConstants.CENTER);
+		date.setHorizontalAlignment(SwingConstants.TRAILING);
+		date.setPreferredSize(new Dimension((int) getSize().getWidth(), detailHeight));
 		add(date, new GridBagConstraints() {{
 			gridy = 2;
 			gridx = 0;
@@ -88,6 +90,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 		size = new JLabel();
 		size.setHorizontalAlignment(SwingConstants.CENTER);
+		date.setPreferredSize(new Dimension((int) getSize().getWidth(), detailHeight));		
 		add(size, new GridBagConstraints() {{
 			gridy = 2;
 			gridx = 1;
@@ -98,19 +101,45 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		}});
 
 
+		requirements = new JLabel();
+// 		panelSize = new Dimension(getSize());
+// 		panelSize.setSize(panelSize.getWidth(), 50);
+		requirements.setPreferredSize(new Dimension((int) getSize().getWidth(), detailHeight));
+		requirements.setHorizontalAlignment(SwingConstants.LEADING);
+ 		add(requirements, new GridBagConstraints() {{
+			gridy = 3;
+			gridwidth = 2;
+			weightx = 0;
+			weighty = 0;
+			fill = BOTH;
+			anchor = LINE_START;
+		}});
+		
 	}
 
 	private void refreshUi() {
 		title.setText(current.getTitle());
 		date.setText(toString(current.getDate()));
 		size.setText((float) current.getSize() / 1000f + "mb");		
-		description.setText(current.getDescription());
+		description.setText("<p align=\"center\">"
+		                    + "<img width=\"200\" height=\"150\" "
+		                    + "src=\"http://www.quaddicted.com/reviews/screenshots/"
+		                    + current.getId() +"_injector.jpg\" /></p>"
+		                    + current.getDescription());
+		requirements.setText(toString(current.getRequirements()));
 	}
 
 	private String toString(Date date) {
 		DateFormat dfm = new SimpleDateFormat("MMM d, yyyy");
 		dfm.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		return dfm.format(date);
+	}
+
+	private String toString(List<Requirement> requirements) {
+		if (requirements.isEmpty()) {
+			return "No Requirements.";
+		}
+		return "Requires: " + Utils.join(requirements, ", ") + ".";
 	}
 
 	@Override
