@@ -354,7 +354,6 @@ public class QuakeInjector extends JFrame {
 		                                      mainPanel,
 		                                      infoPanel);
 		splitPane.setOneTouchExpandable(true);
-		splitPane.setDividerLocation(150);
 		splitPane.setResizeWeight(1);
 
 		panel.add(splitPane);
