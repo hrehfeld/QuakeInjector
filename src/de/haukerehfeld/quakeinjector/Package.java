@@ -24,6 +24,8 @@ public class Package extends SortableRequirement implements Requirement {
 
 	private Rating rating;
 
+	private String description;
+
 	/**
 	 * Size in kb?
 	 */
@@ -47,8 +49,9 @@ public class Package extends SortableRequirement implements Requirement {
 				   int size,
 				   Date date,
 	               boolean isInstalled,
-	               Rating rating) {
-		this(id, author, title, size, date, isInstalled, rating, null, null, null, null);
+	               Rating rating,
+	               String description) {
+		this(id, author, title, size, date, isInstalled, rating, description, null, null, null, null);
 	}
 
 	public Package(String id,
@@ -58,6 +61,7 @@ public class Package extends SortableRequirement implements Requirement {
 				   Date date,
 				   boolean isInstalled,
 	               Rating rating,
+	               String description,
 				   String relativeBaseDir,
 				   String commandline,
 				   List<String> startmaps,
@@ -69,6 +73,7 @@ public class Package extends SortableRequirement implements Requirement {
 		this.date = date;
 		super.setInstalled(isInstalled);
 		this.rating = rating;
+		this.description = description;
 		this.relativeBaseDir = relativeBaseDir;
 		this.commandline = commandline;
 		this.startmaps = startmaps;
@@ -97,6 +102,12 @@ public class Package extends SortableRequirement implements Requirement {
 	 * get rating
 	 */
 	public Rating getRating() { return rating; }
+
+
+	/**
+	 * get description
+	 */
+	public String getDescription() { return description; }
 	
 
 	public String getRelativeBaseDir() {

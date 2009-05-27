@@ -118,6 +118,9 @@ public class PackageDatabaseParser implements java.io.Serializable {
 
 		String date = XmlUtils.getFirstElement(file, "date").getTextContent().trim();
 
+		String description = XmlUtils.getTextForNode(XmlUtils.getFirstElement(file, "description"))
+		    .trim();
+
 
 		String relativeBaseDir = null;
 		String cmdline = null;
@@ -170,6 +173,7 @@ public class PackageDatabaseParser implements java.io.Serializable {
 									 PackageDatabaseParser.parseDate(date),
 									 false,
 		                             rating,
+		                             description,
 									 relativeBaseDir,
 									 cmdline,
 									 startmaps,
