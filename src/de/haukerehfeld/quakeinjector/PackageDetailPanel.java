@@ -18,6 +18,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
@@ -114,19 +115,22 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 			fill = BOTH;
 			anchor = LINE_START;
 		}});
-		
 	}
 
 	private void refreshUi() {
 		title.setText(current.getTitle());
 		date.setText(toString(current.getDate()));
 		size.setText((float) current.getSize() / 1000f + "mb");		
+		
+		requirements.setText(toString(current.getRequirements()));
+
+		description.getEditorKit().createDefaultDocument();
 		description.setText("<p align=\"center\">"
 		                    + "<img width=\"200\" height=\"150\" "
 		                    + "src=\"http://www.quaddicted.com/reviews/screenshots/"
-		                    + current.getId() +"_injector.jpg\" /></p>"
+		                    + current.getId() +"_injector.jpg\" /></p><br/>"
 		                    + current.getDescription());
-		requirements.setText(toString(current.getRequirements()));
+		description.setCaretPosition(0);
 	}
 
 	private String toString(Date date) {
