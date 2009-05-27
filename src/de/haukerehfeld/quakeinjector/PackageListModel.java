@@ -12,22 +12,32 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
 public class PackageListModel extends AbstractTableModel implements ChangeListener {
+	private static final int columnCount = 6;
+	
 	private static final int name = 0;
-	private static final int rating = 1;
+	private static final int title = 1;
 	private static final int author = 2;
 	private static final int releasedate = 3;
-	private static final int installed = 4;
-	private static final int requirements = 5;
+	private static final int rating = 4;
+	private static final int installed = 5;
 
-	private static final String[] columnNames = new String[6];
-		static {
-			columnNames[name] = "Name";
-			columnNames[author] = "Author";
-			columnNames[releasedate] = "Releasedate";
-			columnNames[installed] = "Installed";
-			columnNames[requirements] = "Requirements";
-			columnNames[rating] = "Rating";
-		}
+	private static final String nameHeader = "Name";
+	private static final String titleHeader = "Title";
+	private static final String authorHeader = "Author";
+	private static final String releasedateHeader = "Released";
+	private static final String ratingHeader = "Rating";
+	private static final String installedHeader = "";
+
+	private static final String[] columnNames = new String[columnCount];
+	                                              
+	static {
+		columnNames[name] = nameHeader;
+		columnNames[title] = titleHeader;
+		columnNames[author] = authorHeader;
+		columnNames[releasedate] = releasedateHeader;
+		columnNames[installed] = installedHeader;
+		columnNames[rating] = ratingHeader;
+	}
 			
 	
 	private ChangeListenerList listeners = new ChangeListenerList();
@@ -59,7 +69,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	}
 
     public int getColumnCount() {
-        return columnNames.length;
+        return columnCount;
     }
 
     public String getColumnName(int col) {
@@ -78,19 +88,10 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		switch (col) {
 		case name: return info.getId();
 		case author: return info.getAuthor();
+		case title: return info.getTitle();
 		case releasedate: return info.getDate();
 		case installed: return new Boolean(info.isInstalled());
 		case rating: return info.getRating().toString();
-		case requirements:
-			String delimiter = ", ";
-			List<Requirement> reqs = new ArrayList<Requirement>(info.getRequirements());
-			
-			java.util.Collections.sort(reqs);
-			String result = Utils.join(reqs, delimiter);
-			return result;
-			/*
-			 * Should never be used
-			 */
 		default: throw new RuntimeException("This should never happen: check the switch statement above");
 		}
 	}
@@ -99,10 +100,10 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		switch (c) {
 		case name: return String.class;
 		case rating: return String.class;
+		case title: return String.class;
 		case author: return String.class;
 		case releasedate: return Date.class;
 		case installed: return Boolean.class;
-		case requirements: return String.class;
 			/*
 			 * Should never be used
 			 */
