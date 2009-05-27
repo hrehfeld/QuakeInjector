@@ -8,7 +8,6 @@ import java.util.List;
 /**
  * this class provides functions used to generate a relative path
  * from two absolute paths
- * @author David M. Howard
  * @see http://www.devx.com/tips/Tip/13737
  */
 public class RelativePath {
@@ -19,13 +18,13 @@ public class RelativePath {
 	 * @return a List collection with the individual elements of the path in
 reverse order
 	 */
-	private static List<String> getPathList(File f) {
-		List<String> list = new ArrayList<String>();
+	private static List<File> getPathList(File f) {
+		List<File> list = new ArrayList<File>();
 		File parent;
 		try {
 			parent = f.getCanonicalFile();
 			while (parent != null) {
-				list.add(parent.getName());
+				list.add(parent);
 				parent = parent.getParentFile();
 			}
 		}
@@ -42,14 +41,30 @@ reverse order
 	 * @param home home path list
 	 * @param file path of file list
 	 */
-	private static String matchPathLists(List<String> home, List<String> file) {
+	private static String matchPathLists(List<File> home, List<File> file) {
+		if (file.size() <= 0) {
+			return "";
+		}
+		if (home.size() <= 0) {
+			return file.get(0).getAbsolutePath();
+		}
+		
 		int i;
 		int j;
 		String result = "";
 		// start at the beginning of the lists
 		// iterate while both lists are equal
-		i = home.size()-1;
-		j = file.size()-1;
+		final int homeLast = home.size() - 1;
+		final int fileLast = file.size() - 1;
+
+		//the root isn't identical (common on win32) - just return an absolute path
+		if (!home.get(homeLast).equals(file.get(fileLast))) {
+			return file.get(0).getAbsolutePath();
+		}
+		
+
+		i = homeLast;
+		j = fileLast;
 
 		// first eliminate common root
 		while((i >= 0) && (j >= 0) && (home.get(i).equals(file.get(j)))) {
@@ -58,18 +73,18 @@ reverse order
 		}
 
 		// for each remaining level in the home path, add a ..
-		for(; i>=0; i--) {
+		for(; i >= 0; i--) {
 			result += ".." + File.separator;
 		}
 
 		// for each level in the file path, add the path
-		for(; j>=1; j--) {
-			result += file.get(j) + File.separator;
+		for(; j >= 1; j--) {
+			result += file.get(j).getName() + File.separator;
 		}
 
 		if (j >= 0) {
 			// file name doesn't need separator at the end
-			result += file.get(j);
+			result += file.get(j).getName();
 		}
 		return result;
 	}
@@ -84,13 +99,13 @@ make sense
 	 * @param f file to generate path for
 	 * @return path from home to f as a string
 	 */
-	public static String getRelativePath(File home, File f){
-		List<String> homelist;
-		List<String> filelist;
+	public static String getRelativePath(File home, File file){
+		List<File> homelist;
+		List<File> filelist;
 		String s;
 
 		homelist = getPathList(home);
-		filelist = getPathList(f);
+		filelist = getPathList(file);
 
 		s = matchPathLists(homelist,filelist);
 
