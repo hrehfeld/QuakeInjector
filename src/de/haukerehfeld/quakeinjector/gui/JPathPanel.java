@@ -127,6 +127,8 @@ public class JPathPanel extends JPanel {
 		if (verifies) {
 			this.path.setText(RelativePath.getRelativePath(basePath, oldFile));
 		}
+		//put this above the if (verifies) to change chooser to the new basedir
+		this.chooser.setCurrentDirectory(getPath());
 		verify();
 	}
 
