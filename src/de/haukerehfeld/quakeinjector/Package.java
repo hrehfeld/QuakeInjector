@@ -179,12 +179,12 @@ public class Package extends SortableRequirement implements Requirement {
 	public void setFileList(PackageFileList fileList) { this.fileList = fileList; }
 
 	public static enum Rating {
-		Unrated("Unrated"),
-		    Crap("Crap"),
-		    Poor("Poor"),
-		    Average("Average"),
-		    Nice("Nice"),
-		    Excellent("Excellent");
+		Unrated(""),
+		    Crap("★☆☆☆☆"),
+		    Poor("★★☆☆☆"),
+		    Average("★★★☆☆"),
+		    Nice("★★★★☆"),
+		    Excellent("★★★★★");
 
 		private String description;
 		Rating(String description) {
