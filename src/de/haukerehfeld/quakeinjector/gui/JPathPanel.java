@@ -40,6 +40,12 @@ public class JPathPanel extends JPanel {
 	private final Verifier check;
 
 	/**
+	 * If the saved path is absolute although we have a basepath - happens on windows when the basepath is
+	 * on a different drive
+	 */
+	private boolean absolute = false;
+
+	/**
 	 * @param filesAndOrDirectories what kind of files can be selected with the filechooser:
 	 *        one of JFileChooser.DIRECTORIES_ONLY,
 	 *               JFileChooser.FILES_AND_DIRECTORIES,
@@ -63,6 +69,8 @@ public class JPathPanel extends JPanel {
 		this.basePath = basePath;
 		
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+
+		absolute = new File(defaultPath).isAbsolute();
 
 		this.path = new JTextField(defaultPath, inputLength);
 		PathVerifier verifier = new PathVerifier();
@@ -125,7 +133,7 @@ public class JPathPanel extends JPanel {
 		boolean verifies = verifies();
 		this.basePath = basePath;
 		if (verifies) {
-			this.path.setText(RelativePath.getRelativePath(basePath, oldFile));
+			this.path.setText(RelativePath.getRelativePath(basePath, oldFile).toString());
 		}
 		//put this above the if (verifies) to change chooser to the new basedir
 		this.chooser.setCurrentDirectory(getPath());
@@ -139,7 +147,10 @@ public class JPathPanel extends JPanel {
 	public void setPath(File path) {
 		String pathString;
 		if (basePath != null) {
-			pathString = RelativePath.getRelativePath(basePath, path);
+			File relative = RelativePath.getRelativePath(basePath, path);
+			//may return absolute path if no relative path possible
+			absolute = relative.isAbsolute();
+			pathString = relative.toString();
 		}
 		else {
 			pathString = path.getAbsolutePath();
@@ -161,7 +172,7 @@ public class JPathPanel extends JPanel {
 		}
 
 		File file;
-		if (basePath != null) {
+		if (basePath != null && !absolute) {
 			file = new File(basePath.getAbsolutePath() + File.separator + path);
 		}
 		else {
