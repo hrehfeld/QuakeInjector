@@ -261,7 +261,7 @@ public class QuakeInjector extends JFrame {
 		
 		//create a table
 		final PackageTable table =  new PackageTable(maplist);
-
+		maplist.size(table);
 
 		{
 			JPanel filterPanel = new JPanel();

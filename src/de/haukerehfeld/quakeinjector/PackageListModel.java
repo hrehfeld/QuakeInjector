@@ -10,6 +10,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumnModel;
+import javax.swing.JTable;
 
 public class PackageListModel extends AbstractTableModel implements ChangeListener {
 	private static final int columnCount = 6;
@@ -46,13 +48,26 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 
 
 	public PackageListModel() {
-		data = new ArrayList<Package>();
+		this(new ArrayList<Package>());
 	}
 
 	public PackageListModel(List<Package> data) {
 		setMapList(data);
 	}
 
+	public void size(JTable table) {
+		TableColumnModel m = table.getColumnModel();
+		
+		m.getColumn(name).setPreferredWidth(70);
+		m.getColumn(title).setPreferredWidth(150);
+		m.getColumn(author).setPreferredWidth(100);
+		m.getColumn(installed).setMaxWidth(16);
+		m.getColumn(rating).setMaxWidth(50);
+		m.getColumn(releasedate).setPreferredWidth(70);
+		m.getColumn(releasedate).setMaxWidth(100);
+
+	}
+	
 	public List<Package> getPackageList() {
 		return this.data;
 	}
