@@ -100,21 +100,6 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 			fill = BOTH;
 			anchor = LINE_END;
 		}});
-
-
-		requirements = new JLabel();
-// 		panelSize = new Dimension(getSize());
-// 		panelSize.setSize(panelSize.getWidth(), 50);
-		requirements.setPreferredSize(new Dimension((int) getSize().getWidth(), detailHeight));
-		requirements.setHorizontalAlignment(SwingConstants.LEADING);
- 		add(requirements, new GridBagConstraints() {{
-			gridy = 3;
-			gridwidth = 2;
-			weightx = 0;
-			weighty = 0;
-			fill = BOTH;
-			anchor = LINE_START;
-		}});
 	}
 
 	private void refreshUi() {
@@ -122,14 +107,13 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		date.setText(toString(current.getDate()));
 		size.setText((float) current.getSize() / 1000f + "mb");		
 		
-		requirements.setText(toString(current.getRequirements()));
-
 		description.getEditorKit().createDefaultDocument();
 		description.setText("<p align=\"center\">"
 		                    + "<img width=\"200\" height=\"150\" "
 		                    + "src=\"http://www.quaddicted.com/reviews/screenshots/"
 		                    + current.getId() +"_injector.jpg\" /></p><br/>"
-		                    + current.getDescription());
+		                    + current.getDescription()
+		                    + "<p>" + toString(current.getRequirements()) + "</p>");
 		description.setCaretPosition(0);
 	}
 
