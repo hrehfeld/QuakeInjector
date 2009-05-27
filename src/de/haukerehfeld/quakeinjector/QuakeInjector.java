@@ -24,6 +24,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SpringLayout;
@@ -253,15 +254,13 @@ public class QuakeInjector extends JFrame {
 	}
 
 	private void addMainPane(Container panel) {
-		panel.setLayout(new GridBagLayout());
-
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
+		mainPanel.setMinimumSize(new Dimension(450, 300));
 
 		
 		//create a table
 		final PackageTable table =  new PackageTable(maplist);
-		table.setMinimumSize(new Dimension(450, 300));
 
 
 		{
@@ -309,15 +308,9 @@ public class QuakeInjector extends JFrame {
 				gridy = 1;
 				gridwidth = 1;
 				gridheight = 1;
-				weightx = weighty = 1;
+				weightx = 1;
+				weighty = 1;
 			}});
-
-		panel.add(mainPanel, new GridBagConstraints() {{
-			gridx = 0;
-			gridy = 0;
-			weightx = weighty = 1;
-			fill = BOTH;
-		}});
 
 		final InstallQueuePanel installQueue = new InstallQueuePanel();
 
@@ -330,13 +323,14 @@ public class QuakeInjector extends JFrame {
 		infoPanel.add(details, new GridBagConstraints() {{
 			anchor = PAGE_START;
 			fill = BOTH;
-			weightx = 0;
+			weightx = 1;
 			weighty = 1;
 		}});
 
 		infoPanel.add(interactionPanel, new GridBagConstraints() {{
 			gridy = 1;
 			fill = BOTH;
+			weightx = 1;
 		}});
 
 		JScrollPane queueScroll = new JScrollPane(installQueue);
@@ -344,15 +338,9 @@ public class QuakeInjector extends JFrame {
 			anchor = PAGE_END;
 			fill = BOTH;
 			gridy = 2;
+			weightx = 1;
 		}});
 
-		panel.add(infoPanel, new GridBagConstraints() {{
-			gridx = 1;
-			gridy = 0;
-			weightx = 0;
-			weighty = 1;
-			fill = BOTH;
-		}});
 		
 		PackageListSelectionHandler selectionHandler
 			= new PackageListSelectionHandler(maplist,
@@ -361,6 +349,16 @@ public class QuakeInjector extends JFrame {
 		selectionHandler.addSelectionListener(interactionPanel);
 		selectionHandler.addSelectionListener(details);
 
+
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+		                                      mainPanel,
+		                                      infoPanel);
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setDividerLocation(150);
+		splitPane.setResizeWeight(1);
+
+		panel.add(splitPane);
+		
 	}
 
 	
@@ -472,19 +470,19 @@ public class QuakeInjector extends JFrame {
 
 
 	public static void main(String[] args) {
-		try {
-        // Set System L&F
-			javax.swing.UIManager.setLookAndFeel(
-				javax.swing.UIManager.getSystemLookAndFeelClassName());
-		} 
-		catch (javax.swing.UnsupportedLookAndFeelException e) {
-		}
-		catch (ClassNotFoundException e) {
-		}
-		catch (InstantiationException e) {
-		}
-		catch (IllegalAccessException e) {
-		}
+// 		try {
+//         // Set System L&F
+// 			javax.swing.UIManager.setLookAndFeel(
+// 				javax.swing.UIManager.getSystemLookAndFeelClassName());
+// 		} 
+// 		catch (javax.swing.UnsupportedLookAndFeelException e) {
+// 		}
+// 		catch (ClassNotFoundException e) {
+// 		}
+// 		catch (InstantiationException e) {
+// 		}
+// 		catch (IllegalAccessException e) {
+// 		}
 
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
