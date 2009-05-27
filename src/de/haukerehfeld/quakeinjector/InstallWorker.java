@@ -100,7 +100,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 
 			ArrayList<File> createdDirs = mkdirs(f);
 			for (File dirname: createdDirs) {
-				String relative = RelativePath.getRelativePath(new File(basedir), dirname);
+				String relative = RelativePath.getRelativePath(new File(basedir), dirname).toString();
 				//System.out.println("adding to installpaths: " + relative);
 				files.add(relative);
 			}
@@ -109,7 +109,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 				continue;
 			}
 
-			String filename = RelativePath.getRelativePath(new File(basedir), f);
+			String filename = RelativePath.getRelativePath(new File(basedir), f).toString();
 			files.add(filename);
 			System.out.println("Writing " + filename + " (" + entry.getCompressedSize() + "b)");
 			try {

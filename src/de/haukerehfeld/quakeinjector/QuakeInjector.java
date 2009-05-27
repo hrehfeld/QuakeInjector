@@ -227,7 +227,7 @@ public class QuakeInjector extends JFrame {
 		                rogueInstalled, hipnoticInstalled);
 
 		getConfig().setEnginePath(enginePath.getAbsolutePath());
-		getConfig().setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable));
+		getConfig().setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable).toString());
 		getConfig().setEngineCommandline(commandline);
 		
 		getConfig().write();
