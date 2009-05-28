@@ -184,6 +184,7 @@ public class QuakeInjector extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					setVisible(false);
 					dispose();
+					System.exit(0);
 				}
 			});
 		fileMenu.add(quit);
