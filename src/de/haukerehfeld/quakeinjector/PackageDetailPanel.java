@@ -113,7 +113,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		                    + "src=\"http://www.quaddicted.com/reviews/screenshots/"
 		                    + current.getId() +"_injector.jpg\" /></p><br/>"
 		                    + current.getDescription()
-		                    + "<p>" + toString(current.getRequirements()) + "</p>");
+		                    + toString(current.getRequirements()));
 		description.setCaretPosition(0);
 	}
 
@@ -125,9 +125,9 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 	private String toString(List<Requirement> requirements) {
 		if (requirements.isEmpty()) {
-			return "No Requirements.";
+			return "";
 		}
-		return "Requires: " + Utils.join(requirements, ", ") + ".";
+		return "<p>Requires: " + Utils.join(requirements, ", ") + ".</p>";
 	}
 
 	@Override
