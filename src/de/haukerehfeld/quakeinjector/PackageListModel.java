@@ -61,8 +61,10 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		m.getColumn(name).setPreferredWidth(70);
 		m.getColumn(title).setPreferredWidth(150);
 		m.getColumn(author).setPreferredWidth(100);
+		m.getColumn(installed).setResizable(false);
 		m.getColumn(installed).setMaxWidth(16);
 		m.getColumn(rating).setMaxWidth(50);
+		m.getColumn(rating).setResizable(false);
 		m.getColumn(releasedate).setPreferredWidth(70);
 		m.getColumn(releasedate).setMaxWidth(100);
 
