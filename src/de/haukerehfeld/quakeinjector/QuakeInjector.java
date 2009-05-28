@@ -180,6 +180,12 @@ public class QuakeInjector extends JFrame {
 		JMenuItem quit = new JMenuItem("Quit", KeyEvent.VK_T);
 		quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
 		quit.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
+		quit.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					setVisible(false);
+					dispose();
+				}
+			});
 		fileMenu.add(quit);
 
 		JMenu configM = new JMenu("Configuration");
