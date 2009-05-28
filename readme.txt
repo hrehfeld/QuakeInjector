@@ -3,10 +3,12 @@ Quake Injector
 
 Quake Injector is a tool to *download, install and play* Quake (some call it "Quake 1") singleplayer maps from Spirit's "Quaddicted archive":http://www.quaddicted.com - basically the complete history of all quake singleplayer maps ever made. Ever been annoyed by an excruciating installation process? Could not figure out how to install a certain map? Well, this tool makes it a piece of cake. Simply pick a map and click Install.
  
+"[* http://www.quaddicted.com/wp-content/uploads/quakeinjector_20090528_n.png *]":http://www.quaddicted.com/wp-content/uploads/quakeinjector_20090528.png
 
 Features
 ***
-- "More than 900 Quake maps":http://www.quaddicted.com/spmaps.html for one-click installation
+- Simply pick a map, click install and play
+- "All Quake singleplayer maps ever made":http://www.quaddicted.com/spmaps.html  (900+) in the database
 - Filter, sort, browse to find your favourite map
 - Automatically installs dependencies (e.g. Quoth)
 - Cross-Platform
