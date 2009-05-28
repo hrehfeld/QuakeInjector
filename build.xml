@@ -127,21 +127,9 @@
 		<!-- Who is building this jar? -->
 		<attribute name="Built-By" value="Hauke Rehfeld"/>
 		<!-- Information about the program itself -->
-		<attribute name="Implementation-Title" value="quakeinjectorschaftsspiel"/>
-		<!--<attribute name="Implementation-Version" value="1.0.0beta2"/>-->
+		<attribute name="Implementation-Title" value="QuakeInjector"/>
+		<attribute name="Implementation-Version" value="alpha1"/>
       </manifest>
 	</jar>
-  </target>
-
-  <target name="quakeinjector.webstart" depends="quakeinjector.jar">
-	<signjar destDir="${quakeinjector.webstart}"
-			 alias="hrehfeld" keystore=".keystore"
-			 storepass="blubb123"
-			 preservelastmodified="true">
-	  <path>
-		<fileset dir="${engine.dist}" includes="**/*.jar" />
-		<fileset dir="${quakeinjector.dist}" includes="**/*.jar" />
-	  </path>
-	</signjar>
   </target>
 </project>
