@@ -199,11 +199,11 @@ public class Package extends SortableRequirement implements Requirement {
 
 	public static enum Rating {
 		Unrated("-"),
-		    Crap("||"),
-		    Poor("||||"),
-		    Average("||||||"),
-		    Nice("||||||||"),
-		    Excellent("||||||||||");
+		    Crap("|"),
+		    Poor("||"),
+		    Average("|||"),
+		    Nice("||||"),
+		    Excellent("|||||");
 
 		private String description;
 		Rating(String description) {

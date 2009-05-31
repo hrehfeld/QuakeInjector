@@ -320,7 +320,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 							  private void cleanup(PackageFileList alreadyInstalledFiles,
 							                       String message) {
 								  System.out.println("Cleaning up...");
-								  uninstall(alreadyInstalledFiles);
+								  uninstall(selectedMap, alreadyInstalledFiles);
 								  installQueue.finished(progressListener, message);
 							  }
 						  },
@@ -335,49 +335,52 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 		}
 		if (!hasCurrentPackage()) { return; }
 
-		uninstall(selectedMap.getFileList());
+		uninstall(selectedMap, selectedMap.getFileList());
 		uninstallButton.setEnabled(false);
-
-		SwingWorker<Void,Void> saveInstalled = new SwingWorker<Void,Void>() {
-			@Override
-			public Void doInBackground() {
-				selectedMap.setInstalled(false);
-				
-				try {
-					requirements.writeInstalled();
-				}
-				catch (java.io.IOException e) {
-					System.out.println("Couldn't write installed Maps file!" + e.getMessage());
-				}
-				return null;
-			}
-		};
-		saveInstalled.execute();
-		
 	}
 
-	private void uninstall(PackageFileList files) {
+	private void uninstall(final Package map, PackageFileList files) {
 		String description = "Uninstalling " + files.getId();
 		
 		final InstallQueuePanel.Job progressListener
 		    = installQueue.addJob(description,
 		                          new ActionListener() {
 									  public void actionPerformed(ActionEvent e) {
-										  
+//cancel button action
 									  }
 								  });
 
-		installer.uninstall(selectedMap,
+		installer.uninstall(files,
 		                    new Installer.UninstallErrorHandler() {
 								@Override
 								public void success() {
 									installQueue.finished(progressListener, "success");
+
+									SwingWorker<Void,Void> saveInstalled
+									    = new SwingWorker<Void,Void>() {
+										@Override
+										public Void doInBackground() {
+											map.setInstalled(false);
+											
+											try {
+												requirements.writeInstalled();
+											}
+											catch (java.io.IOException e) {
+												System.out.println("Couldn't write installed Maps file!" + e.getMessage());
+											}
+											return null;
+										}
+									};
+									saveInstalled.execute();
+									
+
 								}
 
 								@Override
 								public void error(Exception e) {
 									installQueue.finished(progressListener, "fail");
 									System.out.println(e.getMessage());
+									e.printStackTrace();
 								}
 							},
 		                    progressListener

@@ -14,10 +14,8 @@ import javax.swing.SwingWorker;
 public class UninstallWorker extends SwingWorker<Void, Void> {
 	private String baseDirectory;
 	private PackageFileList files;
-	private Package map;
 
-	public UninstallWorker(Package map, PackageFileList files, String baseDirectory) {
-		this.map = map;
+	public UninstallWorker(PackageFileList files, String baseDirectory) {
 		this.files = files;
 		this.baseDirectory = baseDirectory;
 	}
@@ -54,7 +52,5 @@ public class UninstallWorker extends SwingWorker<Void, Void> {
 
 	@Override
     public void done() {
-		map.setInstalled(false);
-		
 	}
 }

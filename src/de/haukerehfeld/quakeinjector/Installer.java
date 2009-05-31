@@ -123,12 +123,10 @@ public class Installer {
 		return new File(installDirectory).canWrite();
 	}
 
-	public void uninstall(Package map,
+	public void uninstall(PackageFileList map,
 	                      final UninstallErrorHandler errorHandler,
 	                      PropertyChangeListener progressListener) {
-		final UninstallWorker uninstall = new UninstallWorker(map,
-		                                                      map.getFileList(),
-		                                                      installDirectory);
+		final UninstallWorker uninstall = new UninstallWorker(map, installDirectory);
 		uninstall.addPropertyChangeListener(progressListener);
 		uninstall.execute();
 
@@ -140,8 +138,18 @@ public class Installer {
 					uninstall.get();
 					errorHandler.success();
 				}
-				catch (Exception e) {
-					errorHandler.error(e);
+				catch (java.util.concurrent.ExecutionException e) {
+					Throwable er = e.getCause();
+					if (er instanceof Exception) {
+						errorHandler.error((Exception) er);
+					}
+					else {
+						errorHandler.error(e);
+					}
+				}
+				catch (java.lang.InterruptedException e) {
+					System.out.println("Installer: " + e.getMessage());
+					e.printStackTrace();
 				}
 				return null;
 			}
