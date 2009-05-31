@@ -235,7 +235,6 @@ public class QuakeInjector extends JFrame {
 				public void actionPerformed(ActionEvent e) {
 					setVisible(false);
 					dispose();
-					System.exit(0);
 				}
 			});
 		fileMenu.add(quit);
@@ -579,6 +578,8 @@ public class QuakeInjector extends JFrame {
 			config.write();
 			System.out.println("Closing Window: " + (int) bounds.getWidth()
 			    + (int) bounds.getHeight());
+
+			System.exit(0);
 		}
 
 	}
