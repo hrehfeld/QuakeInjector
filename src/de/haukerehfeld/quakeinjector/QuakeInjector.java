@@ -124,27 +124,32 @@ public class QuakeInjector extends JFrame {
 
 		addWindowListener(new QuakeInjectorWindowListener());
 
-		{
-			Configuration c = getConfig();
-			if (c.hasMainWindowSettings()) {
-				int posX = c.getMainWindowPositionX();
-				int posY = c.getMainWindowPositionY();
-				int width = c.getMainWindowWidth();
-				int height = c.getMainWindowHeight();
-
-				System.out.println("Setting window size: "
-				                   + posX + ", "
-				                   + posY + ", "
-				                   + width + ", "
-				                   + height);
-
-				setBounds(posX, posY, width, height);
-				setSize(width, height);
-			}
-		}
-		
+		setWindowSize();
 	}
 
+	private void setWindowSize() {
+		Configuration c = getConfig();
+		if (c.hasMainWindowSettings()) {
+			int posX = c.getMainWindowPositionX();
+			int posY = c.getMainWindowPositionY();
+			int width = c.getMainWindowWidth();
+			int height = c.getMainWindowHeight();
+			
+			System.out.println("Setting window size: "
+			                   + posX + ", "
+			                   + posY + ", "
+			                   + width + ", "
+			                   + height);
+			
+			setBounds(posX, posY, width, height);
+			setSize(width, height);
+		}
+		else {
+			pack();
+		}
+	}
+		
+	
 	private void init() {
 		parseInstalled.execute();
 		
