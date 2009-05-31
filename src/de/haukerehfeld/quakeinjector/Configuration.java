@@ -35,6 +35,11 @@ public class Configuration {
 	private static final String rogueInstalled = "rogueInstalled";
 	private static final String hipnoticInstalled = "hipnoticInstalled";
 
+	private static final String mainWindowPositionX = "mainWindowPositionX";
+	private static final String mainWindowPositionY = "mainWindowPositionY";
+	private static final String mainWindowWidth = "mainWindowWidth";
+	private static final String mainWindowHeight = "mainWindowHeight";
+
 	
 	private Properties properties;
 	private File configFile = new File("config.properties");
@@ -177,5 +182,65 @@ public class Configuration {
 	 */
 	public void setHipnoticInstalled(boolean hipnoticInstalled) { set(this.hipnoticInstalled,
 																	  Boolean.toString(hipnoticInstalled)); }
+
+	/**
+	 * get mainWindowPositionX
+	 */
+	public int getMainWindowPositionX() {
+		return Integer.parseInt(get(mainWindowPositionX));
+	}
+    
+    /**
+     * set mainWindowPositionX
+     */
+	public void setMainWindowPositionX(int mainWindowPositionX) {
+		set(Configuration.mainWindowPositionX, Integer.toString(mainWindowPositionX));
+	}
+
+	/**
+	 * get mainWindowPositionY
+	 */
+	public int getMainWindowPositionY() {
+		return Integer.parseInt(get(mainWindowPositionY));
+	}
+    
+    /**
+     * set mainWindowPositionY
+     */
+	public void setMainWindowPositionY(int mainWindowPositionY) {
+		set(Configuration.mainWindowPositionY, Integer.toString(mainWindowPositionY));
+	}
 	
+
+	/**
+	 * get mainWindowWidth
+	 */
+	public int getMainWindowWidth() {
+		return Integer.parseInt(get(mainWindowWidth));
+	}
+    
+    /**
+     * set mainWindowWidth
+     */
+	public void setMainWindowWidth(int mainWindowWidth) {
+		set(Configuration.mainWindowWidth, Integer.toString(mainWindowWidth));
+	}
+	
+	/**
+	 * get mainWindowHeight
+	 */
+	public int getMainWindowHeight() {
+		return Integer.parseInt(get(mainWindowHeight));
+	}
+    
+    /**
+     * set mainWindowHeight
+     */
+	public void setMainWindowHeight(int mainWindowHeight) {
+		set(Configuration.mainWindowHeight, Integer.toString(mainWindowHeight));
+	}
+
+	public boolean hasMainWindowSettings() {
+		return get(mainWindowHeight) != null;
+	}
 }

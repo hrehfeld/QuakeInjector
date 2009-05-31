@@ -24,9 +24,12 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +107,9 @@ public class QuakeInjector extends JFrame {
 
 	public QuakeInjector() {
 		super(applicationName);
+
+		loadConfig.execute();
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		setLayout(new BoxLayout(getContentPane(),
@@ -115,10 +121,31 @@ public class QuakeInjector extends JFrame {
 
 		createMenu();
 		addMainPane(getContentPane());
+
+		addWindowListener(new QuakeInjectorWindowListener());
+
+		{
+			Configuration c = getConfig();
+			if (c.hasMainWindowSettings()) {
+				int posX = c.getMainWindowPositionX();
+				int posY = c.getMainWindowPositionY();
+				int width = c.getMainWindowWidth();
+				int height = c.getMainWindowHeight();
+
+				System.out.println("Setting window size: "
+				                   + posX + ", "
+				                   + posY + ", "
+				                   + width + ", "
+				                   + height);
+
+				setBounds(posX, posY, width, height);
+				setSize(width, height);
+			}
+		}
+		
 	}
 
 	private void init() {
-		loadConfig.execute();
 		parseInstalled.execute();
 		
 		final DatabaseParser dbParse = new DatabaseParser(maps, maplist);
@@ -282,7 +309,6 @@ public class QuakeInjector extends JFrame {
 	private void addMainPane(Container panel) {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
-		mainPanel.setMinimumSize(new Dimension(450, 300));
 
 		
 		//create a table
@@ -390,14 +416,16 @@ public class QuakeInjector extends JFrame {
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setResizeWeight(1);
 		splitPane.setContinuousLayout(true);
+		splitPane.setMinimumSize(new Dimension(450, 300));
 
 		panel.add(splitPane);
+
 		
 	}
 
 	
 	private void display() {
-		pack();
+		//pack();
 		setVisible(true);
 	}
 
@@ -527,4 +555,27 @@ public class QuakeInjector extends JFrame {
 			});
 
 	}
+
+	private class QuakeInjectorWindowListener extends WindowAdapter
+	{
+		@Override
+		public void windowClosing(WindowEvent e) {
+			windowClosed(e);
+		}
+		@Override
+		public void windowClosed(WindowEvent e)
+		{
+			Configuration config = getConfig();
+			Rectangle bounds = QuakeInjector.this.getBounds();
+			config.setMainWindowPositionX((int) bounds.getX());
+			config.setMainWindowPositionY((int) bounds.getY());
+			config.setMainWindowWidth((int) bounds.getWidth());
+			config.setMainWindowHeight((int) bounds.getHeight());
+			config.write();
+			System.out.println("Closing Window: " + (int) bounds.getWidth()
+			    + (int) bounds.getHeight());
+		}
+
+	}
+	
 }
