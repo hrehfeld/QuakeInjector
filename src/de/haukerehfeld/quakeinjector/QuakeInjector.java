@@ -62,6 +62,8 @@ public class QuakeInjector extends JFrame {
 	 * Window title
 	 */
 	private static final String applicationName = "Quake Injector";
+	private static final int minWidth = 300;
+	private static final int minHeight = 300;
 
 	private Paths paths;
 
@@ -120,6 +122,9 @@ public class QuakeInjector extends JFrame {
 
 
 		createMenu();
+
+		setMinimumSize(new Dimension(minWidth, minHeight));
+		
 		addMainPane(getContentPane());
 
 		addWindowListener(new QuakeInjectorWindowListener());
