@@ -74,38 +74,7 @@ public class QuakeInjector extends JFrame {
 	private final PackageListModel maplist;
 	private Installer installer;
 
-	private final SwingWorker<List<PackageFileList>,Void> parseInstalled
-	    = new SwingWorker<List<PackageFileList>, Void>() {
-		@Override
-		public List<PackageFileList> doInBackground() {
-			List<PackageFileList> files;
-			try {
-				files = new InstalledPackageList().read();
-			}
-			catch (java.io.FileNotFoundException e) {
-				System.out.println("Notice: InstalledMaps xml doesn't exist yet,"
-				                   + " no maps installed?");
-				return new ArrayList<PackageFileList>();
-			}
-			catch (java.io.IOException e) {
-				System.out.println("Error: InstalledMaps xml couldn't be loaded: " + e.getMessage());
-				
-				return new ArrayList<PackageFileList>();
-			}
-				
-			return files;
-		}
 
-			
-	};
-	
-	private final SwingWorker<Configuration,Void> loadConfig
-	    = new SwingWorker<Configuration,Void>() {
-		@Override
-		public Configuration doInBackground() {
-			return new Configuration();
-		}
-	};
 
 	public QuakeInjector() {
 		super(applicationName);
@@ -120,9 +89,8 @@ public class QuakeInjector extends JFrame {
 		maplist = new PackageListModel();
 		maps = new PackageList();
 
-
-		createMenu();
-
+		setJMenuBar(createMenuBar());
+		
 		setMinimumSize(new Dimension(minWidth, minHeight));
 		
 		addMainPane(getContentPane());
@@ -132,8 +100,37 @@ public class QuakeInjector extends JFrame {
 		setWindowSize();
 	}
 
+	private Menu createMenuBar() {
+
+		ActionListener parseDatabase = new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					new DatabaseParser(maps, maplist)
+					    .execute();
+				}
+			};
+
+		ActionListener quit = new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						setVisible(false);
+						dispose();
+					}
+			};
+
+		ActionListener showEngineConfig = new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						showEngineConfig(maps.getRequirement("rogue").isInstalled(),
+						                 maps.getRequirement("hipnotic").isInstalled());
+					}};
+
+		return new Menu(parseDatabase, quit, showEngineConfig);
+	}
+
+	/**
+	 * Try setting the saved window size and position
+	 */
 	private void setWindowSize() {
 		Configuration c = getConfig();
+		
 		if (c.hasMainWindowSettings()) {
 			int posX = c.getMainWindowPositionX();
 			int posY = c.getMainWindowPositionY();
@@ -197,6 +194,17 @@ public class QuakeInjector extends JFrame {
 		}
 	}
 
+	/**
+	 * Thread worker to parse the config file in background
+	 */
+	private final SwingWorker<Configuration,Void> loadConfig
+	    = new SwingWorker<Configuration,Void>() {
+		@Override
+		public Configuration doInBackground() {
+			return new Configuration();
+		}
+	};
+
 	private synchronized Configuration getConfig() {
 		try {
 			return loadConfig.get();
@@ -205,6 +213,35 @@ public class QuakeInjector extends JFrame {
 		catch (java.util.concurrent.ExecutionException e) {}
 		return null;
 	}
+
+	/**
+	 * Thread worker to parse the installed maps in background
+	 */
+	private final SwingWorker<List<PackageFileList>,Void> parseInstalled
+	    = new SwingWorker<List<PackageFileList>, Void>() {
+		@Override
+		public List<PackageFileList> doInBackground() {
+			List<PackageFileList> files;
+			try {
+				files = new InstalledPackageList().read();
+			}
+			catch (java.io.FileNotFoundException e) {
+				System.out.println("Notice: InstalledMaps xml doesn't exist yet,"
+				                   + " no maps installed?");
+				return new ArrayList<PackageFileList>();
+			}
+			catch (java.io.IOException e) {
+				System.out.println("Error: InstalledMaps xml couldn't be loaded: "
+				                   + e.getMessage());
+				
+				return new ArrayList<PackageFileList>();
+			}
+				
+			return files;
+		}
+
+			
+	};
 
 	private synchronized List<PackageFileList> getInstalledFileLists() {
 		try {
@@ -215,49 +252,6 @@ public class QuakeInjector extends JFrame {
 		return new ArrayList<PackageFileList>();
 	}
 	
-	private void createMenu() {
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.setOpaque(true);
-		menuBar.setPreferredSize(new Dimension(200, 20));
-
-		JMenu fileMenu = new JMenu("File");
-		menuBar.add(fileMenu);
-
-		JMenuItem reparseDatabase = new JMenuItem("Reload database", KeyEvent.VK_R);
-		reparseDatabase.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					new DatabaseParser(maps, maplist)
-					    .execute();
-				}
-			});
-		fileMenu.add(reparseDatabase);
-		
-
-		JMenuItem quit = new JMenuItem("Quit", KeyEvent.VK_T);
-		quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
-		quit.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
-		quit.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					setVisible(false);
-					dispose();
-				}
-			});
-		fileMenu.add(quit);
-
-		JMenu configM = new JMenu("Configuration");
-		menuBar.add(configM);
-
-		JMenuItem engine = new JMenuItem("Engine Configuration");
-		configM.add(engine);
-		engine.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					showEngineConfig(maps.getRequirement("rogue").isInstalled(),
-		                             maps.getRequirement("hipnotic").isInstalled());
-				}});
-
-		setJMenuBar(menuBar);
-	}
-
 	private void showEngineConfig(boolean rogueInstalled, boolean hipnoticInstalled) {
 		final EngineConfigDialog d
 		    = new EngineConfigDialog(QuakeInjector.this,
@@ -347,10 +341,6 @@ public class QuakeInjector extends JFrame {
 			mainPanel.add(filterPanel, new GridBagConstraints() {{
 				anchor = LINE_START;
 				fill = HORIZONTAL;
-				gridx = 0;
-				gridy = 0;
-				gridwidth = 1;
-				gridheight = 1;
 				weightx = 1;
 				weighty = 0;
 			}});
@@ -438,6 +428,9 @@ public class QuakeInjector extends JFrame {
 		setVisible(true);
 	}
 
+	/**
+	 * Parse database xml and est in background
+	 */
 	public class DatabaseParser extends SwingWorker<List<Package>, Void> {
 		private final PackageList requirementList;
 		private final PackageListModel model;
@@ -456,7 +449,11 @@ public class QuakeInjector extends JFrame {
 
 			requirementList.setRequirements(all);
 			try {
-				requirementList.setInstalled(parseInstalled.get());
+				List<PackageFileList> installed = parseInstalled.get();
+
+				synchronized (requirementList) {
+					requirementList.setInstalled(installed);
+				}
 			}
 			catch (java.util.concurrent.ExecutionException e) {}
 			catch (java.lang.InterruptedException e) {
