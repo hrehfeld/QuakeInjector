@@ -63,7 +63,14 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 		System.out.println("Installing " + map.getId());
 
 		try {
-			files = download(url);
+			InputStream in = download(url);
+			String relativedir = map.getRelativeBaseDir();
+			String unzipdir = baseDirectory;
+			if (relativedir != null) {
+				unzipdir += File.separator + relativedir;
+			}
+		
+			files = unzip(in, this.baseDirectory, unzipdir, map.getId());
 		}
 		catch (Installer.CancelledException e) {
 			System.out.println("cancelled exception!");
@@ -74,7 +81,8 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 		return files;
 	}
 
-	public PackageFileList download(String urlString) throws java.io.IOException, Installer.CancelledException {
+	public InputStream download(String urlString) throws Installer.CancelledException,
+	    IOException {
 		URL url;
 		try {
 			url = new URL(urlString);
@@ -94,14 +102,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> {
 			throw new OnlineFileNotFoundException(e.getMessage());
 		}
 
-
-		String relativedir = map.getRelativeBaseDir();
-		String unzipdir = baseDirectory;
-		if (relativedir != null) {
-			unzipdir += File.separator + relativedir;
-		}
-		
-		return unzip(in, this.baseDirectory, unzipdir, map.getId());
+		return in;
 	}
 
 	public PackageFileList unzip(InputStream in,
