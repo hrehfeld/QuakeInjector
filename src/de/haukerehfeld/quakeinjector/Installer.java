@@ -169,7 +169,7 @@ public class Installer {
 		public void error(Exception e);
 	}
 
-	public static class CancelledException extends Exception {}
+	public static class CancelledException extends RuntimeException {}
 
 	
 }
