@@ -34,7 +34,7 @@ import javax.xml.ws.http.HTTPException;
 public class Download {
 	private final URL url;
 	private InputStream stream;
-	private HttpURLConnection connection; 
+	private HttpURLConnection connection;
 
 	public static Download create(String urlString) throws IOException {
 		URL url;
@@ -48,45 +48,51 @@ public class Download {
 		return new Download(url);
 	}
 
-	public Download(URL url) {
+	public Download(URL url) throws IOException, HTTPException {
 		this.url = url;
-	}
 
-	public InputStream init() throws Installer.CancelledException, IOException, HTTPException {
 		try {
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setFollowRedirects(true);
 			connection.setRequestProperty("Accept-Encoding","gzip, deflate");
 			connection.connect();
-			String encoding = connection.getContentEncoding();
-			String contentType = connection.getContentType();
 
 			int response = connection.getResponseCode();
 			if (response != HttpURLConnection.HTTP_OK) {
 				throw new HTTPException(response);
-			}			
+			}
 
-			//make appropriate stream
-			if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
-				stream = new GZIPInputStream(connection.getInputStream());
-			}
-			else if (encoding != null && encoding.equalsIgnoreCase("deflate")) {
-				stream = new InflaterInputStream(connection.getInputStream(),
-				                                 new Inflater(true));
-			}
-			else {
-				stream = connection.getInputStream();
-			}
+			//try getting the stream
+			connection.getInputStream();
 		}
 		catch (FileNotFoundException e) {
 			throw new OnlineFileNotFoundException(e.getMessage());
 		}
-
-
-		return stream;
+		
 	}
 
-	public InputStream getStream() {
+	public InputStream getStream() throws IOException {
+		return getStream(null);
+	}
+	
+	public InputStream getStream(ProgressListener progress) throws IOException {
+		if (stream == null) {
+			String encoding = connection.getContentEncoding();
+
+
+			stream = connection.getInputStream();
+			if (progress != null) {
+				stream = new ProgressListenerInputStream(stream, progress);
+			}
+
+			if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
+				stream = new GZIPInputStream(stream);
+			}
+			else if (encoding != null && encoding.equalsIgnoreCase("deflate")) {
+				stream = new InflaterInputStream(stream, new Inflater(true));
+			}
+		}
+		
 		return stream;
 	}
 

@@ -67,7 +67,6 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 
 		try {
 			Download d = Download.create(url);
-			d.init();
 			downloadSize = d.getSize();
 			InputStream in = d.getStream();
 			String relativedir = map.getRelativeBaseDir();
