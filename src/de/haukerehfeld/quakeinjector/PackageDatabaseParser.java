@@ -46,16 +46,12 @@ public class PackageDatabaseParser implements java.io.Serializable {
 	/**
 	 * Parse the complete document
 	 */
-	public List<Requirement> parse(String databaseUrl) throws IOException,
+	public List<Requirement> parse(Document document) throws IOException,
 		org.xml.sax.SAXException {
 		HashMap<String, Requirement> packages = new HashMap<String,Requirement>();
 		Map<Package,List<String>> unresolvedRequirements = new HashMap<Package,List<String>>();
 
-		Document document = XmlUtils.getDocument(databaseUrl);
-
 		Element files = document.getDocumentElement();
-		//			System.out.println(files.getTagName());
-
 
 		for (Node file: XmlUtils.iterate(files.getChildNodes())) {
 			if (XmlUtils.isElement(file)) {

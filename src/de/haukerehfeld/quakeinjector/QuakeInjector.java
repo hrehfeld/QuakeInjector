@@ -31,6 +31,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -431,7 +432,8 @@ public class QuakeInjector extends JFrame {
 	/**
 	 * Parse database xml and est in background
 	 */
-	public class DatabaseParser extends SwingWorker<List<Package>, Void> {
+	public class DatabaseParser extends SwingWorker<List<Package>, Void>
+		implements ProgressListener {
 		private final PackageList requirementList;
 		private final PackageListModel model;
 		
@@ -444,9 +446,34 @@ public class QuakeInjector extends JFrame {
 		@Override
 		    public List<Package> doInBackground() throws java.io.IOException,
 		    org.xml.sax.SAXException {
-			final PackageDatabaseParser parser = new PackageDatabaseParser();
-			List<Requirement> all = parser.parse(getConfig().getRepositoryDatabase());
 
+			InputStream dl;
+			try {
+			String databaseUrl = getConfig().getRepositoryDatabase();
+			
+			Download d = Download.create(databaseUrl);
+// 			ProgressListener progress =
+// 			    new SumProgressListener(new PercentageProgressListener(d.getSize(), this));
+			//			InputStream dl = d.getStream(progress);
+			dl = d.getStream(null);
+
+			}
+			catch (Exception e) {
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+				return null;
+			}
+
+			final PackageDatabaseParser parser = new PackageDatabaseParser();
+			List<Requirement> all;
+			try {
+				all = parser.parse(XmlUtils.getDocument(dl));
+			}
+			catch (javax.xml.parsers.ParserConfigurationException e) {
+				System.err.println("omg parsing failed!");
+				return null;
+			}
+			
 			requirementList.setRequirements(all);
 			try {
 				List<PackageFileList> installed = parseInstalled.get();
@@ -505,6 +532,13 @@ public class QuakeInjector extends JFrame {
 				throw new RuntimeException("Couldn't get map list!" + e.getMessage());
 			}
 		}
+
+		public void publish(long progress) {
+			if (progress <= 100) {
+				setProgress((int) progress);
+			}
+		}
+		
 	}
 
 	/**

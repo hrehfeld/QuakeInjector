@@ -10,6 +10,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.io.InputStream;
+
 public class XmlUtils {
 	/**
 	 * get the first element in the parent element that's named name or null if no such element exists
@@ -30,21 +32,19 @@ public class XmlUtils {
 		return (Element) node;
 	}
 
-	public static Document getDocument(String file)
+	public static Document getDocument(InputStream xml)
 		throws java.io.IOException,
-		       org.xml.sax.SAXException {
-		try {
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			dbf.setIgnoringElementContentWhitespace(true);
-			DocumentBuilder db = dbf.newDocumentBuilder();
-	 
-			Document doc = db.parse(file);
-			return doc;
-		}
-		catch (javax.xml.parsers.ParserConfigurationException e) {
-			return null;
-		}
+		org.xml.sax.SAXException,
+		javax.xml.parsers.ParserConfigurationException {
+		
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setIgnoringElementContentWhitespace(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		
+		Document doc = db.parse(xml);
+		return doc;
 	}
+	
 
 	public static java.lang.Iterable<Node> iterate(NodeList list) {
 		return new NodeListIterator(list);
