@@ -34,7 +34,7 @@ import javax.xml.ws.http.HTTPException;
 public class Download {
 	private final URL url;
 	private InputStream stream;
-	private HttpURLConnection connection;
+	private URLConnection connection;
 
 	public static Download create(String urlString) throws IOException {
 		URL url;
@@ -52,16 +52,25 @@ public class Download {
 		this.url = url;
 
 		try {
-			connection = (HttpURLConnection) url.openConnection();
-			connection.setFollowRedirects(true);
-			connection.setRequestProperty("Accept-Encoding","gzip, deflate");
-			connection.connect();
+			HttpURLConnection con = null;
+			connection = url.openConnection();
 
-			int response = connection.getResponseCode();
-			if (response != HttpURLConnection.HTTP_OK) {
-				throw new HTTPException(response);
+			//http stuff, but url might be something different
+			if (connection instanceof HttpURLConnection) {
+				con = (HttpURLConnection) connection;
+				con.setFollowRedirects(true);
+				con.setRequestProperty("Accept-Encoding","gzip, deflate");
 			}
 
+			connection.connect();
+
+			if (con != null) {
+				int response = con.getResponseCode();
+				if (response != HttpURLConnection.HTTP_OK) {
+					throw new HTTPException(response);
+				}
+			}
+			
 			//try getting the stream
 			connection.getInputStream();
 		}
@@ -85,6 +94,7 @@ public class Download {
 				stream = new ProgressListenerInputStream(stream, progress);
 			}
 
+			/** @todo 2009-07-15 18:55 hrehfeld    check what this does for non-http connections */
 			if (encoding != null && encoding.equalsIgnoreCase("gzip")) {
 				stream = new GZIPInputStream(stream);
 			}
