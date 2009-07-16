@@ -53,7 +53,7 @@ public class InstallQueuePanel extends JPanel {
 	 */
 	public Job addJob(String description, ActionListener cancelAction) {
 		final JProgressBar progress = new JProgressBar();
-		progress.setString(progressString(description, 0));
+		progress.setString(ProgressPopup.progressString(description, 0));
 		progress.setValue(0);
 		progress.setStringPainted(true);
 		add(progress, new GridBagConstraints() {{
@@ -150,7 +150,7 @@ public class InstallQueuePanel extends JPanel {
 		public void propertyChange(PropertyChangeEvent evt) {
 			if ("progress" == evt.getPropertyName()) {
 				int p = (Integer) evt.getNewValue();
-				progressBar.setString(progressString(description, p));
+				progressBar.setString(ProgressPopup.progressString(description, p));
 				progressBar.setValue(p);
 			} 
 		}
@@ -160,15 +160,7 @@ public class InstallQueuePanel extends JPanel {
 			
 			progressBar.setEnabled(false);
 
-			progressBar.setString(progressString(description, message));
+			progressBar.setString(ProgressPopup.progressString(description, message));
 		}
-	}
-
-	public static String progressString(String description, String status) {
-		return description + ": " + status;
-	}
-
-	public static String progressString(String description, int progress) {
-		return progressString(description, progress + "%");
 	}
 }

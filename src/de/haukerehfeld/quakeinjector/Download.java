@@ -48,7 +48,7 @@ public class Download {
 		return new Download(url);
 	}
 
-	public Download(URL url) throws IOException, HTTPException {
+	public Download(URL url) throws IOException, HTTPException, java.net.UnknownHostException {
 		this.url = url;
 
 		try {

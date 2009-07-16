@@ -105,8 +105,7 @@ public class QuakeInjector extends JFrame {
 
 		ActionListener parseDatabase = new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					new DatabaseParser(maps, maplist)
-					    .execute();
+					parseDatabase();
 				}
 			};
 
@@ -155,9 +154,9 @@ public class QuakeInjector extends JFrame {
 	
 	private void init() {
 		parseInstalled.execute();
-		
-		final DatabaseParser dbParse = new DatabaseParser(maps, maplist);
-		dbParse.execute();
+
+		final DatabaseParser dbParse = parseDatabase();
+
 
 		paths = new Paths(getConfig().get("repositoryBase"));
 		
@@ -213,6 +212,23 @@ public class QuakeInjector extends JFrame {
 		catch (InterruptedException e) { }
 		catch (java.util.concurrent.ExecutionException e) {}
 		return null;
+	}
+
+	private DatabaseParser parseDatabase() {
+		final DatabaseParser dbParse = new DatabaseParser(maps, maplist);
+		final ProgressPopup dbpopup =
+		    new ProgressPopup("Downloading package database",
+		                      new ActionListener() {
+								  public void actionPerformed(ActionEvent e) {
+									  dbParse.cancel(true);
+								  }
+							  },
+		                      QuakeInjector.this);
+		dbParse.addPropertyChangeListener(dbpopup);
+		dbParse.execute();
+		dbpopup.pack();
+		dbpopup.setVisible(true);
+		return dbParse;
 	}
 
 	/**
@@ -459,7 +475,7 @@ public class QuakeInjector extends JFrame {
 
 			}
 			catch (Exception e) {
-				System.err.println(e.getMessage());
+				System.err.println(getClass() + ": " + e.getMessage());
 				e.printStackTrace();
 				return null;
 			}
@@ -540,6 +556,7 @@ public class QuakeInjector extends JFrame {
 		}
 		
 	}
+
 
 	/**
 	 * @return false if the user didn't open the config dialog
