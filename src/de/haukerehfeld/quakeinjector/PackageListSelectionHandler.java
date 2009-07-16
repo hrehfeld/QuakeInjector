@@ -33,6 +33,8 @@ class PackageListSelectionHandler implements ListSelectionListener {
 
 	private ArrayList<SelectionListener> listeners = new ArrayList<SelectionListener>();
 
+	private int lastSelection = -1;
+
 	public PackageListSelectionHandler(PackageListModel list,
 	                                   JTable table) {
 		this.list = list;
@@ -48,7 +50,11 @@ class PackageListSelectionHandler implements ListSelectionListener {
 
 		if (!lsm.isSelectionEmpty()) {
 			int selection = table.convertRowIndexToModel(getSelection(lsm));
+			if (lastSelection == selection) {
+				return;
+			}
 			notifySelectionListeners(list.getPackage(selection));	
+			lastSelection = selection;
 		}
 	}
 
