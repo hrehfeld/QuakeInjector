@@ -91,9 +91,10 @@ public class Installer {
 					else if (error instanceof IOException) {
 						errorHandler.handle((IOException) error, files);
 					}
-					System.out.println("unhandled exception from install worker" + error);
-					error.printStackTrace();
-
+					else {
+						System.out.println("unhandled exception from install worker" + error);
+						error.printStackTrace();
+					}
 				}
 				else if (installer.isCancelled()) {
 					System.out.println("CancelledException!");
