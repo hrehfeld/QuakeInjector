@@ -34,12 +34,16 @@ public class XmlUtils {
 
 	public static Document getDocument(InputStream xml)
 		throws java.io.IOException,
-		org.xml.sax.SAXException,
-		javax.xml.parsers.ParserConfigurationException {
-		
+		org.xml.sax.SAXException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setIgnoringElementContentWhitespace(true);
-		DocumentBuilder db = dbf.newDocumentBuilder();
+		DocumentBuilder db;
+		try {
+			db = dbf.newDocumentBuilder();
+		}
+		catch (javax.xml.parsers.ParserConfigurationException e) {
+			throw new RuntimeException("Parser misconfiguration");
+		}
 		
 		Document doc = db.parse(xml);
 		return doc;

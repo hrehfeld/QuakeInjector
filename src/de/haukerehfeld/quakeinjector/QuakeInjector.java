@@ -463,32 +463,23 @@ public class QuakeInjector extends JFrame {
 		    public List<Package> doInBackground() throws java.io.IOException,
 		    org.xml.sax.SAXException {
 
-			InputStream dl;
-			try {
 			String databaseUrl = getConfig().getRepositoryDatabase();
-			
-			Download d = Download.create(databaseUrl);
-// 			ProgressListener progress =
-// 			    new SumProgressListener(new PercentageProgressListener(d.getSize(), this));
-			//			InputStream dl = d.getStream(progress);
-			dl = d.getStream(null);
 
+			//get download stream
+			Download d = Download.create(databaseUrl);
+			int size = d.getSize();
+			InputStream dl;
+			if (size > 0) {
+				ProgressListener progress =
+				    new SumProgressListener(new PercentageProgressListener(size, this));
+				dl = d.getStream(progress);
 			}
-			catch (Exception e) {
-				System.err.println(getClass() + ": " + e.getMessage());
-				e.printStackTrace();
-				return null;
+			else {
+				dl = d.getStream(null);
 			}
 
 			final PackageDatabaseParser parser = new PackageDatabaseParser();
-			List<Requirement> all;
-			try {
-				all = parser.parse(XmlUtils.getDocument(dl));
-			}
-			catch (javax.xml.parsers.ParserConfigurationException e) {
-				System.err.println("omg parsing failed!");
-				return null;
-			}
+			List<Requirement> all = parser.parse(XmlUtils.getDocument(dl));
 			
 			requirementList.setRequirements(all);
 			try {
