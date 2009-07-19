@@ -37,10 +37,8 @@ import javax.swing.JFrame;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
 
-public class ProgressPopup extends JDialog implements PropertyChangeListener {
+public class ProgressPopup extends JDialog {
 	private JProgressBar progress;
 	private JButton cancelButton;
 	private String description;
@@ -54,7 +52,7 @@ public class ProgressPopup extends JDialog implements PropertyChangeListener {
 		setLayout(new GridBagLayout());
 
 		progress = new JProgressBar();
-		progress.setString(" " + description + " ");
+		progress.setString(description);
 		progress.setValue(0);
 		progress.setIndeterminate(true);
 		progress.setStringPainted(true);
@@ -66,30 +64,29 @@ public class ProgressPopup extends JDialog implements PropertyChangeListener {
 			weightx = 1;
 		}});
 
-				JButton cancelButton;
-				cancelButton = new JButton("Cancel");
-				cancelButton.addActionListener(cancel);
-				add(cancelButton, new GridBagConstraints() {{
-					anchor = CENTER;
-					fill = BOTH;
-					gridy = 1;
-				}});
+		JButton cancelButton;
+		cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(cancel);
+		add(cancelButton, new GridBagConstraints() {{
+			anchor = CENTER;
+			fill = BOTH;
+			gridy = 1;
+		}});
 	}
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt.getPropertyName() == "progress") {
-			int p = (Integer) evt.getNewValue();
-			progress.setString(progressString(description, p));
-			progress.setValue(p);
-		}
-		if (evt.getPropertyName() == "state"
-		    && evt.getNewValue().equals(SwingWorker.StateValue.DONE)) {
-			close();
-		}
+	/**
+	 * Change progress
+	 *
+	 * @param percent percent [0, 100]
+	 */
+	public void setProgress(int percent) {
+		progress.setIndeterminate(false);
+		progress.setValue(percent);
+		progress.setString(progressString(description, percent));
+
 	}
 
-	private void close() {
+	public void close() {
 		setVisible(false);
 		dispose();
 	}

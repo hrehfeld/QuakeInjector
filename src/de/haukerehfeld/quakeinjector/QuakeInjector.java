@@ -58,6 +58,10 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+
+
 public class QuakeInjector extends JFrame {
 	/**
 	 * Window title
@@ -224,7 +228,20 @@ public class QuakeInjector extends JFrame {
 								  }
 							  },
 		                      QuakeInjector.this);
-		dbParse.addPropertyChangeListener(dbpopup);
+
+		dbParse.addPropertyChangeListener(new PropertyChangeListener() {
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					if (evt.getPropertyName() == "progress") {
+						int p = (Integer) evt.getNewValue();
+						dbpopup.setProgress(p);
+					}
+					else if (evt.getPropertyName() == "state"
+					    && evt.getNewValue().equals(SwingWorker.StateValue.DONE)) {
+						dbpopup.close();
+					}
+				}
+			});
 		dbParse.execute();
 		dbpopup.pack();
 		dbpopup.setVisible(true);
