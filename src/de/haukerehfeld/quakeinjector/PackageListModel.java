@@ -180,7 +180,16 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		if (e.getSource() instanceof PackageList) {
 			listeners.notifyChangeListeners(e.getSource());
 			super.fireTableChanged(new TableModelEvent(this));
-			System.out.println("packagelist changed");
+			/** @todo 2009-08-12 22:13 hrehfeld    why does this get called twice? */
+			// System.out.println(this + ".stateChanged()");
+			// System.out.println("Thread: " + Thread.currentThread().getName());
+			// try {
+			// 	throw new RuntimeException();
+			// }
+			// catch (Exception ex) {
+			// 	ex.printStackTrace();
+			// }
+			
 			return;
 		}
 		
@@ -189,6 +198,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 			listeners.notifyChangeListeners(r);
 			int i = data.indexOf(r);
 			super.fireTableRowsUpdated(i, i);
+			return;
 		}
 
 		throw new RuntimeException("didn't recognise what changed!");
