@@ -49,11 +49,11 @@ public class RequirementList implements Iterable<Requirement> {
 		}
 		this.requirements = requirements;
 
-		listeners.notifyChangeListeners(this);
 	}
 
 	public void setInstalled(PackageFileList l) {
 		Requirement r = get(l.getId());
+		System.out.println("Setting " + l.getId() + " to installed");
 		r.setInstalled(true);
 		if (r instanceof Package) {
 			((Package) r).setFileList(l);
@@ -97,4 +97,11 @@ public class RequirementList implements Iterable<Requirement> {
 	public void addChangeListener(ChangeListener l) {
 		listeners.addChangeListener(l);
 	}
+	public void removeChangeListener(ChangeListener l) {
+		listeners.removeChangeListener(l);
+	}
+	public void notifyChangeListeners() {
+		listeners.notifyChangeListeners(this);
+	}
+
 }

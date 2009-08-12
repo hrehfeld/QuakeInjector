@@ -21,7 +21,7 @@ Installation
 Quake Injector requires "Java 6":http://www.java.com/en/download/ and a Quake installation ("Linux howto":http://tldp.org/HOWTO/Quake-HOWTO-2.html, "modern Fitzquake engine":http://www.celephais.net/fitzquake/).
 
 1) Make sure you have Java 6 installed,
-2) "Download Quake Injector Alpha 1":http://bla.de,
+2) Download Quake Injector Alpha 1
 3) Extract the .zip file,
 4) Double click `quakeinjector.jar`, or simply start it with `java -jar quakeinjector.jar` from the extraction directory. On windows, you can also use the supplied `quakeinjector.bat`.
 

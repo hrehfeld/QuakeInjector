@@ -35,11 +35,11 @@ public class PackageList implements Iterable<Package>, ChangeListener {
 	private RequirementList requirements;
 
 	public PackageList(RequirementList requirements) {
+		this.requirements = requirements;
 		setRequirements(requirements);
 	}
 
-	public void setRequirements(RequirementList requirements) {
-		this.requirements = requirements;
+	private void setRequirements(RequirementList requirements) {
 		
 		packages.clear();
 		for (Requirement r: requirements) {
@@ -48,8 +48,9 @@ public class PackageList implements Iterable<Package>, ChangeListener {
 			}
 		}
 
-		requirements.addChangeListener(this);
-		listeners.notifyChangeListeners(this);
+		this.requirements = requirements;
+		this.requirements.addChangeListener(this);
+		notifyChangeListeners();
 	}
 
 	public void writeInstalled() throws java.io.IOException {
@@ -88,7 +89,13 @@ public class PackageList implements Iterable<Package>, ChangeListener {
 	private ChangeListenerList listeners = new ChangeListenerList();
 
 	public void addChangeListener(ChangeListener l) {
+		System.out.println(this + ": adding change listener " + l);
 		listeners.addChangeListener(l);
+	}
+	private void notifyChangeListeners() {
+		System.out.println(this + ": notifying listeners");
+		
+		listeners.notifyChangeListeners(this);
 	}
 
 	public void stateChanged(ChangeEvent e) {

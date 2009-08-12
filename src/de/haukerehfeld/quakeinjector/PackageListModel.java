@@ -179,7 +179,8 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof PackageList) {
 			listeners.notifyChangeListeners(e.getSource());
-			super.fireTableDataChanged();
+			super.fireTableChanged(new TableModelEvent(this));
+			System.out.println("packagelist changed");
 			return;
 		}
 		
@@ -190,7 +191,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 			super.fireTableRowsUpdated(i, i);
 		}
 
-		throw new RuntimeException("don't recognise what changed!");
+		throw new RuntimeException("didn't recognise what changed!");
 	}
 
 

@@ -66,16 +66,10 @@ import java.beans.PropertyChangeEvent;
  */
 public class PackageDatabaseParserWorker extends SwingWorker<List<Requirement>, Void>
 	implements ProgressListener {
-	private final RequirementList requirementList;
 	private final String databaseUrl;
-	private final ThreadedGetter<List<PackageFileList>> getInstalled;
 	
-	public PackageDatabaseParserWorker(RequirementList requirementList,
-	                                   String databaseUrl,
-	                                   ThreadedGetter<List<PackageFileList>> getInstalled) {
-		this.requirementList = requirementList;
+	public PackageDatabaseParserWorker(String databaseUrl) {
 		this.databaseUrl = databaseUrl;
-		this.getInstalled = getInstalled;
 	}
 	
 	@Override
@@ -84,29 +78,6 @@ public class PackageDatabaseParserWorker extends SwingWorker<List<Requirement>, 
 		
 		final PackageDatabaseParser parser = new PackageDatabaseParser();
 		List<Requirement> all = parser.parse(XmlUtils.getDocument(dl));
-
-		synchronized (requirementList) {
-			requirementList.setRequirements(all);
-		}
-
-		//parsing finished
-		
-		try {
-			List<PackageFileList> installed = getInstalled.get();
-
-			synchronized (requirementList) {
-				for (PackageFileList l: installed) {
-					requirementList.setInstalled(l);
-				}
-			}
-		}
-		catch (java.util.concurrent.ExecutionException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
-		catch (java.lang.InterruptedException e) {
-			System.out.println("Couldn't wait for result of installedMaps parse!" + e);
-		}
 
 		return all;
 	}
