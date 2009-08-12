@@ -19,16 +19,12 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import java.util.Comparator;
-import java.lang.Iterable;
-import java.util.Iterator;
-import java.util.ArrayList;
-
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class PackageList implements Iterable<Package>, ChangeListener {
 	private List<Package> packages = new ArrayList<Package>();

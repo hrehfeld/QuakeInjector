@@ -20,15 +20,16 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 
 package de.haukerehfeld.quakeinjector;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
-import java.io.FileNotFoundException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.HttpURLConnection;
+
 import javax.xml.ws.http.HTTPException;
 
 public class Download {

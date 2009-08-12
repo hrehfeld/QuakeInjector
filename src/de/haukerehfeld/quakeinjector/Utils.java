@@ -21,16 +21,14 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 package de.haukerehfeld.quakeinjector;
 
 
-import java.util.Iterator;
-
-import java.io.File;
-import java.util.List;
-import java.util.ArrayList;
-
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Utils {
 	public static <T> String join(final Iterable<T> objs, final String delimiter) {

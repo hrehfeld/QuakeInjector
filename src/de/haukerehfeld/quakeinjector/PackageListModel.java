@@ -24,13 +24,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
-import javax.swing.JTable;
 
 public class PackageListModel extends AbstractTableModel implements ChangeListener {
 	private static final int columnCount = 6;

@@ -1,7 +1,6 @@
 package de.haukerehfeld.quakeinjector;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import javax.swing.SwingWorker;

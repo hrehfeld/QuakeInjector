@@ -20,8 +20,8 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 
 package de.haukerehfeld.quakeinjector;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * report progress while reading InputStream

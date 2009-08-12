@@ -1,5 +1,6 @@
 package de.haukerehfeld.quakeinjector;
 
+import java.io.InputStream;
 import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -9,8 +10,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import java.io.InputStream;
 
 public class XmlUtils {
 	/**

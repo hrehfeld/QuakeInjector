@@ -19,12 +19,12 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector;
 
+import java.util.ArrayList;
+
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import java.util.ArrayList;
 
 class PackageListSelectionHandler implements ListSelectionListener {
 	private PackageListModel list;
