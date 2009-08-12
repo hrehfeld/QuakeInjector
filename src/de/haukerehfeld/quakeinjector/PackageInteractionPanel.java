@@ -201,6 +201,27 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 	}
 
 	private boolean checkPlayRequirements(Package selectedMap) {
+		//in theory this should never happen ;)
+		if (!selectedMap.isInstalled()) {
+			String msg = selectedMap.getId()
+			    + " doesn't seem to be installed.";
+			Object[] options = {"Install",
+			                    "Cancel Start"};
+			int install =
+			    JOptionPane.showOptionDialog(this,
+			                                 msg,
+			                                 "Map not installed",
+			                                 JOptionPane.YES_NO_OPTION,
+			                                 JOptionPane.WARNING_MESSAGE,
+			                                 null,
+			                                 options,
+			                                 options[1]);
+			if (install == 0) {
+				install(selectedMap, false);
+			}
+			return false;
+		}
+		
 		List<Requirement> unmet = selectedMap.getUnmetRequirements();
 		if (!unmet.isEmpty()) {
 			String msg = "The following prerequisites to play "
@@ -287,6 +308,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 									                     + e.getMessage());
 								  }
 								  installQueue.finished(progressListener, "Success");
+								  refreshUi();
 								  
 							  }
 							  public void handle(FileNotWritableException error,
@@ -322,6 +344,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 								  System.out.println("Cleaning up...");
 								  uninstall(selectedMap, alreadyInstalledFiles);
 								  installQueue.finished(progressListener, message);
+								  refreshUi();
 							  }
 						  },
 						  progressListener);
@@ -360,7 +383,9 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 									    = new SwingWorker<Void,Void>() {
 										@Override
 										public Void doInBackground() {
-											map.setInstalled(false);
+											synchronized (map) {
+												map.setInstalled(false);
+											}
 											
 											try {
 												requirements.writeInstalled();
@@ -372,12 +397,13 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 										}
 									};
 									saveInstalled.execute();
-									
 
+									refreshUi();
 								}
 
 								@Override
 								public void error(Exception e) {
+									refreshUi();
 									installQueue.finished(progressListener, "fail");
 									System.out.println(e.getMessage());
 									e.printStackTrace();

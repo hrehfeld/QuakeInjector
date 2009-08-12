@@ -63,14 +63,10 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	
 	private ChangeListenerList listeners = new ChangeListenerList();
 	
-	private List<Package> data;
+	private PackageList data;
 
 
-	public PackageListModel() {
-		this(new ArrayList<Package>());
-	}
-
-	public PackageListModel(List<Package> data) {
+	public PackageListModel(PackageList data) {
 		setMapList(data);
 	}
 
@@ -89,17 +85,17 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 
 	}
 	
-	public List<Package> getPackageList() {
-		return this.data;
-	}
+//  	public List<Package> getPackageList() {
+//  		return this.data;
+//  	}
 
 
-	public void setMapList(List<Package> data) {
-		this.data = new ArrayList<Package>(data);
-		java.util.Collections.sort(this.data);
-
-		for (Package m: data) {
-			m.addChangeListener(this);
+	public void setMapList(PackageList data) {
+		this.data = data;
+		data.addChangeListener(this);
+		
+		for (Package map: data) {
+			map.addChangeListener(this);
 		}
 
 		fireTableChanged(new TableModelEvent(this));
@@ -122,15 +118,30 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
     }
 
 	public Object getColumnData(int col, Package info) {
+		if (info instanceof Package) {
+			Package p = (Package) info;
+			switch (col) {
+			case name: return p.getId();
+			case author: return p.getAuthor();
+			case title: return p.getTitle();
+			case releasedate: return p.getDate();
+			case installed: return new Boolean(p.isInstalled());
+			case rating: return p.getRating().toString();
+			default: throw new RuntimeException("This should never happen: check the switch statement above");
+			}
+		}
+
 		switch (col) {
 		case name: return info.getId();
-		case author: return info.getAuthor();
-		case title: return info.getTitle();
-		case releasedate: return info.getDate();
-		case installed: return new Boolean(info.isInstalled());
-		case rating: return info.getRating().toString();
+		case author: return "";
+		case title: return "";
+		case releasedate: return null;
+		case installed: return false;
+		case rating: return "";
 		default: throw new RuntimeException("This should never happen: check the switch statement above");
 		}
+		
+		
 	}
 
     public Class<? extends Object> getColumnClass(int c) {
@@ -166,11 +177,20 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	}
 
 	public void stateChanged(ChangeEvent e) {
-		listeners.notifyChangeListeners(e.getSource());
-
-		int i = data.indexOf((Package) e.getSource());
-		super.fireTableRowsUpdated(i, i);
+		if (e.getSource() instanceof PackageList) {
+			listeners.notifyChangeListeners(e.getSource());
+			super.fireTableDataChanged();
+			return;
+		}
 		
+		if (e.getSource() instanceof Package) {
+			Package r = (Package) e.getSource();
+			listeners.notifyChangeListeners(r);
+			int i = data.indexOf(r);
+			super.fireTableRowsUpdated(i, i);
+		}
+
+		throw new RuntimeException("don't recognise what changed!");
 	}
 
 

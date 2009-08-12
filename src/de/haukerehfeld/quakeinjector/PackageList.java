@@ -25,50 +25,79 @@ import java.util.List;
 import java.util.Comparator;
 import java.lang.Iterable;
 import java.util.Iterator;
+import java.util.ArrayList;
 
-public class PackageList extends HashMap<String, Requirement> implements Iterable<Requirement> {
-	private final InstalledPackageList installedList = new InstalledPackageList();
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
-	public PackageList() {}
-	
-	public PackageList(List<Requirement> requirements) {
+public class PackageList implements Iterable<Package>, ChangeListener {
+	private List<Package> packages = new ArrayList<Package>();
+	private RequirementList requirements;
+
+	public PackageList(RequirementList requirements) {
 		setRequirements(requirements);
 	}
 
-	public void setRequirements(List<Requirement> requirements) {
-		for (Requirement r: requirements) {
-			put(r.getId(), r);
-		}
-	}
-
-	public void setInstalled(List<PackageFileList> files) throws java.io.IOException {
-		for (PackageFileList l: files) {
-			Requirement r = get(l.getId());
-			if (r == null) {
-				System.out.println("Warning: InstalledMaps xml contains map that isn't known: "
-				                   + l.getId());
-				continue;
-			}
-			r.setInstalled(true);
-			if (r instanceof Package) { ((Package) r).setFileList(l); }
-		}
+	public void setRequirements(RequirementList requirements) {
+		this.requirements = requirements;
 		
+		packages.clear();
+		for (Requirement r: requirements) {
+			if (r instanceof Package) {
+				packages.add((Package) r);
+			}
+		}
+
+		requirements.addChangeListener(this);
+		listeners.notifyChangeListeners(this);
 	}
 
 	public void writeInstalled() throws java.io.IOException {
-		installedList.write(this);
+		requirements.writeInstalled();
 	}
 
-	public Requirement getRequirement(String id) {
-		Requirement g = get(id);
-		if (g == null) {
-			return new UnavailableRequirement(id);
+	public Package get(int i) {
+		return packages.get(i);
+	}
+
+	public Package get(String id) {
+		Requirement r = requirements.get(id);
+		if (!(r instanceof Package)) {
+			return null;
 		}
-		return g;
-	}		
-
-	public Iterator<Requirement> iterator() {
-		return values().iterator();
+		return (Package) r;
 	}
+	
+	
+	public Iterator<Package> iterator() {
+		return packages.iterator();
+	}
+
+	public int size() {
+		return packages.size();
+	}
+
+	public int indexOf(Package r) {
+		return packages.indexOf(r);
+	}
+
+
+	/**
+	 * easily have change listeners
+	 */
+	private ChangeListenerList listeners = new ChangeListenerList();
+
+	public void addChangeListener(ChangeListener l) {
+		listeners.addChangeListener(l);
+	}
+
+	public void stateChanged(ChangeEvent e) {
+		if (!(e.getSource() instanceof RequirementList)) {
+			throw new RuntimeException("getting change events with source not a RequirementList");
+		}
+
+		setRequirements((RequirementList) e.getSource());
+		listeners.notifyChangeListeners(this);
+	}	
 	
 }

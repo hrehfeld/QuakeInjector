@@ -75,7 +75,8 @@ public class QuakeInjector extends JFrame {
 	private EngineStarter starter;
 
 	private PackageInteractionPanel interactionPanel;
-	private PackageList maps;
+	private RequirementList maps;
+	private PackageList packages;
 	private final PackageListModel maplist;
 	private Installer installer;
 
@@ -91,8 +92,9 @@ public class QuakeInjector extends JFrame {
 		setLayout(new BoxLayout(getContentPane(),
 								BoxLayout.PAGE_AXIS));
 
-		maplist = new PackageListModel();
-		maps = new PackageList();
+		maps = new RequirementList();
+		packages = new PackageList(maps);
+		maplist = new PackageListModel(packages);
 
 		setJMenuBar(createMenuBar());
 		
@@ -122,8 +124,8 @@ public class QuakeInjector extends JFrame {
 
 		ActionListener showEngineConfig = new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						showEngineConfig(maps.getRequirement("rogue").isInstalled(),
-						                 maps.getRequirement("hipnotic").isInstalled());
+						showEngineConfig(maps.get("rogue").isInstalled(),
+						                 maps.get("hipnotic").isInstalled());
 					}};
 
 		return new Menu(parseDatabase, quit, showEngineConfig);
@@ -159,7 +161,7 @@ public class QuakeInjector extends JFrame {
 	private void init() {
 		parseInstalled.execute();
 
-		final DatabaseParser dbParse = parseDatabase();
+		final PackageDatabaseParserWorker dbParse = parseDatabase();
 
 
 		paths = new Paths(getConfig().get("repositoryBase"));
@@ -174,7 +176,7 @@ public class QuakeInjector extends JFrame {
 		installer = new Installer();
 		interactionPanel.init(installer,
 		                      paths,
-		                      maps,
+		                      packages,
 		                      starter);
 
 		installer.setInstallDirectory(getConfig().getEnginePath());
@@ -218,8 +220,18 @@ public class QuakeInjector extends JFrame {
 		return null;
 	}
 
-	private DatabaseParser parseDatabase() {
-		final DatabaseParser dbParse = new DatabaseParser(maps, maplist);
+	private PackageDatabaseParserWorker parseDatabase() {
+		final PackageDatabaseParserWorker dbParse
+		    = new PackageDatabaseParserWorker(maps,
+		                                      getConfig().getRepositoryDatabase(),
+		                                      new ThreadedGetter<List<PackageFileList>>() {
+		                                          @Override
+		                                          public List<PackageFileList> get()
+		                                          throws java.util.concurrent.ExecutionException,
+		                                          java.lang.InterruptedException {
+													  return parseInstalled.get();
+												  }
+		                                      });
 		final ProgressPopup dbpopup =
 		    new ProgressPopup("Downloading package database",
 		                      new ActionListener() {
@@ -462,108 +474,108 @@ public class QuakeInjector extends JFrame {
 		setVisible(true);
 	}
 
-	/**
-	 * Parse database xml and est in background
-	 */
-	public class DatabaseParser extends SwingWorker<List<Package>, Void>
-		implements ProgressListener {
-		private final PackageList requirementList;
-		private final PackageListModel model;
+// 	/**
+// 	 * Parse database xml and est in background
+// 	 */
+// 	public class DatabaseParser extends SwingWorker<List<Package>, Void>
+// 		implements ProgressListener {
+// 		private final PackageList requirementList;
+// 		private final PackageListModel model;
 		
-		public DatabaseParser(final PackageList requirementList,
-		                      final PackageListModel model) {
-			this.requirementList = requirementList;
-			this.model = model;
-		}
+// 		public DatabaseParser(final PackageList requirementList,
+// 		                      final PackageListModel model) {
+// 			this.requirementList = requirementList;
+// 			this.model = model;
+// 		}
 		
-		@Override
-		    public List<Package> doInBackground() throws java.io.IOException,
-		    org.xml.sax.SAXException {
+// 		@Override
+// 		    public List<Package> doInBackground() throws java.io.IOException,
+// 		    org.xml.sax.SAXException {
 
-			String databaseUrl = getConfig().getRepositoryDatabase();
+// 			String databaseUrl = getConfig().getRepositoryDatabase();
 
-			//get download stream
-			Download d = Download.create(databaseUrl);
-			int size = d.getSize();
-			InputStream dl;
-			if (size > 0) {
-				ProgressListener progress =
-				    new SumProgressListener(new PercentageProgressListener(size, this));
-				dl = d.getStream(progress);
-			}
-			else {
-				dl = d.getStream(null);
-			}
+// 			//get download stream
+// 			Download d = Download.create(databaseUrl);
+// 			int size = d.getSize();
+// 			InputStream dl;
+// 			if (size > 0) {
+// 				ProgressListener progress =
+// 				    new SumProgressListener(new PercentageProgressListener(size, this));
+// 				dl = d.getStream(progress);
+// 			}
+// 			else {
+// 				dl = d.getStream(null);
+// 			}
 
-			final PackageDatabaseParser parser = new PackageDatabaseParser();
-			List<Requirement> all = parser.parse(XmlUtils.getDocument(dl));
+// 			final PackageDatabaseParser parser = new PackageDatabaseParser();
+// 			List<Requirement> all = parser.parse(XmlUtils.getDocument(dl));
 			
-			requirementList.setRequirements(all);
-			try {
-				List<PackageFileList> installed = parseInstalled.get();
+// 			requirementList.setRequirements(all);
+// 			try {
+// 				List<PackageFileList> installed = parseInstalled.get();
 
-				synchronized (requirementList) {
-					requirementList.setInstalled(installed);
-				}
-			}
-			catch (java.util.concurrent.ExecutionException e) {}
-			catch (java.lang.InterruptedException e) {
-				System.out.println("Couldn't wait for result of installedMaps parse!" + e);
-			}
+// 				synchronized (requirementList) {
+// 					requirementList.setInstalled(installed);
+// 				}
+// 			}
+// 			catch (java.util.concurrent.ExecutionException e) {}
+// 			catch (java.lang.InterruptedException e) {
+// 				System.out.println("Couldn't wait for result of installedMaps parse!" + e);
+// 			}
 
-			List<Package> packages = new ArrayList<Package>(all.size());
-			for (Requirement r: all) {
-				if (r instanceof Package) {
-					packages.add((Package) r);
-				}
-			}
-			return packages;
-		}
+// 			List<Package> packages = new ArrayList<Package>(all.size());
+// 			for (Requirement r: all) {
+// 				if (r instanceof Package) {
+// 					packages.add((Package) r);
+// 				}
+// 			}
+// 			return packages;
+// 		}
 
-		@Override
-		    public void done() {
-			try {
-				maplist.setMapList(get());
-			}
-			catch (java.util.concurrent.ExecutionException t) {
-				Throwable e = t.getCause();
-				if (e instanceof java.io.IOException) {
-					String msg = "Couldn't open database file: " + e.getMessage();
-					Object[] options = {"Try again",
-					                    "Cancel"};
-					int tryAgain =
-					    JOptionPane.showOptionDialog(QuakeInjector.this,
-					                                 msg,
-					                                 "Could not access database",
-					                                 JOptionPane.YES_NO_OPTION,
-					                                 JOptionPane.WARNING_MESSAGE,
-					                                 null,
-					                                 options,
-					                                 options[1]);
-					if (tryAgain == 0) {
-						new DatabaseParser(requirementList, maplist)
-						    .execute();
-					}
-					else {
-						return;
-					}
-				}
-				else if (e instanceof org.xml.sax.SAXException) {
-					System.out.println("Couldn't parse xml!" + e);
-				}
-			}
-			catch (java.lang.InterruptedException e) {
-				throw new RuntimeException("Couldn't get map list!" + e.getMessage());
-			}
-		}
+// 		@Override
+// 		    public void done() {
+// 			try {
+// 				maplist.setMapList(get());
+// 			}
+// 			catch (java.util.concurrent.ExecutionException t) {
+// 				Throwable e = t.getCause();
+// 				if (e instanceof java.io.IOException) {
+// 					String msg = "Couldn't open database file: " + e.getMessage();
+// 					Object[] options = {"Try again",
+// 					                    "Cancel"};
+// 					int tryAgain =
+// 					    JOptionPane.showOptionDialog(QuakeInjector.this,
+// 					                                 msg,
+// 					                                 "Could not access database",
+// 					                                 JOptionPane.YES_NO_OPTION,
+// 					                                 JOptionPane.WARNING_MESSAGE,
+// 					                                 null,
+// 					                                 options,
+// 					                                 options[1]);
+// 					if (tryAgain == 0) {
+// 						new DatabaseParser(requirementList, maplist)
+// 						    .execute();
+// 					}
+// 					else {
+// 						return;
+// 					}
+// 				}
+// 				else if (e instanceof org.xml.sax.SAXException) {
+// 					System.out.println("Couldn't parse xml!" + e);
+// 				}
+// 			}
+// 			catch (java.lang.InterruptedException e) {
+// 				throw new RuntimeException("Couldn't get map list!" + e.getMessage());
+// 			}
+// 		}
 
-		public void publish(long progress) {
-			if (progress <= 100) {
-				setProgress((int) progress);
-			}
-		}
+// 		public void publish(long progress) {
+// 			if (progress <= 100) {
+// 				setProgress((int) progress);
+// 			}
+// 		}
 		
-	}
+// 	}
 
 
 	/**
@@ -584,6 +596,7 @@ public class QuakeInjector extends JFrame {
 		                                 null,
 		                                 options,
 		                                 options[0]);
+		//button for engine config pressed
 		if (openEngineConfig == 0) {
 			//wait until maps are finished loading
 			showEngineConfig(maps.get("rogue").isInstalled(),
