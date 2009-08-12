@@ -53,7 +53,6 @@ public class RequirementList implements Iterable<Requirement> {
 
 	public void setInstalled(PackageFileList l) {
 		Requirement r = get(l.getId());
-		System.out.println("Setting " + l.getId() + " to installed");
 		r.setInstalled(true);
 		if (r instanceof Package) {
 			((Package) r).setFileList(l);

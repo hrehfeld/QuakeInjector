@@ -33,6 +33,8 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
+
 
 public class InstallQueuePanel extends JPanel {
 	private final static int size = 5;

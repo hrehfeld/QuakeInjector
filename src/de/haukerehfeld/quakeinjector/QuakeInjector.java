@@ -61,6 +61,7 @@ import javax.swing.event.DocumentListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 
+import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 
 public class QuakeInjector extends JFrame {
 	/**

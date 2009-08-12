@@ -101,7 +101,6 @@ public class UpdateRequirementListWorker extends SwingWorker<Void, Void> {
 	@Override
 	public void done() {
 		synchronized (requirementList) {
-			System.out.println("Setting requirements");
 			requirementList.setRequirements(requirement);
 
 			for (PackageFileList l: installed) {

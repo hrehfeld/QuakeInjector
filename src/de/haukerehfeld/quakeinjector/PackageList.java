@@ -89,12 +89,9 @@ public class PackageList implements Iterable<Package>, ChangeListener {
 	private ChangeListenerList listeners = new ChangeListenerList();
 
 	public void addChangeListener(ChangeListener l) {
-		//System.out.println(this + ": addChangeListener(" + l + ")");
 		listeners.addChangeListener(l);
 	}
 	private void notifyChangeListeners() {
-		//System.out.println(this + ": notifying listeners");
-		
 		listeners.notifyChangeListeners(this);
 	}
 
@@ -104,7 +101,6 @@ public class PackageList implements Iterable<Package>, ChangeListener {
 		}
 
 		setRequirements((RequirementList) e.getSource());
-		listeners.notifyChangeListeners(this);
 	}	
 	
 }

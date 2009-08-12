@@ -36,7 +36,6 @@ public class ChangeListenerList {
 		if (listeners.indexOf(l) >= 0) {
 			return;
 		}
-		//System.out.println(this + ": addChangeListener(" + l + ")");
 		listeners.add(l);
 	}
 
@@ -45,13 +44,8 @@ public class ChangeListenerList {
 	}
 	
 	public void notifyChangeListeners(Object source) {
-		// if (listeners.size() > 0) {
-		// 	System.out.println(this + ": listeners: " + Utils.join(listeners, ", "));
-		// }
-		
 		ChangeEvent e = new ChangeEvent(source);
 		for (ChangeListener l: listeners) {
-			//System.out.println(this + ": Notifying " + l);
 			l.stateChanged(e);
 		}
 	}
