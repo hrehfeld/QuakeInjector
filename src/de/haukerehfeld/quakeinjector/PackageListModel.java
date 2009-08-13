@@ -105,7 +105,8 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
         return columnCount;
     }
 
-    public String getColumnName(int col) {
+    @Override
+	public String getColumnName(int col) {
         return columnNames[col];
     }
 
@@ -119,7 +120,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 
 	public Object getColumnData(int col, Package info) {
 		if (info instanceof Package) {
-			Package p = (Package) info;
+			Package p = info;
 			switch (col) {
 			case name: return p.getId();
 			case author: return p.getAuthor();
@@ -144,7 +145,8 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		
 	}
 
-    public Class<? extends Object> getColumnClass(int c) {
+    @Override
+	public Class<? extends Object> getColumnClass(int c) {
 		switch (c) {
 		case name: return String.class;
 		case rating: return String.class;
@@ -164,7 +166,8 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
     }
 
 
-    public boolean isCellEditable(int row, int col) {
+    @Override
+	public boolean isCellEditable(int row, int col) {
 		return false;
     }
 
@@ -215,6 +218,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		}
 
 		RowFilter<PackageListModel, Integer> rf = new RowFilter<PackageListModel,Integer>() {
+			@Override
 			public boolean include(Entry<? extends PackageListModel, ? extends Integer> entry) {
 				//match all patters in at least one column
 				for (Pattern pattern: patterns) {

@@ -34,6 +34,7 @@ public abstract class SortableRequirement implements Requirement {
 		return getId().compareTo(((Requirement) o).getId());
 	}
 
+	@Override
 	public String toString() {
 		return getId();
 	}

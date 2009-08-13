@@ -7,6 +7,7 @@ public class UnavailableRequirement extends SortableRequirement implements Requi
 		super(id);
 	}
 	public void addChangeListener(ChangeListener l) {}
+	@Override
 	protected void notifyChangeListeners() {}
 
 	public PackageFileList getFileList() {

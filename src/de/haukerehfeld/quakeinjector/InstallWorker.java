@@ -40,8 +40,6 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 	private Package map;
 
 	private long downloadSize = 0;
-	private long downloaded = 0;
-
 	private PackageFileList files;
 
 	public InstallWorker(Package map,

@@ -378,13 +378,14 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 								public void success() {
 									installQueue.finished(progressListener, "success");
 
+									synchronized (map) {
+										map.setInstalled(false);
+									}
+									
 									SwingWorker<Void,Void> saveInstalled
 									    = new SwingWorker<Void,Void>() {
 										@Override
 										public Void doInBackground() {
-											synchronized (map) {
-												map.setInstalled(false);
-											}
 											
 											try {
 												requirements.writeInstalled();

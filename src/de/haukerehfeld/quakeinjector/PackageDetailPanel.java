@@ -49,8 +49,6 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 	private JLabel title;
 	private JLabel size;
 	private JLabel date;
-	private JLabel requirements;
-
 	private JEditorPane description;
 
 	public PackageDetailPanel() {
@@ -115,7 +113,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 	private void refreshUi() {
 		title.setText(current.getTitle());
 		date.setText(toString(current.getDate()));
-		size.setText((float) current.getSize() / 1000f + "mb");		
+		size.setText(current.getSize() / 1000f + "mb");		
 		
 		description.getEditorKit().createDefaultDocument();
 		description.setText("<p align=\"center\">"

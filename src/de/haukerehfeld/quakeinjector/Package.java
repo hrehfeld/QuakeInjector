@@ -32,11 +32,6 @@ public class Package extends SortableRequirement implements Requirement {
 	 */
 	private ChangeListenerList listeners = new ChangeListenerList();
 
-	/**
-	 * Unique file/package identifier
-	 */
-	private String id;
-	
 	private String author;
 
 	private String title;
@@ -183,6 +178,7 @@ public class Package extends SortableRequirement implements Requirement {
 		return unmet;
 	}
 
+	@Override
 	protected void notifyChangeListeners() {
 		listeners.notifyChangeListeners(this);
 	}
@@ -210,6 +206,7 @@ public class Package extends SortableRequirement implements Requirement {
 			this.description = description;
 		}
 
+		@Override
 		public String toString() {
 			return description;
 		}

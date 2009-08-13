@@ -138,7 +138,7 @@ public class Configuration {
 	}
 
 	public void setEnginePath(String enginePath) {
-		set(this.enginePath, enginePath);
+		set(Configuration.enginePath, enginePath);
 	}
 
 	public String getEngineExecutable() {
@@ -146,7 +146,7 @@ public class Configuration {
 	}
 
 	public void setEngineExecutable(String engineExecutable) {
-		set(this.engineExecutable, engineExecutable);
+		set(Configuration.engineExecutable, engineExecutable);
 	}
 
 	public String getEngineCommandline() {
@@ -154,7 +154,7 @@ public class Configuration {
 	}
 
 	public void setEngineCommandline(String engineCommandline) {
-		set(this.engineCommandline, engineCommandline);
+		set(Configuration.engineCommandline, engineCommandline);
 	}
 
 	public String getRepositoryDatabase() {
@@ -169,7 +169,7 @@ public class Configuration {
 	/**
 	 * set rogueInstalled
 	 */
-	public void setRogueInstalled(boolean rogueInstalled) { set(this.rogueInstalled,
+	public void setRogueInstalled(boolean rogueInstalled) { set(Configuration.rogueInstalled,
 																Boolean.toString(rogueInstalled)); }
 
 	/**
@@ -180,7 +180,7 @@ public class Configuration {
 	/**
 	 * set hipnoticInstalled
 	 */
-	public void setHipnoticInstalled(boolean hipnoticInstalled) { set(this.hipnoticInstalled,
+	public void setHipnoticInstalled(boolean hipnoticInstalled) { set(Configuration.hipnoticInstalled,
 																	  Boolean.toString(hipnoticInstalled)); }
 
 	/**

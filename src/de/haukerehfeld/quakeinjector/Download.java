@@ -33,7 +33,6 @@ import java.util.zip.InflaterInputStream;
 import javax.xml.ws.http.HTTPException;
 
 public class Download {
-	private final URL url;
 	private InputStream stream;
 	private URLConnection connection;
 
@@ -50,8 +49,6 @@ public class Download {
 	}
 
 	public Download(URL url) throws IOException, HTTPException, java.net.UnknownHostException {
-		this.url = url;
-
 		try {
 			HttpURLConnection con = null;
 			connection = url.openConnection();
@@ -59,7 +56,7 @@ public class Download {
 			//http stuff, but url might be something different
 			if (connection instanceof HttpURLConnection) {
 				con = (HttpURLConnection) connection;
-				con.setFollowRedirects(true);
+				HttpURLConnection.setFollowRedirects(true);
 				con.setRequestProperty("Accept-Encoding","gzip, deflate");
 			}
 
