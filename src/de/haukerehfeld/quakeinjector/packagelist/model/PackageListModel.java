@@ -17,14 +17,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
-package de.haukerehfeld.quakeinjector;
+package de.haukerehfeld.quakeinjector.packagelist.model;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import java.util.EnumSet;
 
 import javax.swing.JTable;
 import javax.swing.RowFilter;
@@ -34,79 +32,11 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 
+import de.haukerehfeld.quakeinjector.ChangeListenerList;
+import de.haukerehfeld.quakeinjector.PackageList;
+import de.haukerehfeld.quakeinjector.Package;
+
 public class PackageListModel extends AbstractTableModel implements ChangeListener {
-	/**
-	 * Enum for the table columns. Saves all info about them.
-	 */
-	public enum Column {
-		NAME("Name") {
-			public Object getData(Package p) {
-				return p.getId();
-			}
-
-			public Class<? extends Object> getColumnClass() { return String.class; }
-		},
-			TITLE("Title") {
-			public Object getData(Package p) {
-				return p.getTitle();
-			}
-			public Class<? extends Object> getColumnClass() { return String.class; }
-		},
-			AUTHOR("Author") {
-			public Object getData(Package p) {
-				return p.getAuthor();
-			}
-			public Class<? extends Object> getColumnClass() { return String.class; }
-		},
-			RELEASEDATE("Released") {
-			public Object getData(Package p) {
-				return p.getDate();
-			}
-			public Class<? extends Object> getColumnClass() { return Date.class; }
-		},
-			RATING("Rating") {
-			public Object getData(Package p) {
-				return p.getRating().toString();
-			}
-			public Class<? extends Object> getColumnClass() { return String.class; }
-		},
-			INSTALLED("") {
-			public Object getData(Package p) {
-				return new Boolean(p.isInstalled());
-			}
-			public Class<? extends Object> getColumnClass() { return Boolean.class; }
-		}
-			;
-
-
-		public String header;
-
-		private Column(String header) {
-			this.header = header;
-		}
-
-		public abstract Object getData(Package p);
-
-		public abstract Class<? extends Object> getColumnClass();
-
-		public static int getColumnNumber(Column c) {
-			return java.util.Arrays.binarySearch(values(), c);
-		}
-
-		public static Column getColumn(int column) {
-			Column[] values = values();
-			if (values.length <= column) {
-				throw new RuntimeException("Unknown Column");
-			}
-			return values[column];
-		}
-
-		public static int count() {
-			return values().length;
-		}
-	}
-
-	
 	private ChangeListenerList listeners = new ChangeListenerList();
 	
 	private PackageList data;
