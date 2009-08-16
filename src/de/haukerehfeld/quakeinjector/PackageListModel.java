@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import java.util.EnumSet;
+
 import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.event.ChangeEvent;
@@ -33,33 +35,77 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 
 public class PackageListModel extends AbstractTableModel implements ChangeListener {
-	private static final int columnCount = 6;
-	
-	private static final int name = 0;
-	private static final int title = 1;
-	private static final int author = 2;
-	private static final int releasedate = 3;
-	private static final int rating = 4;
-	private static final int installed = 5;
+	/**
+	 * Enum for the table columns. Saves all info about them.
+	 */
+	public enum Column {
+		NAME("Name") {
+			public Object getData(Package p) {
+				return p.getId();
+			}
 
-	private static final String nameHeader = "Name";
-	private static final String titleHeader = "Title";
-	private static final String authorHeader = "Author";
-	private static final String releasedateHeader = "Released";
-	private static final String ratingHeader = "Rating";
-	private static final String installedHeader = "";
+			public Class<? extends Object> getColumnClass() { return String.class; }
+		},
+			TITLE("Title") {
+			public Object getData(Package p) {
+				return p.getTitle();
+			}
+			public Class<? extends Object> getColumnClass() { return String.class; }
+		},
+			AUTHOR("Author") {
+			public Object getData(Package p) {
+				return p.getAuthor();
+			}
+			public Class<? extends Object> getColumnClass() { return String.class; }
+		},
+			RELEASEDATE("Released") {
+			public Object getData(Package p) {
+				return p.getDate();
+			}
+			public Class<? extends Object> getColumnClass() { return Date.class; }
+		},
+			RATING("Rating") {
+			public Object getData(Package p) {
+				return p.getRating().toString();
+			}
+			public Class<? extends Object> getColumnClass() { return String.class; }
+		},
+			INSTALLED("") {
+			public Object getData(Package p) {
+				return new Boolean(p.isInstalled());
+			}
+			public Class<? extends Object> getColumnClass() { return Boolean.class; }
+		}
+			;
 
-	private static final String[] columnNames = new String[columnCount];
-	                                              
-	static {
-		columnNames[name] = nameHeader;
-		columnNames[title] = titleHeader;
-		columnNames[author] = authorHeader;
-		columnNames[releasedate] = releasedateHeader;
-		columnNames[installed] = installedHeader;
-		columnNames[rating] = ratingHeader;
+
+		public String header;
+
+		private Column(String header) {
+			this.header = header;
+		}
+
+		public abstract Object getData(Package p);
+
+		public abstract Class<? extends Object> getColumnClass();
+
+		public static int getColumnNumber(Column c) {
+			return java.util.Arrays.binarySearch(values(), c);
+		}
+
+		public static Column getColumn(int column) {
+			Column[] values = values();
+			if (values.length <= column) {
+				throw new RuntimeException("Unknown Column");
+			}
+			return values[column];
+		}
+
+		public static int count() {
+			return values().length;
+		}
 	}
-			
+
 	
 	private ChangeListenerList listeners = new ChangeListenerList();
 	
@@ -72,16 +118,16 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 
 	public void size(JTable table) {
 		TableColumnModel m = table.getColumnModel();
-		
-		m.getColumn(name).setPreferredWidth(70);
-		m.getColumn(title).setPreferredWidth(150);
-		m.getColumn(author).setPreferredWidth(100);
-		m.getColumn(installed).setResizable(false);
-		m.getColumn(installed).setMaxWidth(16);
-		m.getColumn(rating).setMaxWidth(50);
-		m.getColumn(rating).setResizable(false);
-		m.getColumn(releasedate).setPreferredWidth(70);
-		m.getColumn(releasedate).setMaxWidth(100);
+
+		m.getColumn(Column.getColumnNumber(Column.NAME)).setPreferredWidth(70);
+		m.getColumn(Column.getColumnNumber(Column.TITLE)).setPreferredWidth(150);
+		m.getColumn(Column.getColumnNumber(Column.AUTHOR)).setPreferredWidth(100);
+		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setResizable(false);
+		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setMaxWidth(16);
+		m.getColumn(Column.getColumnNumber(Column.RATING)).setMaxWidth(50);
+		m.getColumn(Column.getColumnNumber(Column.RATING)).setResizable(false);
+		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setPreferredWidth(70);
+		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setMaxWidth(100);
 
 	}
 	
@@ -102,65 +148,33 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	}
 
     public int getColumnCount() {
-        return columnCount;
+        return Column.count();
     }
 
     @Override
 	public String getColumnName(int col) {
-        return columnNames[col];
+        return Column.getColumn(col).header;
     }
 
 	/*
 	 * data
 	 */
-	
+	@Override
     public int getRowCount() {
         return data.size();
     }
 
-	public Object getColumnData(int col, Package info) {
-		if (info instanceof Package) {
-			Package p = info;
-			switch (col) {
-			case name: return p.getId();
-			case author: return p.getAuthor();
-			case title: return p.getTitle();
-			case releasedate: return p.getDate();
-			case installed: return new Boolean(p.isInstalled());
-			case rating: return p.getRating().toString();
-			default: throw new RuntimeException("This should never happen: check the switch statement above");
-			}
-		}
 
-		switch (col) {
-		case name: return info.getId();
-		case author: return "";
-		case title: return "";
-		case releasedate: return null;
-		case installed: return false;
-		case rating: return "";
-		default: throw new RuntimeException("This should never happen: check the switch statement above");
-		}
-		
-		
+	public Object getColumnData(int col, Package info) {
+		return Column.getColumn(col).getData(info);
 	}
 
     @Override
 	public Class<? extends Object> getColumnClass(int c) {
-		switch (c) {
-		case name: return String.class;
-		case rating: return String.class;
-		case title: return String.class;
-		case author: return String.class;
-		case releasedate: return Date.class;
-		case installed: return Boolean.class;
-			/*
-			 * Should never be used
-			 */
-		default: throw new RuntimeException("This should never happen: check the switch statement above");
-		}
+		return Column.getColumn(c).getColumnClass();
     }
 
+	@Override
     public Object getValueAt(int row, int col) {
         return getColumnData(col, data.get(row));
     }
@@ -203,7 +217,10 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	 * the text box.
 	 */
 	public RowFilter<PackageListModel, Integer> filter(final String filterText) {
-		final int[] columnsToCheck = { name, author, releasedate };
+		final int[] columnsToCheck = { Column.getColumnNumber(Column.NAME),
+									   Column.getColumnNumber(Column.AUTHOR),
+									   Column.getColumnNumber(Column.RELEASEDATE)
+		};
 
 		String[] filterTexts = filterText.split(" ");
 
