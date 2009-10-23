@@ -37,10 +37,10 @@ public class CompressedProgressListener implements ProgressListener {
 	 * tell the reporter of the size of uncompression
 	 */
 	public void publish(long writtenBytes) {
-		long downloaded = (long) (writtenBytes * compressionRatio);
-		if (downloaded <= 0) {
-			System.err.println("Reporting less than zero! " + downloaded);
+		if (writtenBytes <= 0) {
+			System.err.println("Progress <= 0 written bytes: " + writtenBytes);
 		}
+		long downloaded = (long) (writtenBytes * compressionRatio);
 		progress.publish(downloaded);
 	}
 }
