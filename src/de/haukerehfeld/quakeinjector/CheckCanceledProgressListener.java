@@ -25,9 +25,9 @@ package de.haukerehfeld.quakeinjector;
  */
 public class CheckCanceledProgressListener implements ProgressListener {
 	private final ProgressListener progress;
-	private final InstallWorker toCheck;
+	private final Cancelable toCheck;
 
-	public CheckCanceledProgressListener(InstallWorker toCheck, ProgressListener progress) {
+	public CheckCanceledProgressListener(Cancelable toCheck, ProgressListener progress) {
 		this.progress = progress;
 		this.toCheck = toCheck;
 	}

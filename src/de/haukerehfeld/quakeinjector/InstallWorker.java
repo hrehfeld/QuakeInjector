@@ -24,7 +24,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -34,7 +37,11 @@ import javax.swing.SwingWorker;
  * Install maps in a worker thread
  * Init once and let swing start it - don't reuse
  */
-public class InstallWorker extends SwingWorker<PackageFileList, Void> implements ProgressListener {
+public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
+																	  ProgressListener,
+																	  Cancelable {
+	private final static int BUFFERSIZE = 1024;
+	
 	private String url;
 	private String baseDirectory;
 	private Package map;
@@ -62,40 +69,61 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 			Download d = Download.create(url);
 			downloadSize = d.getSize();
 			InputStream in = d.getStream();
+
+			//build progress filter chain
+			ProgressListener progress =
+			    new SumProgressListener(
+					new PercentageProgressListener(downloadSize,
+					                               new CheckCanceledProgressListener(this,
+					                                                                 this)));
+			
+			
+			ByteArrayOutputStream temp = new ByteArrayOutputStream();
+
+			{
+				byte data[] = new byte[BUFFERSIZE];
+				int readcount;
+				while ((readcount = in.read(data, 0, BUFFERSIZE)) != -1) {
+					progress.publish(readcount);
+					temp.write(data, 0, readcount);
+				}
+			}			
+
 			String relativedir = map.getRelativeBaseDir();
 			String unzipdir = baseDirectory;
 			if (relativedir != null) {
 				unzipdir += File.separator + relativedir;
 			}
 		
-			files = unzip(in, this.baseDirectory, unzipdir, map.getId());
+			Map<File,File> filesToRename = unzip(in, this.baseDirectory, unzipdir, map.getId());
 		}
 		catch (Installer.CancelledException e) {
 			System.out.println("cancelled exception!");
 			//throw e;
 			throw new OnlineFileNotFoundException();
 		}
+
 		map.setInstalled(true);
 		return files;
 	}
 
 
-	public PackageFileList unzip(InputStream in,
+	/**
+	 * Unzip from the inputstream to the quake base dir
+	 *
+	 * @return a map of temporary files that need to renamed to the entry files
+	 */
+	public Map<File,File> unzip(InputStream in,
 	                             String basedir,
 	                             String unzipdir,
 	                             String mapid)
 	    throws IOException, FileNotFoundException, Installer.CancelledException {
-		//build progress filter chain
-		ProgressListener progress =
-		      new SumProgressListener(
-			    new PercentageProgressListener(downloadSize,
-			      new CheckCanceledProgressListener(this,
-			        this)));
 		
 
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
 		ZipEntry entry;
 
+		Map<File,File> fileRenames = new HashMap<File,File>();
 
 		while((entry = zis.getNextEntry()) != null) {
 			File f = new File(unzipdir + File.separator + entry.getName());
@@ -116,23 +144,31 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 			files.add(filename);
 			System.out.println("Writing " + filename + " (" + entry.getCompressedSize() + "b)");
 
-			try {
-				Utils.writeFile(zis,
-				                f,
-				                new CompressedProgressListener(entry.getCompressedSize()
-				                                               / (double) entry.getSize(),
-				                                               progress));
+			if (f.exists()) {
+				//create Temp file and rename later
+				File temporaryFile = f.createTempFile("quakeinjector", "tmp");
+				fileRenames.put(temporaryFile, f);
+				System.out.println("Output file " + f
+				                   + " already exists, writing to " + temporaryFile);
+				f = temporaryFile;
 			}
-			catch (FileNotFoundException e) {
-				files.remove(filename);
-				throw new FileNotWritableException(e.getMessage());
-			}
+
+			// try {
+				// Utils.writeFile(zis,
+				//                 f,
+				//                 new CompressedProgressListener(entry.getCompressedSize()
+				//                                                / (double) entry.getSize(),
+				//                                                progress));
+			// }
+			// catch (FileNotFoundException e) {
+			// 	files.remove(filename);
+			// 	throw new FileNotWritableException(e.getMessage());
+			// }
 			
 		}
-		//save the mapfile list so we can uninstall
 		zis.close();
 
-		return files;
+		return fileRenames;
 	}
 
 	public void publish(long progress) {
