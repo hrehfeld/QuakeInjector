@@ -24,7 +24,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Map;
 import java.util.List;
+import java.util.ArrayList;
+
+import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -294,6 +298,35 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 								                                "File not found (404)",
 								                                JOptionPane.WARNING_MESSAGE);
 							  }
+
+							  public List<File> overwrite(Map<String,File> files) {
+								  PackageOverwriteDialog overwrite = new PackageOverwriteDialog(main);
+								  for (Map.Entry<String,File> e: files.entrySet()) {
+									  String name = e.getKey();
+									  File f = e.getValue();
+									  
+									  overwrite.addFile(name, f.exists());
+								  }
+
+								  overwrite.packAndShow();
+
+								  List<File> overwriteFiles = new ArrayList<File>();
+
+								  if (overwrite.isCanceled()) {
+									  return overwriteFiles;
+								  }
+								  
+								  for (Map.Entry<String,File> e: files.entrySet()) {
+									  String name = e.getKey();
+									  File f = e.getValue();
+									  
+									  if (overwrite.overwrite(name)) {
+										  overwriteFiles.add(f);
+									  }
+								  }
+								  return overwriteFiles;
+							  }
+							  
 							  public void success(PackageFileList installedFiles) {
 								  Requirement r = requirements.get(installedFiles.getId());
 								  r.setInstalled(true);

@@ -43,25 +43,31 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 	private final static int BUFFERSIZE = 1024;
 	
 	private String baseDirectory;
+	private String unzipDirectory;
 	private Package map;
 	private InputStream input;
+	private List<File> overwrites;
 
 	private long downloadSize = 0;
 	private PackageFileList files;
 
 	/**
 	 * @param inputSize size of the input stream in bytes, for progress reporting
+	 * @param overwrites a list of files that we should overwrite
 	 */
 	public InstallWorker(InputStream input,
 	                     long inputSize,
 	                     Package map,
-	                     String baseDirectory) {
+	                     String baseDirectory,
+	                     String unzipDirectory,
+	                     List<File> overwrites) {
 		this.map = map;
 		this.input = input;
 		this.downloadSize = inputSize;
 		this.baseDirectory = baseDirectory;
+		this.unzipDirectory = unzipDirectory;
 		this.files = new PackageFileList(map.getId());
-
+		this.overwrites = overwrites;
 	}
 
 	@Override
@@ -71,13 +77,11 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 		System.out.println("Installing " + map.getId());
 
 		try {
-			String relativedir = map.getRelativeBaseDir();
-			String unzipdir = baseDirectory;
-			if (relativedir != null) {
-				unzipdir += File.separator + relativedir;
-			}
-		
-			Map<File,File> filesToRename = unzip(input, this.baseDirectory, unzipdir, map.getId());
+			unzip(input,
+			      baseDirectory,
+			      unzipDirectory,
+			      map.getId(),
+			      overwrites);
 		}
 		catch (Installer.CancelledException e) {
 			System.out.println("cancelled exception!");
@@ -95,10 +99,11 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 	 *
 	 * @return a map of temporary files that need to renamed to the entry files
 	 */
-	public Map<File,File> unzip(InputStream in,
-	                             String basedir,
-	                             String unzipdir,
-	                             String mapid)
+	public void unzip(InputStream in,
+	                            String basedir,
+	                            String unzipdir,
+	                            String mapid,
+	                            List<File> overwrites)
 	    throws IOException, FileNotFoundException, Installer.CancelledException {
 		//build progress filter chain
 		ProgressListener progress =
@@ -111,10 +116,14 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
 		ZipEntry entry;
 
-		Map<File,File> fileRenames = new HashMap<File,File>();
-
 		while((entry = zis.getNextEntry()) != null) {
-			File f = new File(unzipdir + File.separator + entry.getName());
+			File f = Installer.getFile(entry, map, basedir);
+			String filename = RelativePath.getRelativePath(new File(basedir), f).toString();
+			
+			if (overwrites != null && overwrites.indexOf(f) < 0) {
+				System.out.println("Skipping " + filename + ", because it isn't supposed to be overwritten.");
+				continue;
+			}
 
 			//create dirs
 			List<File> createdDirs = Utils.mkdirs(f);
@@ -128,17 +137,14 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 				continue;
 			}
 
-			String filename = RelativePath.getRelativePath(new File(basedir), f).toString();
 			files.add(filename);
 			System.out.println("Writing " + filename + " (" + entry.getCompressedSize() + "b)");
 
+			File original = f;
 			if (f.exists()) {
 				//create Temp file and rename later
-				File temporaryFile = f.createTempFile("quakeinjector", "tmp");
-				fileRenames.put(temporaryFile, f);
-				System.out.println("Output file " + f
-				                   + " already exists, writing to " + temporaryFile);
-				f = temporaryFile;
+				f = f.createTempFile("quakeinjector", ".tmp", f.getParentFile());
+				System.out.println("create Temp file " + f);
 			}
 
 			try {
@@ -153,10 +159,13 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 				throw new FileNotWritableException(e.getMessage());
 			}
 			
+			if (!f.equals(original)) {
+				original.delete();
+				System.out.println("moving Temp file to " + original);
+				f.renameTo(original);
+			}
 		}
 		zis.close();
-
-		return fileRenames;
 	}
 
 	public void publish(long progress) {
