@@ -108,4 +108,7 @@ public class Download {
 		return connection.getContentLength();
 	}
 
+	public String toString() {
+		return connection.getURL().toString();
+	}
 }
