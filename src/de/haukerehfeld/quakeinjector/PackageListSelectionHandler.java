@@ -26,6 +26,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
+
 class PackageListSelectionHandler implements ListSelectionListener {
 	private PackageListModel list;
 

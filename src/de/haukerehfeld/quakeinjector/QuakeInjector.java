@@ -51,6 +51,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
+import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
 
 public class QuakeInjector extends JFrame {
 	/**

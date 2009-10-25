@@ -24,6 +24,11 @@ import java.awt.Dimension;
 import javax.swing.JTable;
 import javax.swing.table.TableRowSorter;
 
+import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
+
+/**
+ * @todo check if dependency on de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel is necessary
+ */
 public class PackageTable extends JTable {
 
 	public PackageTable(PackageListModel maplist) {
