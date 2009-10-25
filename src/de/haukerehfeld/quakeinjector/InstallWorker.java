@@ -42,18 +42,23 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 																	  Cancelable {
 	private final static int BUFFERSIZE = 1024;
 	
-	private String url;
 	private String baseDirectory;
 	private Package map;
+	private InputStream input;
 
 	private long downloadSize = 0;
 	private PackageFileList files;
 
-	public InstallWorker(Package map,
-					 String url,
-					 String baseDirectory) {
+	/**
+	 * @param inputSize size of the input stream in bytes, for progress reporting
+	 */
+	public InstallWorker(InputStream input,
+	                     long inputSize,
+	                     Package map,
+	                     String baseDirectory) {
 		this.map = map;
-		this.url = url;
+		this.input = input;
+		this.downloadSize = inputSize;
 		this.baseDirectory = baseDirectory;
 		this.files = new PackageFileList(map.getId());
 
@@ -66,36 +71,13 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 		System.out.println("Installing " + map.getId());
 
 		try {
-			Download d = Download.create(url);
-			downloadSize = d.getSize();
-			InputStream in = d.getStream();
-
-			//build progress filter chain
-			ProgressListener progress =
-			    new SumProgressListener(
-					new PercentageProgressListener(downloadSize,
-					                               new CheckCanceledProgressListener(this,
-					                                                                 this)));
-			
-			
-			ByteArrayOutputStream temp = new ByteArrayOutputStream();
-
-			{
-				byte data[] = new byte[BUFFERSIZE];
-				int readcount;
-				while ((readcount = in.read(data, 0, BUFFERSIZE)) != -1) {
-					progress.publish(readcount);
-					temp.write(data, 0, readcount);
-				}
-			}			
-
 			String relativedir = map.getRelativeBaseDir();
 			String unzipdir = baseDirectory;
 			if (relativedir != null) {
 				unzipdir += File.separator + relativedir;
 			}
 		
-			Map<File,File> filesToRename = unzip(in, this.baseDirectory, unzipdir, map.getId());
+			Map<File,File> filesToRename = unzip(input, this.baseDirectory, unzipdir, map.getId());
 		}
 		catch (Installer.CancelledException e) {
 			System.out.println("cancelled exception!");
@@ -118,6 +100,12 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 	                             String unzipdir,
 	                             String mapid)
 	    throws IOException, FileNotFoundException, Installer.CancelledException {
+		//build progress filter chain
+		ProgressListener progress =
+			    new SumProgressListener(
+					new PercentageProgressListener(downloadSize,
+					                               new CheckCanceledProgressListener(this,
+					                                                                 this)));
 		
 
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
@@ -153,17 +141,17 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 				f = temporaryFile;
 			}
 
-			// try {
-				// Utils.writeFile(zis,
-				//                 f,
-				//                 new CompressedProgressListener(entry.getCompressedSize()
-				//                                                / (double) entry.getSize(),
-				//                                                progress));
-			// }
-			// catch (FileNotFoundException e) {
-			// 	files.remove(filename);
-			// 	throw new FileNotWritableException(e.getMessage());
-			// }
+			try {
+				Utils.writeFile(zis,
+				                f,
+				                new CompressedProgressListener(entry.getCompressedSize()
+				                                               / (double) entry.getSize(),
+				                                               progress));
+			}
+			catch (FileNotFoundException e) {
+				files.remove(filename);
+				throw new FileNotWritableException(e.getMessage());
+			}
 			
 		}
 		zis.close();

@@ -31,40 +31,63 @@ import javax.swing.SwingWorker;
 
 public class Installer {
 	private static final int simultanousDownloads = 1;
+	private static final int simultanousInstalls = 1;
 	
 	private String installDirectory;
-	private ExecutorService pool;
+	private ExecutorService activeDownloaders = Executors.newFixedThreadPool(simultanousDownloads);
+	private ExecutorService activeInstallers = Executors.newFixedThreadPool(simultanousInstalls);
 
-	private Map<Package,InstallWorker> installers = new HashMap<Package,InstallWorker>();
+	private Map<Package,InstallWorker> installerQueue = new HashMap<Package,InstallWorker>();
+	private Map<Package,DownloadWorker> downloaderQueue = new HashMap<Package,DownloadWorker>();
 
-	public Installer() {
-		pool = Executors.newFixedThreadPool(simultanousDownloads);
-	}
-
-	public boolean alreadyInstalling(final Package map) {
-		return installers.get(map) != null;
+	public boolean alreadyQueued(final Package map) {
+		return installerQueue.get(map) != null || downloaderQueue.get(map) != null;
 	}
 
 	public void install(final Package selectedMap,
 	                    final String url,
 						final InstallErrorHandler errorHandler,
-						final PropertyChangeListener propertyListener) {
+						final PropertyChangeListener downloadProgressListener) {
 		//map already in the instalation queue
-		if (alreadyInstalling(selectedMap)) {
+		if (alreadyQueued(selectedMap)) {
 			return;
 		}
-		final InstallWorker installer = new InstallWorker(selectedMap, url, installDirectory);
-		installers.put(selectedMap, installer);
-		installer.addPropertyChangeListener(propertyListener);
+		
+		Download download;
+		try {
+			download = Download.create(url);
+		}
+		catch (IOException e) {
+			errorHandler.handle((OnlineFileNotFoundException) e);
+			return;
+		}
+		final long downloadSize = download.getSize();
 
-		pool.submit(installer);
+		//first, download the file into memory
+		final DownloadWorker downloader = new DownloadWorker(download);
 
+		downloader.addPropertyChangeListener(downloadProgressListener);
+		downloaderQueue.put(selectedMap, downloader);
+		
+		activeDownloaders.submit(downloader);
+
+		//wait for the download to finish, then start
+		//installation. after that, handle errors or save status
 		SwingWorker<Void,Void> saveInstalled = new SwingWorker<Void,Void>() {
+			public InstallWorker installer;
 			private Throwable error;
 			
 			@Override
 			public Void doInBackground() {
 				try {
+					//wait for download and start install
+					installer = new InstallWorker(downloader.get(),
+					                              downloadSize,
+					                              selectedMap,
+					                              installDirectory);
+					synchronized (installerQueue) { installerQueue.put(selectedMap, installer); }
+					synchronized (activeInstallers) { activeInstallers.submit(installer); }
+					//wait for install
 					installer.get();
 				}
 				catch (java.util.concurrent.ExecutionException e) {
@@ -80,18 +103,21 @@ public class Installer {
 			@Override
 			public void done() {
 				PackageFileList files = installer.getInstalledFiles();
-				
+				//see if there was an error
 				if (error != null) {
-					if (error instanceof OnlineFileNotFoundException) {
+					try {
+						throw error;
+					}
+					catch (OnlineFileNotFoundException error) {
 						errorHandler.handle((OnlineFileNotFoundException) error);
 					}
-					else if (error instanceof FileNotWritableException) {
+					catch (FileNotWritableException error) {
 						errorHandler.handle((FileNotWritableException) error, files);
 					}
-					else if (error instanceof IOException) {
+					catch (IOException error) {
 						errorHandler.handle((IOException) error, files);
 					}
-					else {
+					catch (Throwable e) {
 						System.out.println("unhandled exception from install worker" + error);
 						error.printStackTrace();
 					}
@@ -105,7 +131,9 @@ public class Installer {
 				}
 
 				System.out.println("Done saving installedmaps");
-				installers.remove(selectedMap);
+				synchronized (installerQueue) { installerQueue.remove(selectedMap); }
+				synchronized (downloaderQueue) { downloaderQueue.remove(selectedMap); }
+
 			}
 		};
 		saveInstalled.execute();
@@ -113,7 +141,8 @@ public class Installer {
 	}
 
 	public void cancel(Package installerMap) {
-		installers.get(installerMap).cancel(true);
+		downloaderQueue.get(installerMap).cancel(true);
+		installerQueue.get(installerMap).cancel(true);
 	}
 
 	public void setInstallDirectory(String installDirectory) {
