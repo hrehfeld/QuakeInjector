@@ -149,6 +149,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	public RowFilter<PackageListModel, Integer> filter(final String filterText) {
 		final int[] columnsToCheck = { Column.getColumnNumber(Column.NAME),
 									   Column.getColumnNumber(Column.AUTHOR),
+		                               Column.getColumnNumber(Column.TITLE),
 									   Column.getColumnNumber(Column.RELEASEDATE)
 		};
 
