@@ -53,7 +53,8 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 
 	/**
 	 * @param inputSize size of the input stream in bytes, for progress reporting
-	 * @param overwrites a list of files that we should overwrite
+	 * @param overwrites a list of files that we should overwrite, or
+	 * null if everything should be overwritten
 	 */
 	public InstallWorker(InputStream input,
 	                     long inputSize,
