@@ -306,11 +306,7 @@ public class Installer {
 			}
 			
 			//see if there was an error
-			if (isCancelled() || downloader.isCancelled() || installer.isCancelled()) {
-				System.out.println("CancelledException!");
-				handler.handle(new CancelledException(), files);
-			}
-			else if (error != null) {
+			if (error != null) {
 				try {
 					throw error;
 				}
@@ -327,6 +323,10 @@ public class Installer {
 					System.out.println("unhandled exception from install worker" + error);
 					error.printStackTrace();
 				}
+			}
+			else if (isCancelled() || downloader.isCancelled() || installer.isCancelled()) {
+				System.out.println("CancelledException!");
+				handler.handle(new CancelledException(), files);
 			}
 			else {
 				handler.success(files);
