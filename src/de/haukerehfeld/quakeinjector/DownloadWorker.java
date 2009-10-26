@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -38,51 +39,48 @@ import javax.swing.SwingWorker;
  * Install maps in a worker thread
  * Init once and let swing start it - don't reuse
  */
-public class DownloadWorker extends SwingWorker<ByteArrayInputStream, Void> implements
-																			ProgressListener,
-																			Cancelable {
+public class DownloadWorker extends SwingWorker<Long, Void> implements ProgressListener, Cancelable {
 	private final static int BUFFERSIZE = 1024;
 	
-	private Download download;
+	private final Download download;
+	private final OutputStream out;
 
-	public DownloadWorker(final Download download) {
+	public DownloadWorker(final Download download,
+	                      final OutputStream out) {
 		this.download = download;
+		this.out = out;
 	}
 
 	@Override
-	public ByteArrayInputStream doInBackground() throws
+	public Long doInBackground() throws
 	    IOException,
 	    FileNotFoundException,
 	    Installer.CancelledException {
 		
 		System.out.println("Downloading " + download);
 
-		try {
+		
+		download.connect();
 
-			//build progress filter chain
-			final ProgressListener progress =
-			    new SumProgressListener(
-					new PercentageProgressListener(download.getSize(),
-					                               new CheckCanceledProgressListener(this,
-					                                                                 this)));
-			
-			
-			final InputStream in = download.getStream();
-			final ByteArrayOutputStream temp = new ByteArrayOutputStream();
-			final byte data[] = new byte[BUFFERSIZE];
-			int readcount;
-			while ((readcount = in.read(data, 0, BUFFERSIZE)) != -1) {
-				progress.publish(readcount);
-				temp.write(data, 0, readcount);
-			}			
+		//build progress filter chain
+		final ProgressListener progress =
+		    new SumProgressListener(
+				new PercentageProgressListener(download.getSize(),
+				                               new CheckCanceledProgressListener(this,
+				                                                                 this)));
+		
+		
+		final InputStream in = download.getStream();
+		final byte data[] = new byte[BUFFERSIZE];
+		long downloadSize = 0;
+		int readcount;
+		while ((readcount = in.read(data, 0, BUFFERSIZE)) != -1) {
+			progress.publish(readcount);
+			out.write(data, 0, readcount);
+			downloadSize += readcount;
+		}			
 
-			return new ByteArrayInputStream(temp.toByteArray());
-		}
-		catch (Installer.CancelledException e) {
-			System.out.println("cancelled exception!");
-			//throw e;
-			throw new OnlineFileNotFoundException();
-		}
+		return downloadSize;
 	}
 
 	public void publish(long progress) {

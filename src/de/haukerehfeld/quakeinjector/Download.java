@@ -33,6 +33,7 @@ import java.util.zip.InflaterInputStream;
 import javax.xml.ws.http.HTTPException;
 
 public class Download {
+	private final URL url;
 	private InputStream stream;
 	private URLConnection connection;
 
@@ -48,16 +49,21 @@ public class Download {
 		return new Download(url);
 	}
 
-	public Download(URL url) throws IOException, HTTPException, java.net.UnknownHostException {
+	public Download(URL url) throws IOException {
+		this.url = url;
+	}
+
+	public void connect() throws IOException, HTTPException, java.net.UnknownHostException {
 		try {
-			HttpURLConnection con = null;
 			connection = url.openConnection();
 
-			//http stuff, but url might be something different
+			//http stuff, but url might be a different protocol
+			HttpURLConnection con = null;
 			if (connection instanceof HttpURLConnection) {
 				con = (HttpURLConnection) connection;
 				HttpURLConnection.setFollowRedirects(true);
 				con.setRequestProperty("Accept-Encoding","gzip, deflate");
+				con.setRequestProperty("User-Agent","Quakeinjector");
 			}
 
 			connection.connect();
@@ -75,8 +81,8 @@ public class Download {
 		catch (FileNotFoundException e) {
 			throw new OnlineFileNotFoundException(e.getMessage());
 		}
-		
-	}
+	}		
+	
 
 	public InputStream getStream() throws IOException {
 		return getStream(null);
@@ -109,6 +115,6 @@ public class Download {
 	}
 
 	public String toString() {
-		return connection.getURL().toString();
+		return "<" + url.toString() + ">";
 	}
 }

@@ -164,13 +164,11 @@ public class QuakeInjector extends JFrame {
 		starter = new EngineStarter(enginePath,
 		                            engineExe,
 									getConfig().getEngineCommandline());
-		installer = new Installer();
+		installer = new Installer(getConfig().getEnginePath(), getConfig().getEnginePath() + File.separator + "downloads");
 		interactionPanel.init(installer,
 		                      paths,
 		                      packages,
 		                      starter);
-
-		installer.setInstallDirectory(getConfig().getEnginePath());
 
 		if (!installer.checkInstallDirectory()) {
 			//wait until database was loaded, then pop up config

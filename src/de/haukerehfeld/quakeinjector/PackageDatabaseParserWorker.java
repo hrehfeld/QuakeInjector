@@ -54,6 +54,7 @@ public class PackageDatabaseParserWorker extends SwingWorker<List<Requirement>, 
 	private InputStream getDownloadStream(final String databaseUrl) throws java.io.IOException {
 		//get download stream
 		Download d = Download.create(databaseUrl);
+		d.connect();
 		int size = d.getSize();
 		InputStream dl;
 		if (size > 0) {

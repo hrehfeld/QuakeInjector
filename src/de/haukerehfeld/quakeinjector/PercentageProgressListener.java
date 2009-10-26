@@ -28,9 +28,9 @@ public class PercentageProgressListener implements ProgressListener {
 	private final ProgressListener progress;
 
 	public PercentageProgressListener(long size, ProgressListener progress) {
-		if (size <= 0) {
-			throw new IllegalArgumentException("Size must be > 0: was " + size);
-		}
+		// if (size <= 0) {
+		// 	throw new IllegalArgumentException("Size must be > 0: was " + size);
+		// }
 
 		this.progress = progress;
 		this.size = size;
@@ -40,7 +40,13 @@ public class PercentageProgressListener implements ProgressListener {
 	 * tell the reporter of the size of uncompression
 	 */
 	public void publish(long writtenBytes) {
-		long per = Math.round(100 * writtenBytes / (double) size);
+		long per;
+		if (size == 0) {
+			per = 0;
+		}
+		else {
+			per = Math.round(100 * writtenBytes / (double) size);			
+		}
 		progress.publish(per);
 	}
 }
