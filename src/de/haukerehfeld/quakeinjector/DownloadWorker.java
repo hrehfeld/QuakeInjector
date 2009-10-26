@@ -79,7 +79,7 @@ public class DownloadWorker extends SwingWorker<Long, Void> implements ProgressL
 			out.write(data, 0, readcount);
 			downloadSize += readcount;
 		}			
-
+		out.flush();
 		return downloadSize;
 	}
 

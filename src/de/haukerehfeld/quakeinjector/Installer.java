@@ -192,7 +192,9 @@ public class Installer {
 
 				long downloadSize;
 				if (!downloadFile.exists()) {
-					downloadSize = download(url, new FileOutputStream(downloadFile));
+					FileOutputStream out = new FileOutputStream(downloadFile);
+					downloadSize = download(url, out);
+					out.close();
 				}
 				else {
 					downloadSize = downloadFile.length();
@@ -200,7 +202,9 @@ public class Installer {
 				}
 
 				System.out.print("Inspecting downloaded archive...");
-				Map<String,File> existingFiles = inspect(new FileInputStream(downloadFile));
+				FileInputStream in = new FileInputStream(downloadFile);
+				Map<String,File> existingFiles = inspect(in);
+				in.close();
 				System.out.println("done.");
 
 				List<File> overwrites = null;
@@ -213,7 +217,8 @@ public class Installer {
 				if (overwrites != null && !overwrites.isEmpty()) {
 					//and start install
 					String mapDir = Installer.getUnzipDir(map, installDirectory);
-					installer = new InstallWorker(new FileInputStream(downloadFile),
+					in = new FileInputStream(downloadFile);
+					installer = new InstallWorker(in,
 					                              downloadSize,
 					                              map,
 					                              installDirectory,
@@ -221,6 +226,7 @@ public class Installer {
 					                              overwrites);
 					synchronized (activeInstallers) { activeInstallers.submit(installer); }
 					installer.get();
+					in.close();
 				}
 			}
 			catch (java.io.FileNotFoundException e) {
