@@ -358,13 +358,15 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 							  }
 							  public void handle(java.io.IOException error,
 							                     PackageFileList alreadyInstalledFiles) {
-								  cleanup(alreadyInstalledFiles, "Connection failed");
+//								  if (!alreadyInstalledFiles.isEmpty()) {
+									  cleanup(alreadyInstalledFiles, "File Error");
+									  //								  }
 
-								  String msg = "Couldn't connect to the online repository! "
+								  String msg = "Couldn't open file! "
 								      + error.getMessage();
 								  JOptionPane.showMessageDialog(PackageInteractionPanel.this,
 								                                msg,
-								                                "Couldn't connect to repository",
+								                                "Couldn't open file!",
 								                                JOptionPane.ERROR_MESSAGE);
 							  }
 							  public void handle(Installer.CancelledException error,
