@@ -39,6 +39,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
@@ -68,7 +69,7 @@ public class PackageOverwriteDialog extends JDialog {
 
 		fileListPanel = new JPanel();
 		fileListPanel.setLayout(new GridBagLayout());
-		add(fileListPanel, BorderLayout.CENTER);
+		add(new JScrollPane(fileListPanel), BorderLayout.CENTER);
 
 		final JButton okay = new JButton("Overwrite files");
 		final JButton cancel = new JButton("Cancel");
