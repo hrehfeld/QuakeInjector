@@ -55,14 +55,17 @@ public class PackageOverwriteDialog extends JDialog {
 	private final JPanel fileListPanel;
 	private int fileListRows = 0;
 
-	private boolean canceled = false;
+	private boolean canceled = true;
 
 	private final Map<String,JCheckBox> overwriteBoxes = new HashMap<String,JCheckBox>();
 	
 	public PackageOverwriteDialog(final JFrame frame) {
 		super(frame, windowTitle, true);
 
-		JLabel description = new JLabel("The following files already exist:", SwingConstants.CENTER);
+		setPreferredSize(new Dimension(300, 600));
+		
+
+		JLabel description = new JLabel(windowTitle, SwingConstants.CENTER);
 		description.setLabelFor(this);
 		description.setPreferredSize(new Dimension(100, 50));
 		add(description, BorderLayout.PAGE_START);
@@ -76,14 +79,14 @@ public class PackageOverwriteDialog extends JDialog {
 
 		okay.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
+					canceled = false;
+					
 					setVisible(false);
 					dispose();
 				}
 			});
 		cancel.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					canceled = true;
-					
 					setVisible(false);
 					dispose();
 				}
