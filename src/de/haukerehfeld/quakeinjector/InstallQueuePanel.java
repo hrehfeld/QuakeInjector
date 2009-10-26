@@ -152,9 +152,13 @@ public class InstallQueuePanel extends JPanel {
 		public void propertyChange(PropertyChangeEvent evt) {
 			if ("progress" == evt.getPropertyName()) {
 				int p = (Integer) evt.getNewValue();
-				progressBar.setString(ProgressPopup.progressString(description, p));
-				progressBar.setValue(p);
+				setProgress(p);
 			} 
+		}
+
+		public void setProgress(int progress) {
+			progressBar.setString(ProgressPopup.progressString(description, progress));
+			progressBar.setValue(progress);
 		}
 
 		private void finish(String message) {

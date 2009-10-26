@@ -339,6 +339,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 									  System.out.println("Couldn't write installed Maps file!"
 									                     + e.getMessage());
 								  }
+								  progressListener.setProgress(100);
 								  installQueue.finished(progressListener, "Success");
 								  refreshUi();
 								  
