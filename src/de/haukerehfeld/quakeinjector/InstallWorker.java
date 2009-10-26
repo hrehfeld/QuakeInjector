@@ -77,19 +77,12 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 	    Installer.CancelledException {
 		System.out.println("Installing " + map.getId());
 
-		try {
-			unzip(input,
-			      baseDirectory,
-			      unzipDirectory,
-			      map.getId(),
-			      overwrites);
-		}
-		catch (Installer.CancelledException e) {
-			System.out.println("cancelled exception!");
-			//throw e;
-			throw new OnlineFileNotFoundException();
-		}
-
+		unzip(input,
+		      baseDirectory,
+		      unzipDirectory,
+		      map.getId(),
+		      overwrites);
+		
 		map.setInstalled(true);
 		return files;
 	}
@@ -117,6 +110,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(in));
 		ZipEntry entry;
 
+		boolean extracted = false;
 		while((entry = zis.getNextEntry()) != null) {
 			File f = Installer.getFile(entry, map, basedir);
 			String filename = RelativePath.getRelativePath(new File(basedir), f).toString();
@@ -165,6 +159,12 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 				System.out.println("moving Temp file to " + original);
 				f.renameTo(original);
 			}
+
+			extracted = true;
+		}
+
+		if (!extracted) {
+			throw new java.util.zip.ZipException("No files extracted from zip, is it an empty file?");
 		}
 		zis.close();
 	}

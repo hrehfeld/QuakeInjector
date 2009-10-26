@@ -208,7 +208,9 @@ public class Installer {
 					overwrites = askForOverwrite(existingFiles);
 				}
 
-				{
+				System.out.println("After asking");
+
+				if (overwrites != null && !overwrites.isEmpty()) {
 					//and start install
 					String mapDir = Installer.getUnzipDir(map, installDirectory);
 					installer = new InstallWorker(new FileInputStream(downloadFile),
