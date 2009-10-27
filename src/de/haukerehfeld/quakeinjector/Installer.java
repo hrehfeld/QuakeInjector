@@ -149,6 +149,11 @@ public class Installer {
 	}
 
 	public interface InstallErrorHandler {
+		/**
+		 * Decide which files in the package should be overwritten
+		 * @param files in the package
+		 * @return all the files that should be overwritten or an empty list to overwrite no files and cancel install
+		 */
 		public List<File> overwrite(Map<String,File> existingFiles);
 		public void success(PackageFileList installedFiles);
 		public void handle(OnlineFileNotFoundException error);
@@ -194,6 +199,7 @@ public class Installer {
 				if (!downloadFile.exists()) {
 					FileOutputStream out = new FileOutputStream(downloadFile);
 					downloadSize = download(url, out);
+					out.flush();
 					out.close();
 				}
 				else {
@@ -214,7 +220,7 @@ public class Installer {
 
 				System.out.println("After asking");
 
-				if (overwrites != null && !overwrites.isEmpty()) {
+				if (overwrites == null || !overwrites.isEmpty()) {
 					//and start install
 					String mapDir = Installer.getUnzipDir(map, installDirectory);
 					in = new FileInputStream(downloadFile);
@@ -276,6 +282,9 @@ public class Installer {
 			final Map<String,File> files = new HashMap<String,File>();
 			boolean existingFile = false;
 			for (ZipEntry z: entries) {
+				if (z.isDirectory()) {
+					continue;
+				}
 				File f = getFile(z, map, installDirectory);
 				String name
 				    = RelativePath.getRelativePath(new File(installDirectory), f).toString();
