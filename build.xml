@@ -55,7 +55,7 @@
   <target name="getversion">
     <exec outputproperty="quakeinjector.buildcommit" executable="git" 
           failifexecutionfails="false" searchpath="true">
-      <arg line="describe" />
+      <arg line="describe --tags" />
     </exec>
     <tstamp />
   </target>
