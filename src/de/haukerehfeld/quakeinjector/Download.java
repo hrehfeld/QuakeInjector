@@ -63,7 +63,7 @@ public class Download {
 				con = (HttpURLConnection) connection;
 				HttpURLConnection.setFollowRedirects(true);
 				con.setRequestProperty("Accept-Encoding","gzip, deflate");
-				con.setRequestProperty("User-Agent","Quakeinjector");
+				con.setRequestProperty("User-Agent","Quakeinjector-" + BuildCommit.buildCommit);
 			}
 
 			connection.connect();
