@@ -53,6 +53,9 @@ import javax.swing.event.DocumentListener;
 import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 public class QuakeInjector extends JFrame {
 	/**
 	 * Window title
@@ -71,6 +74,10 @@ public class QuakeInjector extends JFrame {
 	private final PackageListModel maplist;
 	private Installer installer;
 
+	/**
+	 * Thread worker to parse the installed maps in background
+	 */
+	private SwingWorker<List<PackageFileList>,Void> parseInstalled;
 
 
 	public QuakeInjector() {
@@ -102,7 +109,8 @@ public class QuakeInjector extends JFrame {
 
 		ActionListener parseDatabase = new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					parseDatabase();
+					parseInstalled();
+					parseDatabaseAndSetList();
 				}
 			};
 
@@ -148,12 +156,15 @@ public class QuakeInjector extends JFrame {
 		}
 	}
 		
-	
-	private void init() {
+
+	private void parseInstalled() {
+		parseInstalled = new ParseInstalledWorker();
 		parseInstalled.execute();
+	}
 
-		final UpdateRequirementListWorker dbParse = parseDatabase();
-
+	private void init() {
+		parseInstalled();
+		final Future<Void> requirementsListUpdater = parseDatabaseAndSetList();
 
 		paths = new Paths(getConfig().get("repositoryBase"));
 		
@@ -176,7 +187,7 @@ public class QuakeInjector extends JFrame {
 				@Override
 			    public Void doInBackground() {
 					try {
-						dbParse.get();
+						requirementsListUpdater.get();
 					}
 					catch (java.lang.InterruptedException e) {}
 					catch (java.util.concurrent.ExecutionException e) {}
@@ -210,7 +221,10 @@ public class QuakeInjector extends JFrame {
 		return null;
 	}
 
-	private UpdateRequirementListWorker parseDatabase() {
+	/**
+	 * Parse the online database
+	 */
+	private Future<List<Requirement>> parseDatabase() {
 		final PackageDatabaseParserWorker dbParse
 		    = new PackageDatabaseParserWorker(getConfig().getRepositoryDatabase());
 
@@ -240,33 +254,55 @@ public class QuakeInjector extends JFrame {
 		dbpopup.pack();
 		dbpopup.setVisible(true);
 
-		UpdateRequirementListWorker updater = new UpdateRequirementListWorker(maps,
-		                                      new ThreadedGetter<List<Requirement>>() {
-		                                          @Override
-		                                          public List<Requirement> get()
-		                                          throws java.util.concurrent.ExecutionException,
-		                                          java.lang.InterruptedException {
-													  return dbParse.get();
-												  }
-		                                      },
-		                                      new ThreadedGetter<List<PackageFileList>>() {
-		                                          @Override
-		                                          public List<PackageFileList> get()
-		                                          throws java.util.concurrent.ExecutionException,
-		                                          java.lang.InterruptedException {
-													  return parseInstalled.get();
-												  }
-		                                      });
-		updater.execute();
-		return updater;
+		return dbParse;
 	}
+
+	/**
+	 * Tell maps what maps are already installed
+	 */
+	private Future<Void> setInstalledStatus(final Future<List<Requirement>> dbParse,
+	                                        final Future<List<PackageFileList>> packages) {
+		SwingWorker<Void,Void> updateRequirementList = new SwingWorker<Void,Void>() {
+			@Override
+			public Void doInBackground() throws ExecutionException, InterruptedException {
+				dbParse.get();
+				return null;
+			}
+			@Override
+			public void done() {
+				try {
+					maps.setRequirements(dbParse.get());
+
+					for (PackageFileList l: packages.get()) {
+						maps.setInstalled(l);
+					}
+
+					maps.notifyChangeListeners();
+				}
+				catch (ExecutionException e) {
+					System.err.println("database parsing failed: " + e.getCause());
+					e.getCause().printStackTrace();
+				}
+				catch (InterruptedException e) {
+					System.err.println("Waiting for database parsing failed: " + e);
+					e.printStackTrace();
+				}
+			}
+		};
+		updateRequirementList.execute();
+		return updateRequirementList;
+	}
+
+	private Future<Void> parseDatabaseAndSetList() {
+		final Future<List<Requirement>> dbParse = parseDatabase();
+		final Future<Void> requirementsListUpdater = setInstalledStatus(dbParse, parseInstalled);
+		return requirementsListUpdater;
+	}
+
 
 	/**
 	 * Thread worker to parse the installed maps in background
 	 */
-	private final SwingWorker<List<PackageFileList>,Void> parseInstalled
-	    = new ParseInstalledWorker();
-
 	private static class ParseInstalledWorker extends SwingWorker<List<PackageFileList>, Void> {
 		@Override
 		public List<PackageFileList> doInBackground() {

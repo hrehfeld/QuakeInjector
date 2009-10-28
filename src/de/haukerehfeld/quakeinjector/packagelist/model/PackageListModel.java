@@ -137,7 +137,6 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		if (e.getSource() instanceof PackageList) {
 			setMapList((PackageList) e.getSource());
 			listeners.notifyChangeListeners(e.getSource());
-			super.fireTableChanged(new TableModelEvent(this));
 			return;
 		}
 		
