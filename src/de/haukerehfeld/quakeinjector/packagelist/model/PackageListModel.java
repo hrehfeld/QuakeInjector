@@ -67,6 +67,16 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 
 
 	public void setMapList(PackageList data) {
+		if (this.data != null) {
+			//remove from all old
+			this.data.removeChangeListener(this);
+			for (Package map: this.data) {
+				map.removeChangeListener(this);
+			}
+		}
+		
+		
+		//add to new
 		this.data = data;
 		data.addChangeListener(this);
 		
@@ -125,6 +135,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof PackageList) {
+			setMapList((PackageList) e.getSource());
 			listeners.notifyChangeListeners(e.getSource());
 			super.fireTableChanged(new TableModelEvent(this));
 			return;

@@ -26,6 +26,9 @@ import java.util.List;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+/**
+ * Only the Package s in a RequirementsList
+ */
 public class PackageList implements Iterable<Package>, ChangeListener {
 	private List<Package> packages = new ArrayList<Package>();
 	private RequirementList requirements;
@@ -86,6 +89,9 @@ public class PackageList implements Iterable<Package>, ChangeListener {
 
 	public void addChangeListener(ChangeListener l) {
 		listeners.addChangeListener(l);
+	}
+	public void removeChangeListener(ChangeListener l) {
+		listeners.removeChangeListener(l);
 	}
 	private void notifyChangeListeners() {
 		listeners.notifyChangeListeners(this);

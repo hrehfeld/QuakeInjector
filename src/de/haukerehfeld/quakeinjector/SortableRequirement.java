@@ -1,5 +1,8 @@
 package de.haukerehfeld.quakeinjector;
 
+/**
+ * Requirements that can be sorted alphabetically by id
+ */
 public abstract class SortableRequirement implements Requirement {
 	private final String id;
 	private boolean isInstalled = false;
@@ -26,11 +29,7 @@ public abstract class SortableRequirement implements Requirement {
 
 	protected abstract void notifyChangeListeners();
 
-	public int compareTo(Object o) {
-		if (!(o instanceof Requirement)) {
-			throw new java.lang.ClassCastException("Can't compare " + SortableRequirement.class
-			                                       + " with " + o.getClass());
-		}
+	public int compareTo(Requirement o) {
 		return getId().compareTo(((Requirement) o).getId());
 	}
 

@@ -25,6 +25,9 @@ import java.util.List;
 
 import javax.swing.event.ChangeListener;
 
+/**
+ * A requirement that has an installation candidate available.
+ */
 public class Package extends SortableRequirement implements Requirement {
 
 	/**
@@ -94,11 +97,17 @@ public class Package extends SortableRequirement implements Requirement {
 		this.requirements = requirements;
 	}
 	
-
+	@Override
 	public void addChangeListener(ChangeListener l) {
 		listeners.addChangeListener(l);
 	}
 
+
+	@Override
+	public void removeChangeListener(ChangeListener l) {
+		listeners.removeChangeListener(l);
+	}
+	
 	public String getAuthor() {
 		return author;
 	}
