@@ -49,6 +49,10 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 	private List<File> overwrites;
 
 	private long downloadSize = 0;
+
+	/**
+	 * files that got installed
+	 */
 	private PackageFileList files;
 
 	/**
@@ -90,8 +94,6 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 
 	/**
 	 * Unzip from the inputstream to the quake base dir
-	 *
-	 * @return a map of temporary files that need to renamed to the entry files
 	 */
 	public void unzip(InputStream in,
 	                            String basedir,

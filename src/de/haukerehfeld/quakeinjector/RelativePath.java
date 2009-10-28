@@ -117,7 +117,7 @@ reverse order
 	 *           s = getRelativePath(home,f) = ../../d/e/x.txt
 	 * @param home base path, should be a directory, not a file, or it doesn't
 make sense
-	 * @param f file to generate path for
+	 * @param file file to generate path for
 	 * @return path from home to f as a string
 	 */
 	public static File getRelativePath(File home, File file){

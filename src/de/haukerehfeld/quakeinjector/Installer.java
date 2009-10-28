@@ -151,7 +151,7 @@ public class Installer {
 	public interface InstallErrorHandler {
 		/**
 		 * Decide which files in the package should be overwritten
-		 * @param files in the package
+		 * @param existingFiles in the package
 		 * @return all the files that should be overwritten or an empty list to overwrite no files and cancel install
 		 */
 		public List<File> overwrite(Map<String,File> existingFiles);
