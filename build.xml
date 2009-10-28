@@ -163,6 +163,7 @@ public final class BuildCommit {
 	  <sourcepath>
 		<path path="${quakeinjector.src}" />
 	  </sourcepath>
+	  <link href="http://java.sun.com/javase/6/docs/api/" />
 	</javadoc>
   </target> 
 
