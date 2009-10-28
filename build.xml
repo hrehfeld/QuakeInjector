@@ -14,6 +14,7 @@
   <property name="quakeinjector.src" location="${quakeinjector.basedir}/src"/>
   <property name="quakeinjector.build" location="${quakeinjector.basedir}/bin"/>
   <property name="quakeinjector.dist"  location="${quakeinjector.basedir}/dist"/>
+  <property name="quakeinjector.doc"  location="${quakeinjector.basedir}/doc"/>
   <property name="quakeinjector.res"  location="${quakeinjector.basedir}/res"/>
   <property name="quakeinjector.webstart"  location="${quakeinjector.basedir}/webstart"/>
 
@@ -48,6 +49,7 @@
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${quakeinjector.build}"/>
     <mkdir dir="${quakeinjector.dist}"/>
+    <mkdir dir="${quakeinjector.doc}"/>
     <mkdir dir="${quakeinjector.res}"/>
     <mkdir dir="${quakeinjector.webstart}"/>
   </target>
@@ -149,4 +151,19 @@ public final class BuildCommit {
       </manifest>
 	</jar>
   </target>
+
+  <target name="javadoc" 
+          description="Compile javadoc">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javadoc destdir="${quakeinjector.doc}"
+			 classpathref="quakeinjector.class.path" 
+			 doctitle="Quakeinjector"
+			 access="private"
+			 >
+	  <sourcepath>
+		<path path="${quakeinjector.src}" />
+	  </sourcepath>
+	</javadoc>
+  </target> 
+
 </project>
