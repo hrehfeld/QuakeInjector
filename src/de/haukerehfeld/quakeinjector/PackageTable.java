@@ -73,6 +73,7 @@ public class PackageTable extends JTable {
             c.setBackground(UIManager.getColor("Table.selectionBackground"));
             c.setForeground(UIManager.getColor("Table.selectionForeground"));
         }
+        //disable cell focus
         if (c instanceof JComponent) { ((JComponent) c).setBorder(border); }
         return c;
     }	
