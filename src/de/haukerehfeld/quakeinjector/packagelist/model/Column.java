@@ -28,6 +28,12 @@ import de.haukerehfeld.quakeinjector.Package;
  * Enum for the table columns. Saves all info about them.
  */
 public enum Column {
+		INSTALLED("") {
+		public Object getData(Package p) {
+			return new Boolean(p.isInstalled());
+		}
+		public Class<? extends Object> getColumnClass() { return Boolean.class; }
+		},
 	NAME("Name") {
 		public Object getData(Package p) {
 			return p.getId();
@@ -58,12 +64,6 @@ public enum Column {
 			return p.getRating();
 		}
 		public Class<? extends Object> getColumnClass() { return Package.Rating.class; }
-	},
-		INSTALLED("") {
-		public Object getData(Package p) {
-			return new Boolean(p.isInstalled());
-		}
-		public Class<? extends Object> getColumnClass() { return Boolean.class; }
 	}
 		;
 
