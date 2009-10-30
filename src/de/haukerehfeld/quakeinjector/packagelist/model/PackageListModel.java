@@ -92,8 +92,9 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 				map.removeChangeListener(this);
 			}
 		}
-		
-		
+
+		data.sort();
+
 		//add to new
 		this.data = data;
 		data.addChangeListener(this);
