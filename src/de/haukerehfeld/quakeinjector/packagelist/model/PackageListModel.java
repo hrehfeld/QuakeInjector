@@ -65,8 +65,13 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		m.getColumn(Column.getColumnNumber(Column.AUTHOR)).setPreferredWidth(100);
 		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setResizable(false);
 		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setMaxWidth(16);
-		m.getColumn(Column.getColumnNumber(Column.RATING)).setMaxWidth(5 * (RatingRenderer.ICONSIZE + RatingRenderer.HORIZONTALGAP) + RatingRenderer.HORIZONTALGAP);
+
+		int ratingSize = 5 * (RatingRenderer.ICONSIZE + RatingRenderer.HORIZONTALGAP)
+		    + RatingRenderer.HORIZONTALGAP;
+		m.getColumn(Column.getColumnNumber(Column.RATING)).setMinWidth(ratingSize);
+		m.getColumn(Column.getColumnNumber(Column.RATING)).setMaxWidth(ratingSize);
 		m.getColumn(Column.getColumnNumber(Column.RATING)).setResizable(false);
+		
 		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setPreferredWidth(70);
 		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setMaxWidth(100);
 
@@ -221,7 +226,6 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 
 		public RatingRenderer() {
 			super();
-			setOpaque(false);
 			EmptyBorder border = new EmptyBorder(0,0,0,0);
 			setBorder(border);
 			((FlowLayout) getLayout()).setHgap(HORIZONTALGAP);
