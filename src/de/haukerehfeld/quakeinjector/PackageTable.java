@@ -26,6 +26,8 @@ import java.awt.Component;
 import javax.swing.UIManager;
 
 import javax.swing.JTable;
+import javax.swing.JComponent;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 
@@ -38,6 +40,8 @@ public class PackageTable extends JTable {
 	private static final int ALTERNATING = 10;
 	private static final Color NORMALROWCOLOR = UIManager.getColor("Table.background");
 	private static final Color ALTERNATINGROWCOLOR = createAlternatingColor(NORMALROWCOLOR, ALTERNATING);
+
+	private final EmptyBorder border = new EmptyBorder(0,0,0,0);
 	                                                           
 
 	public PackageTable(PackageListModel maplist) {
@@ -48,6 +52,8 @@ public class PackageTable extends JTable {
 		
 		setPreferredScrollableViewportSize(new Dimension(500, 500));
 		setFillsViewportHeight(true);
+		setColumnSelectionAllowed(false);
+		//setCellSelectionEnabled(false);
 		setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 		setShowGrid(false);
 		setIntercellSpacing(new Dimension());
@@ -67,6 +73,7 @@ public class PackageTable extends JTable {
             c.setBackground(UIManager.getColor("Table.selectionBackground"));
             c.setForeground(UIManager.getColor("Table.selectionForeground"));
         }
+        if (c instanceof JComponent) { ((JComponent) c).setBorder(border); }
         return c;
     }	
 
