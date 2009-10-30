@@ -65,6 +65,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		m.getColumn(Column.getColumnNumber(Column.AUTHOR)).setPreferredWidth(100);
 		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setResizable(false);
 		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setMaxWidth(16);
+		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setMinWidth(16);
 
 		int ratingSize = 5 * (RatingRenderer.ICONSIZE + RatingRenderer.HORIZONTALGAP)
 		    + RatingRenderer.HORIZONTALGAP;
@@ -72,8 +73,9 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		m.getColumn(Column.getColumnNumber(Column.RATING)).setMaxWidth(ratingSize);
 		m.getColumn(Column.getColumnNumber(Column.RATING)).setResizable(false);
 		
-		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setPreferredWidth(70);
-		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setMaxWidth(100);
+		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setMinWidth(75);
+		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setPreferredWidth(80);
+		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setMaxWidth(80);
 
 	}
 	
