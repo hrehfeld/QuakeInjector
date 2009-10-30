@@ -55,9 +55,9 @@ public enum Column {
 	},
 		RATING("Rating") {
 		public Object getData(Package p) {
-			return p.getRating().toString();
+			return p.getRating();
 		}
-		public Class<? extends Object> getColumnClass() { return String.class; }
+		public Class<? extends Object> getColumnClass() { return Package.Rating.class; }
 	},
 		INSTALLED("") {
 		public Object getData(Package p) {

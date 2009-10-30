@@ -40,6 +40,7 @@ public class PackageTable extends JTable {
 		setPreferredScrollableViewportSize(new Dimension(500, 500));
 		setFillsViewportHeight(true);
 		setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+		setDefaultRenderer(Package.Rating.class, new PackageListModel.RatingRenderer());		
 	}
 
 	@Override

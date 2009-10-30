@@ -203,21 +203,20 @@ public class Package extends SortableRequirement implements Requirement {
 	public void setFileList(PackageFileList fileList) { this.fileList = fileList; }
 
 	public static enum Rating {
-		Unrated("-"),
-		    Crap("|"),
-		    Poor("||"),
-		    Average("|||"),
-		    Nice("||||"),
-		    Excellent("|||||");
+		Unrated(0),
+		    Crap(1),
+		    Poor(2),
+		    Average(3),
+		    Nice(4),
+		    Excellent(5);
 
-		private String description;
-		Rating(String description) {
-			this.description = description;
+		private int rating;
+		Rating(int rating) {
+			this.rating = rating;
 		}
 
-		@Override
-		public String toString() {
-			return description;
+		public int getRating() {
+			return rating;
 		}
 	}
 }

@@ -36,6 +36,17 @@ import de.haukerehfeld.quakeinjector.ChangeListenerList;
 import de.haukerehfeld.quakeinjector.PackageList;
 import de.haukerehfeld.quakeinjector.Package;
 
+import javax.swing.table.TableCellRenderer;
+import java.util.List;
+import java.util.ArrayList;
+
+import java.awt.Component;
+import java.awt.FlowLayout;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import javax.swing.ImageIcon;
+import javax.swing.border.EmptyBorder;
+
 public class PackageListModel extends AbstractTableModel implements ChangeListener {
 	private ChangeListenerList listeners = new ChangeListenerList();
 	
@@ -54,7 +65,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		m.getColumn(Column.getColumnNumber(Column.AUTHOR)).setPreferredWidth(100);
 		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setResizable(false);
 		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setMaxWidth(16);
-		m.getColumn(Column.getColumnNumber(Column.RATING)).setMaxWidth(50);
+		m.getColumn(Column.getColumnNumber(Column.RATING)).setMaxWidth(5 * (RatingRenderer.ICONSIZE + RatingRenderer.HORIZONTALGAP) + RatingRenderer.HORIZONTALGAP);
 		m.getColumn(Column.getColumnNumber(Column.RATING)).setResizable(false);
 		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setPreferredWidth(70);
 		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setMaxWidth(100);
@@ -197,6 +208,66 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		return rf;
 	}					
 	
+	public static class RatingRenderer extends JPanel implements TableCellRenderer {
+		private static final int HORIZONTALGAP = 2;
+		private static final int ICONSIZE = 8;
+
+		private ImageIcon activeIcon = createImageIcon("/star_spirit_8.png",
+		                                               "activeStar");
+		private ImageIcon inactiveIcon = createImageIcon("/star_spirit_8_inactive.png",
+		                                                 "inactiveStar");
+
+		private List<JLabel> ratingLabels = new ArrayList<JLabel>(5);
+
+		public RatingRenderer() {
+			super();
+			setOpaque(false);
+			EmptyBorder border = new EmptyBorder(0,0,0,0);
+			setBorder(border);
+			((FlowLayout) getLayout()).setHgap(HORIZONTALGAP);
+			((FlowLayout) getLayout()).setVgap(4);
+
+			for (int i = 0; i < 5; ++i) {
+				JLabel label = new JLabel(activeIcon);
+				label.setDisabledIcon(inactiveIcon);
+				label.setBorder(border);
+				label.setOpaque(false);
+				add(label);
+				ratingLabels.add(label);
+			}
+		}
+
+		public Component getTableCellRendererComponent(JTable table,
+		                                               Object value,
+		                                               boolean isSelected,
+		                                               boolean hasFocus,
+		                                               int row,
+		                                               int column) {
+			if (value instanceof Package.Rating) {
+				Package.Rating rating = (Package.Rating) value;
+				int i = 0;
+				for (JLabel label: ratingLabels) {
+					boolean enabled = true;
+					if (i >= rating.getRating()) {
+						enabled = false;
+					}
+					label.setEnabled(enabled);
+					++i;
+				}
+			}
+			return this;
+		}
+
+		private ImageIcon createImageIcon(String path, String description) {
+			java.net.URL imgURL = getClass().getResource(path);
+			if (imgURL != null) {
+				return new ImageIcon(imgURL, description);
+			} else {
+				System.err.println("Couldn't find file: " + path);
+				return null;
+			}
+		}
+	}	
 
 //     /*
 //      * Don't need to implement this method unless your table's
