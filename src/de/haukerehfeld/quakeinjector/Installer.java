@@ -303,22 +303,15 @@ public class Installer {
 		    InterruptedException,
 		    InvocationTargetException,
 			ExecutionException {
-			class StartOverwriteDialogue extends SwingWorker<List<File>,Void> {
+			//popup overwrite dialog
+			SwingWorker<List<File>,Void> dialogue = new SwingWorker<List<File>,Void>() {
 				public List<File> doInBackground() {
 					return handler.overwrite(files);
 				}
 			};
-
-			//popup overwrite dialog
-			StartOverwriteDialogue dialogue = new StartOverwriteDialogue();
 			SwingUtilities.invokeAndWait(dialogue);
 
 			List<File> overwrites = dialogue.get();
-
-			if (overwrites == null || overwrites.isEmpty()) {
-				cancel(true);
-				return null;
-			}
 			return overwrites;
 		}
 		
