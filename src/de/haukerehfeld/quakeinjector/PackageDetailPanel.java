@@ -36,6 +36,12 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent;
+
+import edu.stanford.ejalbert.BrowserLauncher;
+
+
 /**
  * the panel that shows Info about the selected map
  */
@@ -51,8 +57,21 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 	private JLabel date;
 	private JEditorPane description;
 
+	private BrowserLauncher launcher = null;
+
 	public PackageDetailPanel() {
 		super(new GridBagLayout());
+
+
+		{
+			try {
+				launcher = new BrowserLauncher();
+			}
+			catch (Exception e) {
+				System.err.println("Couldn't init browserlauncher: " + e.getMessage());
+				e.printStackTrace();
+			}
+		}
 
 		title = new JLabel();
 // 		panelSize = new Dimension(getSize());
@@ -69,6 +88,21 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 		description = new JEditorPane("text/html", "");
 		description.setEditable(false);
+		description.addHyperlinkListener(new HyperlinkListener() {
+				@Override public void hyperlinkUpdate(HyperlinkEvent e) {
+					if (launcher != null && e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+						java.net.URL url = e.getURL();
+						if (url != null) {
+							launcher.openURLinBrowser(url.toString());
+						}
+						else {
+							System.err.println("Weird hyperlink with null URL: " + e.getDescription());
+							String link = "http://www.quaddicted.com/reviews/" + e.getDescription();
+							launcher.openURLinBrowser(link);
+						}
+					}
+				}
+			});
 
 		//Put the editor pane in a scroll pane.
 		JScrollPane descriptionScroll = new JScrollPane(description);

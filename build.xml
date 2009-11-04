@@ -13,6 +13,7 @@
 
   <property name="quakeinjector.src" location="${quakeinjector.basedir}/src"/>
   <property name="quakeinjector.build" location="${quakeinjector.basedir}/bin"/>
+  <property name="quakeinjector.lib" location="${quakeinjector.basedir}/lib"/>
   <property name="quakeinjector.dist"  location="${quakeinjector.basedir}/dist"/>
   <property name="quakeinjector.doc"  location="${quakeinjector.basedir}/doc"/>
   <property name="quakeinjector.res"  location="${quakeinjector.basedir}/res"/>
@@ -25,6 +26,8 @@
 	<pathelement location="${quakeinjector.build}"/>
 	<!-- ressources -->
 	<pathelement location="${quakeinjector.res}"/>
+	<pathelement location="jnlp.jar"/>
+	<fileset dir="${quakeinjector.lib}" includes="**/*.jar" />
   </path>
   <property name="quakeinjector.class.path" refid="quakeinjector.class.path"/>
 
