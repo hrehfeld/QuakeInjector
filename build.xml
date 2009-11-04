@@ -134,6 +134,7 @@ public final class BuildCommit {
 		 they're created above -->
 	<path id="jars">
       <fileset dir="${quakeinjector.dist}" includes="*.jar"/>
+      <fileset dir="${quakeinjector.lib}" includes="*.jar"/>
 	</path>
 
 	<pathconvert dirsep="/" pathsep=" " property="jars" refid="jars">
