@@ -26,6 +26,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.TimeZone;
 
 import javax.swing.JEditorPane;
@@ -169,7 +170,11 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		if (requirements.isEmpty()) {
 			return "";
 		}
-		return "<p>Requires: " + Utils.join(requirements, ", ") + ".</p>";
+		List<String> links = new ArrayList<String>(requirements.size());
+		for (Requirement r: requirements) {
+			links.add("<a href=\"" + r.getId() + ".html\">" + r.getId() + "</a>");
+		}
+		return "<p>Requires: " + Utils.join(links, ", ") + ".</p>";
 	}
 
 	@Override
