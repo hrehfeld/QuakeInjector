@@ -23,6 +23,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import javax.swing.Box;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -31,12 +32,17 @@ import java.util.Queue;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.JProgressBar;
+
+import javax.swing.Scrollable;
+import java.awt.Rectangle;
+
 
 import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 
 
-public class InstallQueuePanel extends JPanel {
+public class InstallQueuePanel extends JPanel implements Scrollable {
 	private final static int size = 5;
 	private final static int rowHeight = 20;
 
@@ -46,9 +52,14 @@ public class InstallQueuePanel extends JPanel {
 	
 	public InstallQueuePanel() {
 		setLayout(layout);
-		setPreferredSize(new Dimension(0, size * rowHeight));
+		//setPreferredSize(new Dimension(0, size * rowHeight));
 	}
 
+	private class RowConstraints extends GridBagConstraints {{
+		anchor = CENTER;
+		fill = HORIZONTAL;
+		insets = new java.awt.Insets(3, 3, 3, 3);
+	}}
 
 	/**
 	 * @return PropertyChangeListener that listens on "progress" for the progressbar
@@ -58,28 +69,26 @@ public class InstallQueuePanel extends JPanel {
 		progress.setString(ProgressPopup.progressString(description, 0));
 		progress.setValue(0);
 		progress.setStringPainted(true);
-		add(progress, new GridBagConstraints() {{
-			anchor = CENTER;
-			gridx = 0;
-			fill = BOTH;
+		add(progress, new RowConstraints() {{
 			weightx = 1;
+			weighty = 1;
+			gridy = jobs.size() + 1;
 		}});
 
 		JButton cancelButton;
 		cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(cancelAction);
-		add(cancelButton, new GridBagConstraints() {{
-			anchor = CENTER;
-			fill = BOTH;
+		add(cancelButton, new RowConstraints() {{
 			gridx = 1;
+			gridy = jobs.size() + 1;
 		}});
-		
-
 
 		Job progressListener
 			= new Job(progress, cancelButton, description);
 
 		jobs.offer(progressListener);
+
+		scrollRectToVisible(new Rectangle(0, getHeight(), 0, 100));
 
 		replaceComponents();
 
@@ -88,26 +97,18 @@ public class InstallQueuePanel extends JPanel {
 	}
 
 	private void replaceComponents() {
-		while (jobs.size() > size) {
-			Job old = jobs.peek();
-			if (old.finished) {
-				remove(old.progressBar);
-				remove(old.cancelButton);
-				jobs.poll();
-			}
-			else {
-				break;
-			}
-		}
-
 		int row = 0;
 		for (Job j: jobs) {
-			replaceToRow(j.progressBar, row);
 			if (!j.finished) {
+				replaceToRow(j.progressBar, row);
 				replaceToRow(j.cancelButton, row);
+			}
+			else {
+				replaceToRow(j.finishedLabel, row);
 			}
 			row++;
 		}
+
 		revalidate();
 		repaint();
 	}
@@ -123,20 +124,62 @@ public class InstallQueuePanel extends JPanel {
 		con.gridwidth++;
 		layout.setConstraints(c, con);
 	}
+
+	private int getRow(Component c) {
+		return layout.getConstraints(c).gridy;
+	}
+
 	
-	public void finished(Job j, String message) {
+	public void finished(final Job j, String message) {
 		j.finish(message);
 
 		remove(j.cancelButton);
-		spanRow(j.progressBar);
+		remove(j.progressBar);
+		add(j.finishedLabel,
+		    new RowConstraints() {{
+				anchor = PAGE_START;
+				fill = HORIZONTAL;
+				weightx = 1;
+				weighty = 1;
+				gridwidth = 2;
+				gridy = getRow(j.progressBar);
+			}});
+		//spanRow(j.progressBar);
 		
 		replaceComponents();
 
 	}
 
+	@Override
+	public Dimension getPreferredScrollableViewportSize() {
+		return getPreferredSize();
+	}
+
+	@Override
+	public int getScrollableUnitIncrement(Rectangle visibleRect,
+	                                      int orientation,
+	                                      int direction) {
+		return rowHeight;
+	}
+
+	@Override
+	public int getScrollableBlockIncrement(Rectangle visibleRect,
+	                                       int orientation,
+	                                       int direction) {
+		return rowHeight;
+	}
+
+	@Override
+	public boolean getScrollableTracksViewportWidth() { return true; }
+	@Override
+	public boolean getScrollableTracksViewportHeight() { return false; }
+
+
 	public static class Job implements PropertyChangeListener {
 		private JProgressBar progressBar;
 		private JButton cancelButton;
+		private JLabel finishedLabel;
+		
 		private String description;
 
 		private boolean finished = false;
@@ -165,8 +208,12 @@ public class InstallQueuePanel extends JPanel {
 			finished = true;
 			
 			progressBar.setEnabled(false);
+			//progressBar.setString(ProgressPopup.progressString(description, message));
 
-			progressBar.setString(ProgressPopup.progressString(description, message));
+			finishedLabel = new JLabel(ProgressPopup.progressString(description, message));
+			finishedLabel.setPreferredSize(new Dimension((int) finishedLabel.getPreferredSize().getWidth(),
+			                                             (int) cancelButton.getSize().getHeight()));
+			
 		}
 	}
 }
