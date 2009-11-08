@@ -64,8 +64,6 @@ public class QuakeInjector extends JFrame {
 	private static final int minWidth = 300;
 	private static final int minHeight = 300;
 
-	private Paths paths;
-
 	private EngineStarter starter;
 
 	private PackageInteractionPanel interactionPanel;
@@ -135,21 +133,27 @@ public class QuakeInjector extends JFrame {
 	 */
 	private void setWindowSize() {
 		Configuration c = getConfig();
+
+		Integer posX = c.MainWindowPositionX.get();
+		Integer posY = c.MainWindowPositionY.get();
+		Integer width = c.MainWindowWidth.get();
+		Integer height = c.MainWindowHeight.get();
+
 		
-		if (c.hasMainWindowSettings()) {
-			int posX = c.getMainWindowPositionX();
-			int posY = c.getMainWindowPositionY();
-			int width = c.getMainWindowWidth();
-			int height = c.getMainWindowHeight();
+		if (width != null && height != null) {
+			if (posX != null && posY != null) {
+				System.out.println("Setting window bounds: "
+				                   + posX + ", "
+				                   + posY + ", "
+				                   + width + ", "
+				                   + height);
 			
-			System.out.println("Setting window size: "
-			                   + posX + ", "
-			                   + posY + ", "
-			                   + width + ", "
-			                   + height);
-			
-			setBounds(posX, posY, width, height);
-			setSize(width, height);
+				setBounds(posX, posY, width, height);
+			}
+			else {
+				System.out.println("Setting window size: " + width + ", " + height);
+				setSize(width, height);
+			}
 		}
 		else {
 			pack();
@@ -166,18 +170,18 @@ public class QuakeInjector extends JFrame {
 		parseInstalled();
 		final Future<Void> requirementsListUpdater = parseDatabaseAndSetList();
 
-		paths = new Paths(getConfig().get("repositoryBase"));
-		
-		File enginePath = new File(getConfig().getEnginePath());
-		File engineExe = new File(getConfig().getEnginePath()
+		Configuration.EnginePath enginePathV = getConfig().EnginePath;
+		File enginePath = new File(enginePathV.toString());
+		File engineExe = new File(enginePathV
 		                          + File.separator
-		                          + getConfig().getEngineExecutable());
+		                          + getConfig().EngineExecutable);
 		starter = new EngineStarter(enginePath,
 		                            engineExe,
-									getConfig().getEngineCommandline());
-		installer = new Installer(getConfig().getEnginePath(), getConfig().getEnginePath() + File.separator + "downloads");
+		                            getConfig().EngineCommandLine);
+		installer = new Installer(enginePathV,
+		                          getConfig().DownloadPath);
 		interactionPanel.init(installer,
-		                      paths,
+		                      getConfig().RepositoryBasePath,
 		                      packages,
 		                      starter);
 
@@ -226,7 +230,7 @@ public class QuakeInjector extends JFrame {
 	 */
 	private Future<List<Requirement>> parseDatabase() {
 		final PackageDatabaseParserWorker dbParse
-		    = new PackageDatabaseParserWorker(getConfig().getRepositoryDatabase());
+		    = new PackageDatabaseParserWorker(getConfig().RepositoryDatabasePath.get());
 
 		final ProgressPopup dbpopup =
 		    new ProgressPopup("Downloading package database",
@@ -340,9 +344,10 @@ public class QuakeInjector extends JFrame {
 	private void showEngineConfig(boolean rogueInstalled, boolean hipnoticInstalled) {
 		final EngineConfigDialog d
 		    = new EngineConfigDialog(QuakeInjector.this,
-		                             getConfig().getEnginePath(),
-		                             getConfig().getEngineExecutable(),
-		                             getConfig().getEngineCommandline(),
+		                             getConfig().EnginePath,
+		                             getConfig().EngineExecutable,
+		                             getConfig().DownloadPath,
+		                             getConfig().EngineCommandLine,
 		                             rogueInstalled,
 		                             hipnoticInstalled
 		        );
@@ -350,6 +355,7 @@ public class QuakeInjector extends JFrame {
 				public void stateChanged(ChangeEvent e) {
 								saveEngineConfig(d.getEnginePath(),
 								                 d.getEngineExecutable(),
+								                 d.getDownloadPath(),
 								                 d.getCommandline(),
 								                 d.getRogueInstalled(),
 								                 d.getHipnoticInstalled());
@@ -362,22 +368,26 @@ public class QuakeInjector extends JFrame {
 
 	private void saveEngineConfig(File enginePath,
 								  File engineExecutable,
+	                              File downloadPath,
 	                              String commandline,
 	                              boolean rogueInstalled,
 	                              boolean hipnoticInstalled) {
-		setEngineConfig(enginePath, engineExecutable, commandline,
-		                rogueInstalled, hipnoticInstalled);
+		Configuration c = getConfig();
+		c.EnginePath.set(enginePath.getAbsolutePath());
+		c.EngineExecutable.set(RelativePath.getRelativePath(enginePath, engineExecutable).toString());
+		c.EngineCommandLine.set(commandline);
 
-		getConfig().setEnginePath(enginePath.getAbsolutePath());
-		getConfig().setEngineExecutable(RelativePath.getRelativePath(enginePath, engineExecutable).toString());
-		getConfig().setEngineCommandline(commandline);
+		c.DownloadPath.set(downloadPath.getAbsolutePath());
+
+		setEngineConfig(enginePath, engineExecutable, getConfig().EngineCommandLine, rogueInstalled, hipnoticInstalled);
+
 		
-		getConfig().write();
+		c.write();
 	}
 
 	private void setEngineConfig(File enginePath,
 								 File engineExecutable,
-	                             String commandline,
+	                             Configuration.EngineCommandLine commandline,
 	                             boolean rogueInstalled,
 	                             boolean hipnoticInstalled) {
 		starter.setQuakeDirectory(enginePath);
@@ -484,8 +494,16 @@ public class QuakeInjector extends JFrame {
 			fill = BOTH;
 			gridy = 3;
 			weightx = 1;
+			weighty = 1;
 		}});
 
+		JSplitPane infoSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+		                                      infoPanel,
+		                                      queueScroll);
+		infoSplit.setOneTouchExpandable(true);
+		infoSplit.setResizeWeight(1);
+		infoSplit.setContinuousLayout(true);
+		//infoSplit.setMinimumSize(new Dimension(450, 300));
 		
 		PackageListSelectionHandler selectionHandler
 			= new PackageListSelectionHandler(maplist,
@@ -497,7 +515,7 @@ public class QuakeInjector extends JFrame {
 
 		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 		                                      mainPanel,
-		                                      infoPanel);
+		                                      infoSplit);
 		splitPane.setOneTouchExpandable(true);
 		splitPane.setResizeWeight(1);
 		splitPane.setContinuousLayout(true);
@@ -546,19 +564,19 @@ public class QuakeInjector extends JFrame {
 
 
 	public static void main(String[] args) {
-// 		try {
-//         // Set System L&F
-// 			javax.swing.UIManager.setLookAndFeel(
-// 				javax.swing.UIManager.getSystemLookAndFeelClassName());
-// 		} 
-// 		catch (javax.swing.UnsupportedLookAndFeelException e) {
-// 		}
-// 		catch (ClassNotFoundException e) {
-// 		}
-// 		catch (InstantiationException e) {
-// 		}
-// 		catch (IllegalAccessException e) {
-// 		}
+		// try {
+        // // Set System L&F
+		// 	javax.swing.UIManager.setLookAndFeel(
+		// 		javax.swing.UIManager.getSystemLookAndFeelClassName());
+		// } 
+		// catch (javax.swing.UnsupportedLookAndFeelException e) {
+		// }
+		// catch (ClassNotFoundException e) {
+		// }
+		// catch (InstantiationException e) {
+		// }
+		// catch (IllegalAccessException e) {
+		// }
 
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
@@ -581,10 +599,10 @@ public class QuakeInjector extends JFrame {
 		{
 			Configuration config = getConfig();
 			Rectangle bounds = QuakeInjector.this.getBounds();
-			config.setMainWindowPositionX((int) bounds.getX());
-			config.setMainWindowPositionY((int) bounds.getY());
-			config.setMainWindowWidth((int) bounds.getWidth());
-			config.setMainWindowHeight((int) bounds.getHeight());
+			config.MainWindowPositionX.set((int) bounds.getX());
+			config.MainWindowPositionY.set((int) bounds.getY());
+			config.MainWindowWidth.set((int) bounds.getWidth());
+			config.MainWindowHeight.set((int) bounds.getHeight());
 			config.write();
 			System.out.println("Closing Window: " + (int) bounds.getWidth()
 			    + (int) bounds.getHeight());

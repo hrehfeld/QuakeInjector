@@ -45,17 +45,16 @@ public class Installer {
 	private static final int simultanousDownloads = 1;
 	private static final int simultanousInstalls = 1;
 
-	private Paths paths;
 	private String installDirectory;
-	private String downloadDirectory;
+	private Configuration.DownloadPath downloadDirectory;
 	
 	private ExecutorService activeDownloaders = Executors.newFixedThreadPool(simultanousDownloads);
 	private ExecutorService activeInstallers = Executors.newFixedThreadPool(simultanousInstalls);
 
 	private Map<Package,Worker> queue = new HashMap<Package,Worker>();
 
-	public Installer(String installDirectory, String downloadDirectory) {
-		this.installDirectory = installDirectory;
+	public Installer(Configuration.EnginePath installDirectory, Configuration.DownloadPath downloadDirectory) {
+		this.installDirectory = installDirectory.get();
 		this.downloadDirectory = downloadDirectory;
 	}
 
@@ -68,7 +67,7 @@ public class Installer {
 	}
 
 	public boolean checkDownloadDirectory() {
-		return new File(downloadDirectory).canWrite();
+		return new File(downloadDirectory.get()).canWrite();
 	}
 	
 	public boolean alreadyQueued(final Package map) {
@@ -194,6 +193,7 @@ public class Installer {
 		    public Void doInBackground() {
 			try {
 				final File downloadFile = new File(downloadDirectory + File.separator + map.getId() + ".zip");
+				System.out.println("Downloading to " + downloadFile);
 
 				long downloadSize;
 				if (!downloadFile.exists()) {

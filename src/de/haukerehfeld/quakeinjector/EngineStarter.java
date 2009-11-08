@@ -27,10 +27,10 @@ public class EngineStarter {
 	private File quakeExe;
 	private String quakeCmdline;
 
-	public EngineStarter(File quakeDir, File quakeExe, String quakeCmdline) {
+	public EngineStarter(File quakeDir, File quakeExe, Configuration.EngineCommandLine quakeCmdline) {
 		this.quakeDir = quakeDir;
 		this.quakeExe = quakeExe;
-		this.quakeCmdline = quakeCmdline;
+		this.quakeCmdline = quakeCmdline.get();
 	}
 
 	public void start(String mapCmdline, String startmap) throws java.io.IOException {
@@ -63,8 +63,8 @@ public class EngineStarter {
 		this.quakeExe = exe;
 	}
 
-	public void setQuakeCommandline(String cmdline) {
-		this.quakeCmdline = cmdline;
+	public void setQuakeCommandline(Configuration.EngineCommandLine cmdline) {
+		this.quakeCmdline = cmdline.get();
 	}
 
 	public boolean checkPaths() {

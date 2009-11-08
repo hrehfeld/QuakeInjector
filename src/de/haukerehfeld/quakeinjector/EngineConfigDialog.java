@@ -53,14 +53,18 @@ public class EngineConfigDialog extends JDialog {
 	private final JPathPanel engineExecutable;
 	private final JTextField engineCommandline;
 
+	private final JPathPanel downloadPath;
+
+
 	private final JCheckBox rogue;
 	private final JCheckBox hipnotic;
 	
 	
 	public EngineConfigDialog(final JFrame frame,
-							  String enginePathDefault,
-							  String engineExeDefault,
-	                          String cmdlineDefault,
+							  Configuration.EnginePath enginePathDefault,
+							  Configuration.EngineExecutable engineExeDefault,
+	                          Configuration.DownloadPath downloadPathDefault,
+	                          Configuration.EngineCommandLine cmdlineDefault,
 	                          boolean rogueInstalled,
 	                          boolean hipnoticInstalled) {
 		super(frame, windowTitle, true);
@@ -100,34 +104,15 @@ public class EngineConfigDialog extends JDialog {
 		{
 			JLabel cmdlineLabel = new JLabel("Quake commandline options");
 			configPanel.add(cmdlineLabel, new LabelConstraints());
-			this.engineCommandline = new JTextField(cmdlineDefault, 40);
+			this.engineCommandline = new JTextField(cmdlineDefault.get(), 40);
 			configPanel.add(engineCommandline, new InputConstraints());
 		}
 		//"Path to quake directory",
 		JLabel enginePathLabel = new JLabel("Quake Directory");
 		configPanel.add(enginePathLabel, new LabelConstraints() {{ gridy = 1; }});
-		enginePath = new JPathPanel(new JPathPanel.Verifier() {
-				public boolean verify(File f) {
-					return (f.exists()
-							&& f.isDirectory()
-							&& f.canRead()
-							&& f.canWrite());
-				}
-				public String errorMessage(File f) {
-					if (!f.exists()) {
-						return "Doesn't exist!";
-					}
-					else if (!f.isDirectory()) {
-						return "Is not a directory!";
-					}
-					else if (!f.canWrite()) {
-						return "Cannot be written to!";
-					}
-					return null;
-				}
-			},
-			enginePathDefault,
-			javax.swing.JFileChooser.DIRECTORIES_ONLY);
+		enginePath = new JPathPanel(new JPathPanel.WritableDirectoryVerifier(),
+		                            enginePathDefault.get(),
+		                            javax.swing.JFileChooser.DIRECTORIES_ONLY);
 		configPanel.add(enginePath, new InputConstraints() {{ gridy = 1; }});
 		
 		JLabel engineExeLabel = new JLabel("Quake Executable");
@@ -153,8 +138,8 @@ public class EngineConfigDialog extends JDialog {
 					return null;
 				}
 			},
-			engineExeDefault,
-			new File(enginePathDefault),
+			engineExeDefault.get(),
+			new File(enginePathDefault.get()),
 			javax.swing.JFileChooser.FILES_ONLY);
 		configPanel.add(engineExecutable, new InputConstraints() {{ gridy = 2; }});
 
@@ -193,21 +178,32 @@ public class EngineConfigDialog extends JDialog {
 		enginePath.verify();
 		engineExecutable.verify();
 
+		{
+			//"Path to quake directory",
+			configPanel.add(new JLabel("Download Directory"), new LabelConstraints() {{ gridy = 3; }});
+			downloadPath = new JPathPanel(new JPathPanel.WritableDirectoryVerifier(),
+			                              downloadPathDefault.get(),
+			                              javax.swing.JFileChooser.DIRECTORIES_ONLY);
+			configPanel.add(downloadPath, new InputConstraints() {{ gridy = 3; }});
+			downloadPath.verify();
+			
+		}
+
 
 		{
 			JLabel expansionsInstalled = new JLabel("Expansion packs installed");
-			configPanel.add(expansionsInstalled, new LabelConstraints() {{ gridy = 3; }});
+			configPanel.add(expansionsInstalled, new LabelConstraints() {{ gridy = 4; }});
 
 			rogue = new JCheckBox("rogue");
 			rogue.setMnemonic(KeyEvent.VK_R);
 			rogue.setSelected(rogueInstalled);
-			configPanel.add(rogue, new InputConstraints() {{ gridy = 3; gridwidth = 1; }});
+			configPanel.add(rogue, new InputConstraints() {{ gridy = 4; gridwidth = 1; }});
 
 			hipnotic = new JCheckBox("hipnotic");
 			hipnotic.setMnemonic(KeyEvent.VK_H);
 			hipnotic.setSelected(hipnoticInstalled);
 			configPanel.add(hipnotic, new InputConstraints() {{
-				gridy = 3;
+				gridy = 4;
 				gridx = 2;
 				gridwidth = 1;
 			}});
@@ -269,6 +265,10 @@ public class EngineConfigDialog extends JDialog {
 	 * get rogueInstalled
 	 */
 	public boolean getRogueInstalled() { return rogue.isSelected(); }
+
+	public File getDownloadPath() {
+		return downloadPath.getPath();
+	}
 	
 	public void addChangeListener(ChangeListener l) {
 		listeners.addChangeListener(l);

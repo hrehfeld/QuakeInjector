@@ -235,6 +235,27 @@ public class JPathPanel extends JPanel {
 		public String errorMessage(File file);
 	}
 
+	public static class WritableDirectoryVerifier implements Verifier {
+		public boolean verify(File f) {
+			return (f.exists()
+			        && f.isDirectory()
+			        && f.canRead()
+			        && f.canWrite());
+		}
+		public String errorMessage(File f) {
+			if (!f.exists()) {
+				return "Doesn't exist!";
+			}
+			else if (!f.isDirectory()) {
+				return "Is not a directory!";
+			}
+			else if (!f.canWrite()) {
+				return "Cannot be written to!";
+			}
+			return null;
+		}
+	}
+
 
 	private class PathVerifier extends InputVerifier implements DocumentListener {
 		@Override
@@ -259,4 +280,5 @@ public class JPathPanel extends JPanel {
 			return true;
 		}
 	}
+
 }

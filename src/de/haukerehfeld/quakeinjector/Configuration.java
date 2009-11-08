@@ -24,32 +24,110 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
+import java.util.List;
+import java.util.ArrayList;
+
+import java.lang.reflect.Field;
+
 /**
  * Handle the config/properties file and allow access to properties
  */
 public class Configuration {
-	private static final String enginePath = "enginePath";
-	private static final String engineExecutable = "engineExecutable";
-	private static final String engineCommandline = "engineCommandline";
-	private static final String repositoryDatabase = "repositoryDatabase";
-	private static final String rogueInstalled = "rogueInstalled";
-	private static final String hipnoticInstalled = "hipnoticInstalled";
+	public class EnginePath extends StringValue {
+		private EnginePath() { super("enginePath", ""); }
+	}
+	public final EnginePath EnginePath = new EnginePath();
 
-	private static final String mainWindowPositionX = "mainWindowPositionX";
-	private static final String mainWindowPositionY = "mainWindowPositionY";
-	private static final String mainWindowWidth = "mainWindowWidth";
-	private static final String mainWindowHeight = "mainWindowHeight";
+	public class EngineExecutable extends StringValue {
+		private EngineExecutable() { super("engineExecutable", ""); }
+	}
+	public final EngineExecutable EngineExecutable = new EngineExecutable();
 
+	public class DownloadPath extends StringValue {
+		private DownloadPath() { super("downloadPath", ""); }
+	}
+	public final DownloadPath DownloadPath = new DownloadPath();
+
+	public class EngineCommandLine extends StringValue {
+		private EngineCommandLine() { super("engineCommandline", ""); }
+	}
+	public final EngineCommandLine EngineCommandLine = new EngineCommandLine();
+
+	public class RepositoryDatabasePath extends StringValue {
+		private RepositoryDatabasePath() { super("repositoryDatabase",
+				"http://www.quaddicted.com/reviews/quaddicted_database.xml"); }
+	}
+	public final RepositoryDatabasePath RepositoryDatabasePath = new RepositoryDatabasePath();
+
+	public class RogueInstalled extends BooleanValue {
+		private RogueInstalled() { super("rogueInstalled", false); }
+	}
+	public final RogueInstalled RogueInstalled = new RogueInstalled();
+
+	public class HipnoticInstalled extends BooleanValue {
+		private HipnoticInstalled() { super("hipnoticInstalled", false); }
+	}
+	public final HipnoticInstalled HipnoticInstalled = new HipnoticInstalled();
+
+	public class MainWindowPositionX extends IntegerValue {
+		private MainWindowPositionX() { super("mainWindowPositionX", null); }
+	}
+	public final MainWindowPositionX MainWindowPositionX = new MainWindowPositionX();
+
+	public class MainWindowPositionY extends IntegerValue {
+		private MainWindowPositionY() { super("mainWindowPositionY", null); }
+	}
+	public final MainWindowPositionY MainWindowPositionY = new MainWindowPositionY();
+
+	public class MainWindowWidth extends IntegerValue {
+		private MainWindowWidth() { super("mainWindowWidth", null); }
+	}
+	public final MainWindowWidth MainWindowWidth = new MainWindowWidth();
+
+	public class MainWindowHeight extends IntegerValue {
+		private MainWindowHeight() { super("mainWindowHeight", null); }
+	}
+	public final MainWindowHeight MainWindowHeight = new MainWindowHeight();
+
+	public class RepositoryBasePath extends StringValue {
+		private final static String onlineRepositoryExtension = ".zip";
+		
+		private RepositoryBasePath() { super("repositoryBase", "http://www.quaddicted.com/filebase/"); }
+
+		/**
+		 * Get a complete Url to a map archive file in the repo
+		 */
+		public String getRepositoryUrl(String mapid) {
+			return get() + mapid + onlineRepositoryExtension;
+		}
+	}
+	public final RepositoryBasePath RepositoryBasePath = new RepositoryBasePath();
+
+	public final List<Value<?>> All = new ArrayList<Value<?>>();
 	
 	private Properties properties;
 	private File configFile = new File("config.properties");
 
-	
+	public Configuration() {
+		Field[] fields = getClass().getDeclaredFields();
+		for (Field f: fields) {
+			System.out.println(f.getType());
+			if (Value.class.isAssignableFrom(f.getType())) {
+				try {
+					All.add((Value) f.get(this));
+				}
+				catch (java.lang.IllegalAccessException e) {
+					System.err.println("Ooops");
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
 	/**
 	 * Get a config property
 	 */
-	public String get(String name) {
+	private String get(String name) {
 		init();
 		return properties.getProperty(name);
 	}
@@ -57,7 +135,7 @@ public class Configuration {
 	/**
 	 * set a config property
 	 */
-	public void set(String name, String value) {
+	private void set(String name, String value) {
 		init();
 		properties.setProperty(name, value);
 	}
@@ -120,127 +198,90 @@ public class Configuration {
 	private Properties defaults() {
 		Properties defaults = new Properties();
 
-		defaults.setProperty("downloadDirectory", "/home/hrehfeld/download/");
-		defaults.setProperty("unzipDirectory", "/home/hrehfeld/games/quake/unzip/");
-		
-		defaults.setProperty("repositoryBase", "http://www.quaddicted.com/filebase/");
-		defaults.setProperty(repositoryDatabase,
-							 "http://www.quaddicted.com/reviews/quaddicted_database.xml");
-		defaults.setProperty(enginePath, "");
-		defaults.setProperty(engineExecutable, "");
-		defaults.setProperty(engineCommandline, "");
+		System.out.println("Setting defaults: ");
 
+		for (Value<?> v: All) {
+			Object value = v.defaultValue();
+			String s = (value != null) ? value.toString() : "";
+			defaults.setProperty(v.key(), s);
+			System.out.println("Setting defaults: " + v.key() + ", " + v.defaultValue());
+		}
 		return defaults;
 	}
 
-	public String getEnginePath() {
-		return get(enginePath);
+	public interface Value<T> {
+		public T get();
+		public void set(T v);
+		public String key();
+		public T defaultValue();
 	}
 
-	public void setEnginePath(String enginePath) {
-		set(Configuration.enginePath, enginePath);
+	private abstract class AbstractValue<T> implements Value<T> {
+		private String key;
+		private T defaultValue;
+
+		protected AbstractValue(String key, T defaultValue) {
+			this.key = key;
+			this.defaultValue = defaultValue;
+		}
+
+		protected abstract T stringToValue(String v);
+
+		public String key() {
+			return key;
+		}
+
+		public T defaultValue() {
+			return defaultValue;
+		}
+
+		public T get() {
+			return stringToValue(Configuration.this.get(key));
+		}
+
+		public void set(T v) {
+			Configuration.this.set(key, v.toString());
+		}
 	}
 
-	public String getEngineExecutable() {
-		return get(engineExecutable);
+	private abstract class StringValue extends AbstractValue<String> {
+		protected StringValue(String key, String defaultValue) { super(key, defaultValue); }
+		
+		protected String stringToValue(String v) {
+			return v;
+		}
+
+		public String toString() {
+			return get();
+		}
 	}
 
-	public void setEngineExecutable(String engineExecutable) {
-		set(Configuration.engineExecutable, engineExecutable);
+	private abstract class BooleanValue extends AbstractValue<Boolean> {
+		protected BooleanValue(String key, boolean defaultValue) { super(key, defaultValue); }
+		
+		protected Boolean stringToValue(String v) {
+			return Boolean.valueOf(v);
+		}
 	}
 
-	public String getEngineCommandline() {
-		return get(engineCommandline);
-	}
+	private abstract class IntegerValue extends AbstractValue<Integer> {
+		protected IntegerValue(String key, Integer defaultValue) { super(key, defaultValue); }
+		
+		protected Integer stringToValue(String v) {
+			if (v == null) {
+				return null;
+			}
+			try {
+				return Integer.valueOf(v);
+			}
+			catch (java.lang.NumberFormatException e) {
+				System.err.println(e);
+				e.printStackTrace();
 
-	public void setEngineCommandline(String engineCommandline) {
-		set(Configuration.engineCommandline, engineCommandline);
-	}
-
-	public String getRepositoryDatabase() {
-		return get(repositoryDatabase);
-	}
-
-	/**
-	 * get rogueInstalled
-	 */
-	public boolean getRogueInstalled() { return Boolean.parseBoolean(get(rogueInstalled)); }
-
-	/**
-	 * set rogueInstalled
-	 */
-	public void setRogueInstalled(boolean rogueInstalled) { set(Configuration.rogueInstalled,
-																Boolean.toString(rogueInstalled)); }
-
-	/**
-	 * get hipnoticInstalled
-	 */
-	public boolean getHipnoticInstalled() { return Boolean.parseBoolean(get(hipnoticInstalled)); }
-
-	/**
-	 * set hipnoticInstalled
-	 */
-	public void setHipnoticInstalled(boolean hipnoticInstalled) { set(Configuration.hipnoticInstalled,
-																	  Boolean.toString(hipnoticInstalled)); }
-
-	/**
-	 * get mainWindowPositionX
-	 */
-	public int getMainWindowPositionX() {
-		return Integer.parseInt(get(mainWindowPositionX));
-	}
-    
-    /**
-     * set mainWindowPositionX
-     */
-	public void setMainWindowPositionX(int mainWindowPositionX) {
-		set(Configuration.mainWindowPositionX, Integer.toString(mainWindowPositionX));
-	}
-
-	/**
-	 * get mainWindowPositionY
-	 */
-	public int getMainWindowPositionY() {
-		return Integer.parseInt(get(mainWindowPositionY));
-	}
-    
-    /**
-     * set mainWindowPositionY
-     */
-	public void setMainWindowPositionY(int mainWindowPositionY) {
-		set(Configuration.mainWindowPositionY, Integer.toString(mainWindowPositionY));
+				return null;
+			}
+		}
 	}
 	
 
-	/**
-	 * get mainWindowWidth
-	 */
-	public int getMainWindowWidth() {
-		return Integer.parseInt(get(mainWindowWidth));
-	}
-    
-    /**
-     * set mainWindowWidth
-     */
-	public void setMainWindowWidth(int mainWindowWidth) {
-		set(Configuration.mainWindowWidth, Integer.toString(mainWindowWidth));
-	}
-	
-	/**
-	 * get mainWindowHeight
-	 */
-	public int getMainWindowHeight() {
-		return Integer.parseInt(get(mainWindowHeight));
-	}
-    
-    /**
-     * set mainWindowHeight
-     */
-	public void setMainWindowHeight(int mainWindowHeight) {
-		set(Configuration.mainWindowHeight, Integer.toString(mainWindowHeight));
-	}
-
-	public boolean hasMainWindowSettings() {
-		return get(mainWindowHeight) != null;
-	}
 }

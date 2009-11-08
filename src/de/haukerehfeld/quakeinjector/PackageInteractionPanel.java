@@ -50,7 +50,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 	private QuakeInjector main;
 	
 	private EngineStarter starter;
-	private Paths paths;
+	private Configuration.RepositoryBasePath paths;
 	private PackageList requirements;
 	private InstallQueuePanel installQueue;
 
@@ -84,17 +84,17 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 			});
 
 		add(uninstallButton, new GridBagConstraints() {{
-			fill = HORIZONTAL;
+			fill = BOTH;
 		}});
 
 		installButton = new JButton(installText);
 		installButton.setEnabled(false);
-		int preferredHeight = (int) installButton.getPreferredSize().getHeight();
-		{
-			Dimension maxSize = new Dimension(150, preferredHeight);
-			installButton.setMinimumSize(maxSize);
-			installButton.setPreferredSize(maxSize);
-		}
+		// int preferredHeight = (int) installButton.getPreferredSize().getHeight();
+		// {
+		// 	Dimension maxSize = new Dimension(150, preferredHeight);
+		// 	installButton.setMinimumSize(maxSize);
+		// 	installButton.setPreferredSize(maxSize);
+		// }
 		installButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					install();
@@ -103,7 +103,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 		add(installButton, new GridBagConstraints() {{
 			gridx = 1;
 			gridy = 0;
-			fill = HORIZONTAL;
+			fill = BOTH;
 		}});
 
 		playButton = new JButton(playText);
@@ -116,29 +116,30 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 		add(playButton, new GridBagConstraints() {{
 			gridx = 0;
 			gridy = 1;
-			fill = HORIZONTAL;
+			fill = BOTH;
 		}});
 
 		startmaps = new JComboBox();
-		{
-			Dimension maxSize = new Dimension(100, preferredHeight);
-			startmaps.setPreferredSize(maxSize);
-			startmaps.setMinimumSize(maxSize);
-		}
+		// {
+		// 	Dimension maxSize = new Dimension(100, preferredHeight);
+		// 	startmaps.setPreferredSize(maxSize);
+		// 	startmaps.setMinimumSize(maxSize);
+		// }
 		add(startmaps, new GridBagConstraints() {{
 			gridx = 1;
 			gridy = 1;
-			fill = HORIZONTAL;
+			fill = BOTH;
 			weightx = 1;
 		}});
 
 
 		disableUI();
+		refreshUi();
 	}
 
 
 	public void init(Installer installer,
-	                 Paths paths,
+	                 Configuration.RepositoryBasePath paths,
 	                 PackageList requirements,
 	                 EngineStarter starter) {
 		this.paths = paths;
@@ -517,6 +518,8 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 			startmaps.setEnabled(false);
 		}
 
+		revalidate();
+		repaint();
 	}
 
 	private void disableUI() {
