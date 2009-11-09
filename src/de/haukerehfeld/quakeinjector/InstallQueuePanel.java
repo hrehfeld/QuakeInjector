@@ -45,6 +45,7 @@ import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 public class InstallQueuePanel extends JPanel implements Scrollable {
 	private final static int size = 5;
 	private final static int rowHeight = 20;
+	private final static int MARGIN = 3;
 
 	private GridBagLayout layout = new GridBagLayout();
 	
@@ -52,59 +53,37 @@ public class InstallQueuePanel extends JPanel implements Scrollable {
 	
 	public InstallQueuePanel() {
 		setLayout(layout);
-		//setPreferredSize(new Dimension(0, size * rowHeight));
 	}
-
-	private class RowConstraints extends GridBagConstraints {{
-		anchor = CENTER;
-		fill = HORIZONTAL;
-		insets = new java.awt.Insets(3, 3, 3, 3);
-	}}
 
 	/**
 	 * @return PropertyChangeListener that listens on "progress" for the progressbar
 	 */
 	public Job addJob(String description, ActionListener cancelAction) {
-		final JProgressBar progress = new JProgressBar();
-		progress.setString(ProgressPopup.progressString(description, 0));
-		progress.setValue(0);
-		progress.setStringPainted(true);
-		add(progress, new RowConstraints() {{
-			weightx = 1;
-			weighty = 1;
-			gridy = jobs.size() + 1;
-		}});
-
-		JButton cancelButton;
-		cancelButton = new JButton("Cancel");
-		cancelButton.addActionListener(cancelAction);
-		add(cancelButton, new RowConstraints() {{
-			gridx = 1;
-			gridy = jobs.size() + 1;
-		}});
-
-		Job progressListener
-			= new Job(progress, cancelButton, description);
-
+		Job progressListener = new Job(cancelAction, description);
 		jobs.offer(progressListener);
 
-		scrollRectToVisible(new Rectangle(0, getHeight(), 0, 100));
-
-		replaceComponents();
-
-		return progressListener;
+		layoutComponents();
 		
+		scrollRectToVisible(new Rectangle(0, getHeight(), 0, 100));
+		return progressListener;
 	}
 
-	private void replaceComponents() {
+	private void layoutComponents() {
 		int row = 0;
 		for (Job j: jobs) {
+			remove(j.progressBar);
+			remove(j.cancelButton);
+			remove(j.finishedLabel);
+			System.out.println("removing finishedlabel");
+
+			final int row_ = row;
 			if (!j.finished) {
-				replaceToRow(j.progressBar, row);
-				replaceToRow(j.cancelButton, row);
+				add(j.progressBar, new ProgressBarConstraints() {{ gridy = row_; }});
+				add(j.cancelButton, new CancelButtonConstraints() {{ gridy = row_; }});
 			}
 			else {
-				replaceToRow(j.finishedLabel, row);
+				add(j.finishedLabel, new FinishedLabelConstraints() {{ gridy = row_; }});
+				System.out.println("adding finishedlabel");
 			}
 			row++;
 		}
@@ -113,41 +92,10 @@ public class InstallQueuePanel extends JPanel implements Scrollable {
 		repaint();
 	}
 
-	private void replaceToRow(Component c, int row) {
-		GridBagConstraints con = layout.getConstraints(c);
-		con.gridy = row;
-		layout.setConstraints(c, con);
-	}
-
-	private void spanRow(Component c) {
-		GridBagConstraints con = layout.getConstraints(c);
-		con.gridwidth++;
-		layout.setConstraints(c, con);
-	}
-
-	private int getRow(Component c) {
-		return layout.getConstraints(c).gridy;
-	}
-
-	
 	public void finished(final Job j, String message) {
 		j.finish(message);
 
-		remove(j.cancelButton);
-		remove(j.progressBar);
-		add(j.finishedLabel,
-		    new RowConstraints() {{
-				anchor = PAGE_START;
-				fill = HORIZONTAL;
-				weightx = 1;
-				weighty = 1;
-				gridwidth = 2;
-				gridy = getRow(j.progressBar);
-			}});
-		//spanRow(j.progressBar);
-		
-		replaceComponents();
-
+		layoutComponents();
 	}
 
 	@Override
@@ -174,6 +122,25 @@ public class InstallQueuePanel extends JPanel implements Scrollable {
 	@Override
 	public boolean getScrollableTracksViewportHeight() { return false; }
 
+	private class RowConstraints extends GridBagConstraints {{
+		anchor = CENTER;
+		fill = HORIZONTAL;
+		insets = new java.awt.Insets(MARGIN, MARGIN, MARGIN, MARGIN);
+	}}
+
+	private class ProgressBarConstraints extends RowConstraints {{
+		weightx = 1;
+		weighty = 1;
+	}}
+
+	private class CancelButtonConstraints extends RowConstraints {{
+		gridx = 1;
+	}}
+
+	private class FinishedLabelConstraints extends RowConstraints {{
+		weightx = 1;
+		gridwidth = 2;
+	}}
 
 	public static class Job implements PropertyChangeListener {
 		private JProgressBar progressBar;
@@ -184,12 +151,18 @@ public class InstallQueuePanel extends JPanel implements Scrollable {
 
 		private boolean finished = false;
 
-		public Job(JProgressBar progressBar,
-				   JButton cancelButton,
-				   String description) {
-			this.progressBar = progressBar;
-			this.cancelButton = cancelButton;
+		public Job(ActionListener cancelAction, String description) {
 			this.description = description;
+
+			progressBar = new JProgressBar();
+			progressBar.setString(ProgressPopup.progressString(description, 0));
+			progressBar.setValue(0);
+			progressBar.setStringPainted(true);
+			
+			cancelButton = new JButton("Cancel");
+			cancelButton.addActionListener(cancelAction);
+
+			finishedLabel = new JLabel(description);
 		}
 
 		public void propertyChange(PropertyChangeEvent evt) {
@@ -206,12 +179,11 @@ public class InstallQueuePanel extends JPanel implements Scrollable {
 
 		private void finish(String message) {
 			finished = true;
-			
 			progressBar.setEnabled(false);
-			//progressBar.setString(ProgressPopup.progressString(description, message));
-
-			finishedLabel = new JLabel(ProgressPopup.progressString(description, message));
-			finishedLabel.setPreferredSize(new Dimension((int) finishedLabel.getPreferredSize().getWidth(),
+			cancelButton.setEnabled(false);
+			finishedLabel.setText(ProgressPopup.progressString(description, message));
+			finishedLabel.setPreferredSize(new Dimension((int) finishedLabel
+			                                             .getPreferredSize().getWidth(),
 			                                             (int) cancelButton.getSize().getHeight()));
 			
 		}
