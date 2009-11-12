@@ -158,10 +158,11 @@ public class Configuration {
 		return c;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void set(Configuration c) {
 		for (Map.Entry<String,Value<?>> e: c.All.entrySet()) {
 			String key = e.getKey();
-			Value v = e.getValue();
+			Value<?> v = e.getValue();
 
 			if (!v.equals(getValue(key))) {
 				getValue(key).set(v.get());
@@ -208,12 +209,14 @@ public class Configuration {
 		System.out.println("done.");		
 	}
 
+	@SuppressWarnings("unchecked")
 	public void set(Properties p) {
 		for (String key: All.keySet()) {
 			String s = p.getProperty(key);
 			if (s == null) {
 				continue;
 			}
+			
 			Value v = All.get(key);
 			v.set(v.stringToValue(s));
 			//System.out.println("Setting " + key + ": " + p.getProperty(key));
