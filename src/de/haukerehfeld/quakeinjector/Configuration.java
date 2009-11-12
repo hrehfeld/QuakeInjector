@@ -40,7 +40,7 @@ public class Configuration {
 	public final EnginePath EnginePath = new EnginePath();
 
 	public class EngineExecutable extends FileValue {
-		private EngineExecutable() { super("engineExecutable", null); }
+		private EngineExecutable() { super("engineExecutable", new File("")); }
 	}
 	public final EngineExecutable EngineExecutable = new EngineExecutable();
 
@@ -56,6 +56,9 @@ public class Configuration {
 		}
 
 		private File defaultPath() {
+			if (EnginePath.get() == null) {
+				return null;
+			}
 			return new File(EnginePath.get() + File.separator + "downloads");
 		}
 
@@ -275,7 +278,16 @@ public class Configuration {
 		public String key();
 		public T defaultValue();
 		public T stringToValue(String s);
+
+		/**
+		 * @return true if this has a value different from the default one
+		 */
 		public boolean exists();
+		
+		/**
+		 * @return true if exists() or has a defaultvalue
+		 */
+		public boolean existsOrDefault();
 	}
 
 	private abstract class AbstractValue<T> implements Value<T> {
@@ -296,6 +308,10 @@ public class Configuration {
 
 		public T defaultValue() {
 			return defaultValue;
+		}
+
+		public boolean existsOrDefault() {
+			return exists() || defaultValue != null;
 		}
 
 		public T get() {
@@ -319,7 +335,7 @@ public class Configuration {
 		}
 
 		public String toString() {
-			return exists() ? value.toString() : defaultValue.toString();
+			return existsOrDefault() ? get().toString() : null;
 		}
 	}
 
@@ -340,10 +356,6 @@ public class Configuration {
 		
 		public File stringToValue(String v) {
 			return new File(v);
-		}
-
-		public String toString() {
-			return get().toString();
 		}
 	}
 	

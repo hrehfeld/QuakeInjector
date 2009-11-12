@@ -69,7 +69,7 @@ public class DownloadWorker extends SwingWorker<Long, Void> implements ProgressL
 				                               new CheckCanceledProgressListener(this,
 				                                                                 this)));
 		
-		
+
 		final InputStream in = download.getStream();
 		final byte data[] = new byte[BUFFERSIZE];
 		long downloadSize = 0;

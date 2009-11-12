@@ -169,10 +169,16 @@ public class QuakeInjector extends JFrame {
 		final Future<Void> requirementsListUpdater = parseDatabaseAndSetList();
 
 		Configuration.EnginePath enginePathV = getConfig().EnginePath;
-		File enginePath = new File(enginePathV.toString());
-		File engineExe = new File(enginePathV
-		                          + File.separator
-		                          + getConfig().EngineExecutable);
+		File enginePath = enginePathV.get();
+		File engineExe;
+		if (getConfig().EngineExecutable.existsOrDefault()) {
+			engineExe = new File(enginePathV.get()
+			                          + File.separator
+			                          + getConfig().EngineExecutable);
+		}
+		else {
+			engineExe = new File("");
+		}
 		starter = new EngineStarter(enginePath,
 		                            engineExe,
 		                            getConfig().EngineCommandLine);
@@ -382,10 +388,6 @@ public class QuakeInjector extends JFrame {
 		c.EngineCommandLine.set(commandline);
 
 		c.DownloadPath.set(downloadPath);
-
-		if (!downloadPath.exists()) {
-			downloadPath.mkdirs();
-		}
 
 		setEngineConfig(enginePath, engineExecutable, getConfig().EngineCommandLine, rogueInstalled, hipnoticInstalled);
 

@@ -59,10 +59,16 @@ public class Installer {
 	}
 
 	public boolean checkInstallDirectory() {
+		if (!installDirectory.existsOrDefault()) {
+			return false;
+		}
 		return installDirectory.get().canWrite();
 	}
 
 	public boolean checkDownloadDirectory() {
+		if (!downloadDirectory.existsOrDefault()) {
+			return false;
+		}
 		return downloadDirectory.get().canWrite();
 	}
 	
@@ -193,6 +199,7 @@ public class Installer {
 
 				long downloadSize;
 				if (!downloadFile.exists()) {
+					downloadFile.mkdirs();
 					FileOutputStream out = new FileOutputStream(downloadFile);
 					downloadSize = download(url, out);
 					out.flush();

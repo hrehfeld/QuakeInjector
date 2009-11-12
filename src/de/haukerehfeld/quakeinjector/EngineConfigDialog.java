@@ -110,10 +110,12 @@ public class EngineConfigDialog extends JDialog {
 		//"Path to quake directory",
 		JLabel enginePathLabel = new JLabel("Quake Directory");
 		configPanel.add(enginePathLabel, new LabelConstraints() {{ gridy = 1; }});
-		enginePath = new JPathPanel(new JPathPanel.WritableDirectoryVerifier(),
-		                            enginePathDefault.get(),
-		                            javax.swing.JFileChooser.DIRECTORIES_ONLY);
-		configPanel.add(enginePath, new InputConstraints() {{ gridy = 1; }});
+		{
+			enginePath = new JPathPanel(new JPathPanel.WritableDirectoryVerifier(),
+			                            enginePathDefault.get(),
+			                            javax.swing.JFileChooser.DIRECTORIES_ONLY);
+			configPanel.add(enginePath, new InputConstraints() {{ gridy = 1; }});
+		}
 		
 		JLabel engineExeLabel = new JLabel("Quake Executable");
 		configPanel.add(engineExeLabel, new LabelConstraints() {{ gridy = 2; }});

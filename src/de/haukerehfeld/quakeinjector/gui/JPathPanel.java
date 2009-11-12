@@ -86,8 +86,15 @@ public class JPathPanel extends JPanel {
 					  int filesAndOrDirectories) {
 		this.check = check;
 		this.basePath = basePath;
+
+		if (defaultPath == null) {
+			defaultPath = new File("");
+		}
+		
 		
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+
+		
 
 		absolute = defaultPath.isAbsolute();
 
@@ -143,6 +150,7 @@ public class JPathPanel extends JPanel {
 
 	private boolean check() {
 		File f = getPath();
+		System.out.println(f);
 		errorLabel.setText(check.errorMessage(f));
 		return this.check.verify(f);
 	}
