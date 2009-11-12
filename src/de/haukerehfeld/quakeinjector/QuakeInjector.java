@@ -377,8 +377,8 @@ public class QuakeInjector extends JFrame {
 	                              boolean rogueInstalled,
 	                              boolean hipnoticInstalled) {
 		Configuration c = getConfig();
-		c.EnginePath.set(enginePath.getAbsolutePath());
-		c.EngineExecutable.set(RelativePath.getRelativePath(enginePath, engineExecutable).toString());
+		c.EnginePath.set(enginePath);
+		c.EngineExecutable.set(RelativePath.getRelativePath(enginePath, engineExecutable));
 		c.EngineCommandLine.set(commandline);
 
 		c.DownloadPath.set(downloadPath);
@@ -410,8 +410,6 @@ public class QuakeInjector extends JFrame {
 			}
 		}
 		catch (java.io.IOException e) {}
-		
-		installer.setInstallDirectory(enginePath.getAbsolutePath());
 	}
 
 	private void addMainPane(Container panel) {

@@ -34,13 +34,13 @@ import java.lang.reflect.Field;
  */
 public class Configuration {
 	private static final String CONFIGHEADER = "Quake Injector " + BuildCommit.buildCommit + " config file";
-	public class EnginePath extends StringValue {
-		private EnginePath() { super("enginePath", ""); }
+	public class EnginePath extends FileValue {
+		private EnginePath() { super("enginePath", null); }
 	}
 	public final EnginePath EnginePath = new EnginePath();
 
-	public class EngineExecutable extends StringValue {
-		private EngineExecutable() { super("engineExecutable", ""); }
+	public class EngineExecutable extends FileValue {
+		private EngineExecutable() { super("engineExecutable", null); }
 	}
 	public final EngineExecutable EngineExecutable = new EngineExecutable();
 
@@ -343,7 +343,7 @@ public class Configuration {
 		}
 
 		public String toString() {
-			return get().getAbsolutePath();
+			return get().toString();
 		}
 	}
 	

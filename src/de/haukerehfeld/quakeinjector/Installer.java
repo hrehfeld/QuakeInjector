@@ -45,7 +45,7 @@ public class Installer {
 	private static final int simultanousDownloads = 1;
 	private static final int simultanousInstalls = 1;
 
-	private String installDirectory;
+	private Configuration.EnginePath installDirectory;
 	private Configuration.DownloadPath downloadDirectory;
 	
 	private ExecutorService activeDownloaders = Executors.newFixedThreadPool(simultanousDownloads);
@@ -54,16 +54,12 @@ public class Installer {
 	private Map<Package,Worker> queue = new HashMap<Package,Worker>();
 
 	public Installer(Configuration.EnginePath installDirectory, Configuration.DownloadPath downloadDirectory) {
-		this.installDirectory = installDirectory.get();
+		this.installDirectory = installDirectory;
 		this.downloadDirectory = downloadDirectory;
 	}
 
-	public void setInstallDirectory(String dir) {
-		this.installDirectory = dir;
-	}
-
 	public boolean checkInstallDirectory() {
-		return new File(installDirectory).canWrite();
+		return installDirectory.get().canWrite();
 	}
 
 	public boolean checkDownloadDirectory() {
@@ -104,7 +100,7 @@ public class Installer {
 	public void uninstall(PackageFileList map,
 	                      final UninstallErrorHandler errorHandler,
 	                      PropertyChangeListener progressListener) {
-		final UninstallWorker uninstall = new UninstallWorker(map, installDirectory);
+		final UninstallWorker uninstall = new UninstallWorker(map, installDirectory.get().getAbsolutePath());
 		uninstall.addPropertyChangeListener(progressListener);
 		uninstall.execute();
 
@@ -222,12 +218,12 @@ public class Installer {
 
 				if (overwrites == null || !overwrites.isEmpty()) {
 					//and start install
-					String mapDir = Installer.getUnzipDir(map, installDirectory);
+					String mapDir = Installer.getUnzipDir(map, installDirectory.get().getAbsolutePath());
 					in = new FileInputStream(downloadFile);
 					installer = new InstallWorker(in,
 					                              downloadSize,
 					                              map,
-					                              installDirectory,
+					                              installDirectory.get(),
 					                              mapDir,
 					                              overwrites);
 					synchronized (activeInstallers) { activeInstallers.submit(installer); }
@@ -285,9 +281,9 @@ public class Installer {
 				if (z.isDirectory()) {
 					continue;
 				}
-				File f = getFile(z, map, installDirectory);
+				File f = getFile(z, map, installDirectory.get().getAbsolutePath());
 				String name
-				    = RelativePath.getRelativePath(new File(installDirectory), f).toString();
+				    = RelativePath.getRelativePath(installDirectory.get(), f).toString();
 				files.put(name, f);
 				if (f.exists()) {
 					existingFile = true;

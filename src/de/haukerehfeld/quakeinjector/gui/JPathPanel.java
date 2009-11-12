@@ -70,7 +70,7 @@ public class JPathPanel extends JPanel {
 	 *               JFileChooser.FILES_AND_DIRECTORIES,
 	 *               JFileChooser.FILES_ONLY
 	 */
-	public JPathPanel(Verifier check, String defaultPath, int filesAndOrDirectories) {
+	public JPathPanel(Verifier check, File defaultPath, int filesAndOrDirectories) {
 		this(check, defaultPath, null, filesAndOrDirectories);
 	}
 
@@ -81,7 +81,7 @@ public class JPathPanel extends JPanel {
 	 *               JFileChooser.FILES_ONLY
 	 */
 	public JPathPanel(Verifier check,
-					  String defaultPath,
+					  File defaultPath,
 					  File basePath,
 					  int filesAndOrDirectories) {
 		this.check = check;
@@ -89,9 +89,9 @@ public class JPathPanel extends JPanel {
 		
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 
-		absolute = new File(defaultPath).isAbsolute();
+		absolute = defaultPath.isAbsolute();
 
-		this.path = new JTextField(defaultPath, inputLength);
+		this.path = new JTextField(defaultPath.toString(), inputLength);
 		PathVerifier verifier = new PathVerifier();
 		path.setInputVerifier(verifier);
 		path.getDocument().addDocumentListener(verifier);

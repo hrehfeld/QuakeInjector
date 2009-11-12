@@ -42,7 +42,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 																	  Cancelable {
 	private final static int BUFFERSIZE = 1024;
 	
-	private String baseDirectory;
+	private File baseDirectory;
 	private String unzipDirectory;
 	private Package map;
 	private InputStream input;
@@ -63,7 +63,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 	public InstallWorker(InputStream input,
 	                     long inputSize,
 	                     Package map,
-	                     String baseDirectory,
+	                     File baseDirectory,
 	                     String unzipDirectory,
 	                     List<File> overwrites) {
 		this.map = map;
@@ -96,7 +96,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 	 * Unzip from the inputstream to the quake base dir
 	 */
 	public void unzip(InputStream in,
-	                            String basedir,
+	                            File basedir,
 	                            String unzipdir,
 	                            String mapid,
 	                            List<File> overwrites)
@@ -114,8 +114,8 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 
 		boolean extracted = false;
 		while((entry = zis.getNextEntry()) != null) {
-			File f = Installer.getFile(entry, map, basedir);
-			String filename = RelativePath.getRelativePath(new File(basedir), f).toString();
+			File f = Installer.getFile(entry, map, basedir.getAbsolutePath());
+			String filename = RelativePath.getRelativePath(basedir, f).toString();
 			
 			if (overwrites != null && overwrites.indexOf(f) < 0) {
 				System.out.println("Skipping " + filename + ", because it isn't supposed to be overwritten.");
@@ -126,7 +126,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 			List<File> createdDirs = Utils.mkdirs(f);
 			for (File dirname: createdDirs) {
 				//save relative paths to files so we can delete dirs later
-				files.add(RelativePath.getRelativePath(new File(basedir), dirname).toString());
+				files.add(RelativePath.getRelativePath(basedir, dirname).toString());
 			}
 
 			//do nothing for directories other than creating them
