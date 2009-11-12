@@ -201,9 +201,17 @@ public class Installer {
 				if (!downloadFile.exists()) {
 					downloadFile.getParentFile().mkdirs();
 					FileOutputStream out = new FileOutputStream(downloadFile);
-					downloadSize = download(url, out);
-					out.flush();
-					out.close();
+					//make sure file streams get closed
+					try {
+						downloadSize = download(url, out);
+					}
+					catch (Exception e) {
+						throw e;
+					}
+					finally {
+						out.flush();
+						out.close();
+					}
 				}
 				else {
 					downloadSize = downloadFile.length();
@@ -234,8 +242,16 @@ public class Installer {
 					                              mapDir,
 					                              overwrites);
 					synchronized (activeInstallers) { activeInstallers.submit(installer); }
-					installer.get();
-					in.close();
+					//make sure file streams get closed
+					try {
+						installer.get();
+					}
+					catch (Exception e) {
+						throw e;
+					}
+					finally {
+						in.close();
+					}
 				}
 			}
 			catch (java.io.FileNotFoundException e) {
@@ -352,6 +368,8 @@ public class Installer {
 					System.out.println("unhandled exception from install worker" + error);
 					error.printStackTrace();
 				}
+				installer = null;
+				downloader = null;
 			}
 			else if (isCancelled()) {
 				System.out.println("CancelledException!");
