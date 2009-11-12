@@ -67,7 +67,7 @@ public class Installer {
 	}
 
 	public boolean checkDownloadDirectory() {
-		return new File(downloadDirectory.get()).canWrite();
+		return downloadDirectory.get().canWrite();
 	}
 	
 	public boolean alreadyQueued(final Package map) {

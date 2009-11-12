@@ -44,23 +44,27 @@ public class Configuration {
 	}
 	public final EngineExecutable EngineExecutable = new EngineExecutable();
 
-	public class DownloadPath extends StringValue {
+	public class DownloadPath extends FileValue {
 		private DownloadPath() { super("downloadPath", null); }
-		public String get() {
-			String result = super.get();
+		public File get() {
+			File result = super.get();
 			if (result == null) {
+				System.out.println("downloadpath null, returning default");
 				return defaultPath();
 			}
 			return result;
 		}
 
-		private String defaultPath() {
-			return EnginePath.get() + File.separator + "downloads";
+		private File defaultPath() {
+			return new File(EnginePath.get() + File.separator + "downloads");
 		}
 
-		public void set(String v) {
-			if (v.equals(defaultPath())) {
-				set(null);
+		public void set(File v) {
+			System.out.println("Setting downloadpath: " + v);
+			if (v.equals(defaultPath()) || v.equals(new File(""))) {
+				System.out.println(getClass() + " Setting downloadpath to null");
+				super.set(null);
+				return;
 			}
 			super.set(v);
 		}
@@ -203,8 +207,12 @@ public class Configuration {
 
 	public void set(Properties p) {
 		for (String key: All.keySet()) {
+			String s = p.getProperty(key);
+			if (s == null) {
+				continue;
+			}
 			Value v = All.get(key);
-			v.set(v.stringToValue(p.getProperty(key)));
+			v.set(v.stringToValue(s));
 			//System.out.println("Setting " + key + ": " + p.getProperty(key));
 		}
 	}
@@ -212,8 +220,14 @@ public class Configuration {
 	public void get(Properties p) {
 		for (String key: All.keySet()) {
 			Value v = All.get(key);
-			if (v.exists() && !v.get().equals(v.defaultValue())) {
+			if (v.exists()) {
+				System.out.println("Writing " + key + " to " + v.toString() + " from " + v.getClass() + ": " + v);
 				p.setProperty(key, v.toString());
+			}
+			else {
+				if (p.getProperty(key) != null) {
+					p.remove(key);
+				}
 			}
 		}
 	}
@@ -293,6 +307,7 @@ public class Configuration {
 
 		public void set(T v) {
 			if (v == null || v.equals(defaultValue())) {
+				System.out.println(getClass() + ": Setting to null or default");
 				value = null;
 				return;
 			}
@@ -304,7 +319,7 @@ public class Configuration {
 		}
 
 		public String toString() {
-			return value != null ? value.toString() : defaultValue.toString();
+			return exists() ? value.toString() : defaultValue.toString();
 		}
 	}
 

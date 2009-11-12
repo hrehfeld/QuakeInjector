@@ -182,7 +182,7 @@ public class EngineConfigDialog extends JDialog {
 			//"Path to quake directory",
 			configPanel.add(new JLabel("Download Directory"), new LabelConstraints() {{ gridy = 3; }});
 			downloadPath = new JPathPanel(new JPathPanel.WritableDirectoryVerifier(),
-			                              downloadPathDefault.get(),
+			                              downloadPathDefault.get().getAbsolutePath(),
 			                              javax.swing.JFileChooser.DIRECTORIES_ONLY);
 			configPanel.add(downloadPath, new InputConstraints() {{ gridy = 3; }});
 			downloadPath.verify();
