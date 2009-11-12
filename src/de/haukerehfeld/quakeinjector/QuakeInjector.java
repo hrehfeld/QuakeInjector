@@ -134,14 +134,12 @@ public class QuakeInjector extends JFrame {
 	private void setWindowSize() {
 		Configuration c = getConfig();
 
-		Integer posX = c.MainWindowPositionX.get();
-		Integer posY = c.MainWindowPositionY.get();
-		Integer width = c.MainWindowWidth.get();
-		Integer height = c.MainWindowHeight.get();
-
-		
-		if (width != null && height != null) {
-			if (posX != null && posY != null) {
+		if (c.MainWindowWidth.exists() && c.MainWindowHeight.exists()) {
+			int width = c.MainWindowWidth.get();
+			int height = c.MainWindowHeight.get();
+			if (c.MainWindowPositionX.exists() && c.MainWindowPositionY.exists()) {
+				int posX = c.MainWindowPositionX.get();
+				int posY = c.MainWindowPositionY.get();
 				System.out.println("Setting window bounds: "
 				                   + posX + ", "
 				                   + posY + ", "
@@ -220,9 +218,15 @@ public class QuakeInjector extends JFrame {
 		try {
 			return loadConfig.get();
 		}
-		catch (InterruptedException e) { }
-		catch (java.util.concurrent.ExecutionException e) {}
-		return null;
+		catch (InterruptedException e) {
+			System.out.println(e);
+			e.printStackTrace();
+		}
+		catch (java.util.concurrent.ExecutionException e) {
+			System.out.println(e);
+			e.printStackTrace();
+		}
+		throw new RuntimeException("Couldn't Load config!");
 	}
 
 	/**
