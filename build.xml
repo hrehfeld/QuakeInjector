@@ -83,7 +83,7 @@ public final class BuildCommit {
 		   source="1.6" fork="true">
 	  <classpath refid="quakeinjector.class.path"/>
 <!--	  <compilerarg value="-Xlint"/> -->
-<!--	  <compilerarg value="-Xlint:unchecked"/>
+	  <compilerarg value="-Xlint:unchecked"/><!--
 	  <compilerarg value="-Xlint:finally"/>
 	  <compilerarg value="-Xlint:fallthrough"/> -->
 	</javac>
