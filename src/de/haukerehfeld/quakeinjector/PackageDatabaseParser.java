@@ -206,7 +206,7 @@ public class PackageDatabaseParser implements java.io.Serializable {
 			throw new RuntimeException("Xml Parsing error: date malformed");
 		}
 		int day = Integer.parseInt(components[0]);
-		int month = Integer.parseInt(components[1]);
+		int month = Integer.parseInt(components[1]) - 1;
 		int year = Integer.parseInt(components[2]);
 		if (year < 60) {
 			year += 2000;
