@@ -204,13 +204,17 @@ public class Installer {
 					//make sure file streams get closed
 					try {
 						downloadSize = download(url, out);
-					}
-					catch (Exception e) {
-						throw e;
-					}
-					finally {
 						out.flush();
 						out.close();
+					}
+					catch (Exception e) {
+						out.close();
+						System.out.print("Error downloading file, removing...");
+						if (!downloadFile.delete()) {
+							System.err.print("Couldn't delete file! ");
+						}
+						System.out.println("done.");
+						throw e;
 					}
 				}
 				else {
