@@ -194,12 +194,12 @@ public class Installer {
 		@Override
 		    public Void doInBackground() {
 			try {
-				final File downloadFile = new File(downloadDirectory + File.separator + map.getId() + ".zip");
+				final File downloadFile = new File(downloadDirectory.get().getAbsolutePath() + File.separator + map.getId() + ".zip");
 				System.out.println("Downloading to " + downloadFile);
 
 				long downloadSize;
 				if (!downloadFile.exists()) {
-					downloadFile.mkdirs();
+					downloadFile.getParentFile().mkdirs();
 					FileOutputStream out = new FileOutputStream(downloadFile);
 					downloadSize = download(url, out);
 					out.flush();
