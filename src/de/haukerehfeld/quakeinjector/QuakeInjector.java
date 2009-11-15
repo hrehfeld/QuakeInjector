@@ -511,7 +511,8 @@ public class QuakeInjector extends JFrame {
 		infoSplit.setOneTouchExpandable(true);
 		infoSplit.setResizeWeight(1);
 		infoSplit.setContinuousLayout(true);
-		infoSplit.setMinimumSize(new Dimension(150, 300));
+		infoSplit.setDividerLocation(400);
+		infoSplit.setMinimumSize(new Dimension(200, 300));
 		
 		PackageListSelectionHandler selectionHandler
 			= new PackageListSelectionHandler(maplist,

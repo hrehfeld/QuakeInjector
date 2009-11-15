@@ -60,7 +60,7 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	public void size(JTable table) {
 		TableColumnModel m = table.getColumnModel();
 
-		m.getColumn(Column.getColumnNumber(Column.NAME)).setPreferredWidth(70);
+		m.getColumn(Column.getColumnNumber(Column.NAME)).setPreferredWidth(80);
 		m.getColumn(Column.getColumnNumber(Column.TITLE)).setPreferredWidth(150);
 		m.getColumn(Column.getColumnNumber(Column.AUTHOR)).setPreferredWidth(100);
 		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setResizable(false);
