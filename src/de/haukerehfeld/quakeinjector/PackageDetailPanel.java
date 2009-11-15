@@ -20,6 +20,7 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 package de.haukerehfeld.quakeinjector;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.DateFormat;
@@ -132,6 +133,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		}});
 
 		imagePanel = new JPanel();
+		imagePanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
  		imagePanel.setOpaque(true);
  		imagePanel.setBackground(java.awt.Color.DARK_GRAY);
 
