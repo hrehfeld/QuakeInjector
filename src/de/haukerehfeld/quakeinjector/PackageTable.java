@@ -40,8 +40,9 @@ public class PackageTable extends JTable {
 	private static final int ALTERNATING = 10;
 	private static final Color NORMALROWCOLOR = UIManager.getColor("Table.background");
 	private static final Color ALTERNATINGROWCOLOR = createAlternatingColor(NORMALROWCOLOR, ALTERNATING);
+	private static final int CELLPADDING = 2;
 
-	private final EmptyBorder border = new EmptyBorder(0,0,0,0);
+	private final EmptyBorder border = new EmptyBorder(0, CELLPADDING, 0, CELLPADDING);
 	                                                           
 
 	public PackageTable(PackageListModel maplist) {
@@ -56,7 +57,7 @@ public class PackageTable extends JTable {
 		//setCellSelectionEnabled(false);
 		setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 		setShowGrid(false);
-		setIntercellSpacing(new Dimension());
+		setIntercellSpacing(new Dimension(0, 0));
 
 		setDefaultRenderer(Package.Rating.class, new PackageListModel.RatingRenderer());		
 	}
@@ -74,7 +75,14 @@ public class PackageTable extends JTable {
             c.setForeground(UIManager.getColor("Table.selectionForeground"));
         }
         //disable cell focus
-        if (c instanceof JComponent) { ((JComponent) c).setBorder(border); }
+        if (c instanceof JComponent) {
+			if (!(c instanceof PackageListModel.RatingRenderer)) {
+				((JComponent) c).setBorder(border);
+			}
+			else {
+				((JComponent) c).setBorder(new EmptyBorder(0, 0, 0, 0));
+			}
+		}
         return c;
     }	
 
