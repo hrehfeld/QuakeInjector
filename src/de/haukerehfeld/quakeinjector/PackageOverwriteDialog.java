@@ -31,6 +31,11 @@ import java.io.File;
 import java.util.Map;
 import java.util.HashMap;
 
+import java.util.List;
+import java.util.ArrayList;
+
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -48,33 +53,66 @@ import javax.swing.event.ChangeListener;
 import de.haukerehfeld.quakeinjector.gui.ErrorEvent;
 import de.haukerehfeld.quakeinjector.gui.ErrorListener;
 import de.haukerehfeld.quakeinjector.gui.JPathPanel;
+import de.haukerehfeld.quakeinjector.gui.ScrollablePanel;
+import de.haukerehfeld.quakeinjector.gui.OkayCancelApplyPanel;
 
 public class PackageOverwriteDialog extends JDialog {
 	private final static String windowTitle = "Overwrite Package Files?";
 
-	private final JPanel fileListPanel;
-	private int fileListRows = 0;
+	private final static int BUTTONMARGIN = 6;
+
+	private final static int MARGINWIDTH = 5;
+	
+	private final static int DESCRIPTIONMARGINWIDTH = 5 + MARGINWIDTH;
+	private final static int DESCRIPTIONMARGINHEIGHT = 10;
+	private final static Border DESCRIPTIONMARGIN
+	= BorderFactory.createEmptyBorder(DESCRIPTIONMARGINHEIGHT,
+	                                  DESCRIPTIONMARGINWIDTH,
+	                                  DESCRIPTIONMARGINHEIGHT,
+	                                  DESCRIPTIONMARGINWIDTH);	
+
+	private final static int LINEENTRYMARGINWIDTH = 4 + MARGINWIDTH;
+	private final static int LINEENTRYMARGINHEIGHT = 2;
+	private final static Border LINEENTRYMARGIN
+	= BorderFactory.createEmptyBorder(LINEENTRYMARGINHEIGHT,
+	                                  LINEENTRYMARGINWIDTH,
+	                                  LINEENTRYMARGINHEIGHT,
+	                                  LINEENTRYMARGINWIDTH);	
+
+	private final static int CHECKBOXINDENT = 17;
+	private final static int CHECKBOXEXTRAMARGIN = 0;
+	private final static Border NOCHECKBOXLINEENTRYMARGIN
+	= BorderFactory.createEmptyBorder(LINEENTRYMARGINHEIGHT + CHECKBOXEXTRAMARGIN,
+	                                  LINEENTRYMARGINWIDTH + CHECKBOXINDENT,
+	                                  LINEENTRYMARGINHEIGHT + CHECKBOXEXTRAMARGIN,
+	                                  LINEENTRYMARGINWIDTH);	
+	
+	private final static int SECTIONMARGIN = 15;
+
+	private final JFrame parent;
+
+	private final JPanel panel;
 
 	private boolean canceled = true;
+
+	private ArrayList<String> overwriteList = new ArrayList<String>();
+	private ArrayList<String> alwaysWriteList = new ArrayList<String>();
 
 	private final Map<String,JCheckBox> overwriteBoxes = new HashMap<String,JCheckBox>();
 	
 	public PackageOverwriteDialog(final JFrame frame) {
 		super(frame, windowTitle, true);
+		this.parent = frame;
 
-		setPreferredSize(new Dimension(300, 600));
-		
+		panel = new ScrollablePanel(50, 50);
+		panel.setLayout(new GridBagLayout());
+		panel.setOpaque(false);
 
-		JLabel description = new JLabel(windowTitle, SwingConstants.CENTER);
-		description.setLabelFor(this);
-		description.setPreferredSize(new Dimension(100, 50));
-		add(description, BorderLayout.PAGE_START);
+		JScrollPane panelScroll = new JScrollPane(panel);
+		panelScroll.getViewport().setBackground(javax.swing.UIManager.getColor("TextPane.background"));
+		add(panelScroll, BorderLayout.CENTER);
 
-		fileListPanel = new JPanel();
-		fileListPanel.setLayout(new GridBagLayout());
-		add(new JScrollPane(fileListPanel), BorderLayout.CENTER);
-
-		final JButton okay = new JButton("Overwrite files");
+		final JButton okay = new JButton("Write files");
 		final JButton cancel = new JButton("Cancel");
 
 		okay.addActionListener(new ActionListener() {
@@ -93,28 +131,39 @@ public class PackageOverwriteDialog extends JDialog {
 			});
 
 		{
-			JPanel okayCancelPanel = new JPanel();
-			okayCancelPanel.setLayout(new BoxLayout(okayCancelPanel, BoxLayout.LINE_AXIS));
-			okayCancelPanel.add(Box.createHorizontalGlue());
-			okayCancelPanel.add(cancel);
-			okayCancelPanel.add(Box.createRigidArea(new Dimension(10,0)));
-			okayCancelPanel.add(okay);
-			okayCancelPanel.add(Box.createHorizontalGlue());
 			
-			add(okayCancelPanel, BorderLayout.PAGE_END);
+			
+			add(new OkayCancelApplyPanel(okay, cancel, null, false), BorderLayout.PAGE_END);
 		}
 		
 	}
 
-	public void addFile(String name, boolean enabled) {
-		JCheckBox overwrite = new JCheckBox(name);
-		overwrite.setSelected(true);
-		overwrite.setEnabled(enabled);
-		fileListPanel.add(overwrite, new OverwriteBoxConstraints() {{
-			gridy = fileListRows;
+	private void addDescriptionLabel(final String text, final int line) {
+		JLabel description = new JLabel(text);
+		description.setLabelFor(this);
+		description.setOpaque(true);
+		description.setBorder(DESCRIPTIONMARGIN);
+		panel.add(description, new GridBagConstraints() {{
+			gridy = line;
+
+			gridwidth = 2;
+			fill = BOTH;
+			anchor = LINE_START;
 		}});
-		overwriteBoxes.put(name, overwrite);
-		++fileListRows;
+	}
+
+	private void addDescription() {
+		addDescriptionLabel(windowTitle, 0);
+	}
+
+	private void addAlwaysWriteDescription(final int line) {
+		addDescriptionLabel("Files that need to be installed:", line);
+	}
+	
+
+	public void addFile(String name, boolean overwrite) {
+		List<String> list = (overwrite ? overwriteList : alwaysWriteList);
+		list.add(name);
 	}
 
 	public boolean overwrite(String name) {
@@ -127,28 +176,54 @@ public class PackageOverwriteDialog extends JDialog {
 	}
 
 	public void packAndShow() {
+		addDescription();
+		int lines = 1;
+
+		java.util.Collections.sort(overwriteList);
+		for (String name: overwriteList) {
+			JCheckBox overwrite = new JCheckBox(name);
+			overwrite.setSelected(true);
+			overwrite.setOpaque(false);
+			overwrite.setBorder(LINEENTRYMARGIN);
+			final int finalLines = lines;
+			panel.add(overwrite, new OverwriteBoxConstraints() {{
+				gridy = finalLines;
+			}});
+			overwriteBoxes.put(name, overwrite);
+			++lines;
+		}
+
+		if (!alwaysWriteList.isEmpty()) {
+			{
+				final int finalLines = lines++;
+				    panel.add(Box.createRigidArea(new Dimension(0,SECTIONMARGIN)),
+				              new GridBagConstraints() {{
+								  gridy = finalLines;
+							  }});
+			}
+			java.util.Collections.sort(alwaysWriteList);
+			addAlwaysWriteDescription(lines++);
+
+			for (String name: alwaysWriteList) {
+				JLabel listEntry = new JLabel(name);
+				listEntry.setOpaque(false);
+				listEntry.setBorder(NOCHECKBOXLINEENTRYMARGIN);
+				final int finalLines = lines;
+				panel.add(listEntry, new OverwriteBoxConstraints() {{
+					gridy = finalLines;
+				}});
+				++lines;
+			}
+		}
 		pack();
+		setLocationRelativeTo(parent);
 		setVisible(true);
 	}
 
-	class FileNameConstraints extends GridBagConstraints {{
-		anchor = LINE_START;
-		fill = NONE;
-		gridx = 0;
-		gridwidth = 1;
-		gridheight = 1;
-		weightx = 0;
-		weighty = 0;
-		
-	}};
 	class OverwriteBoxConstraints extends GridBagConstraints {{
-		anchor = LINE_END;
+		anchor = LINE_START;
 		fill = HORIZONTAL;
-		gridx = 1;
-		gridwidth = 2;
-		gridheight = 1;
 		weightx = 1;
-		weighty = 0;
 	}};
 
 }
