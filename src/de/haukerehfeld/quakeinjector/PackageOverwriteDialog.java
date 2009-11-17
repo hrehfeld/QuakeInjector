@@ -166,15 +166,26 @@ public class PackageOverwriteDialog extends JDialog {
 		list.add(name);
 	}
 
-	public boolean overwrite(String name) {
-		JCheckBox box = overwriteBoxes.get(name);
-		return box != null && box.isSelected();
+	public List<String> getOverwritten() {
+		List<String> overwritten = new ArrayList<String>(alwaysWriteList);
+		for (Map.Entry<String,JCheckBox> e: overwriteBoxes.entrySet()) {
+			String name = e.getKey();
+			JCheckBox box = e.getValue();
+			if (box.isSelected()) {
+				overwritten.add(name);
+			}
+		}
+
+		return overwritten;
 	}
 
 	public boolean isCanceled() {
 		return canceled;
 	}
 
+	/**
+	 * Only call once
+	 */
 	public void packAndShow() {
 		addDescription();
 		int lines = 1;

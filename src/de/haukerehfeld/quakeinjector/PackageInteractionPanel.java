@@ -316,14 +316,9 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 								  if (overwrite.isCanceled()) {
 									  return overwriteFiles;
 								  }
-								  
-								  for (Map.Entry<String,File> e: files.entrySet()) {
-									  String name = e.getKey();
-									  File f = e.getValue();
-									  
-									  if (overwrite.overwrite(name)) {
-										  overwriteFiles.add(f);
-									  }
+
+								  for (String name: overwrite.getOverwritten()) {
+									  overwriteFiles.add(files.get(name));
 								  }
 								  return overwriteFiles;
 							  }

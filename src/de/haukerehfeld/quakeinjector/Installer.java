@@ -237,6 +237,7 @@ public class Installer {
 
 				if (overwrites == null || !overwrites.isEmpty()) {
 					//and start install
+					System.out.println("Starting install");
 					String mapDir = Installer.getUnzipDir(map, installDirectory.get().getAbsolutePath());
 					in = new FileInputStream(downloadFile);
 					installer = new InstallWorker(in,
@@ -256,6 +257,10 @@ public class Installer {
 					finally {
 						in.close();
 					}
+				}
+				else {
+					System.out.println("Canceling install");
+					cancel();
 				}
 			}
 			catch (java.io.FileNotFoundException e) {
@@ -380,6 +385,7 @@ public class Installer {
 				handler.handle(new CancelledException(), files);
 			}
 			else {
+				System.out.println("Success installing");
 				handler.success(files);
 			}
 
