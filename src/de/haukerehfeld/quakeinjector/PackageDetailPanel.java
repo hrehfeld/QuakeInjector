@@ -60,6 +60,8 @@ import edu.stanford.ejalbert.BrowserLauncher;
 import javax.swing.SwingWorker;
 import java.util.concurrent.Future;
 
+import de.haukerehfeld.quakeinjector.gui.ScrollablePanel;
+
 /**
  * the panel that shows Info about the selected map
  */
@@ -77,7 +79,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 	private JLabel size;
 	private JLabel date;
 
-	private ScrollPanel content;
+	private ScrollablePanel content;
 
 	private JLabel image;
 	private boolean imageDisplayed = false;
@@ -116,7 +118,9 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 			}
 		}
 
-		content = new ScrollPanel();
+		content = new ScrollablePanel(50, 50) {{
+			setLayout(new GridBagLayout());
+		}};
 		content.setOpaque(false);
 		//content.setBackground();
 		
@@ -352,37 +356,4 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		System.out.println("StateChanged()");
 		refreshUi();
 	}
-	
-	static class ScrollPanel extends JPanel implements Scrollable {
-			public ScrollPanel() {
-				super(new GridBagLayout());
-			}
-
-			@Override
-			public Dimension getPreferredScrollableViewportSize() {
-				return getPreferredSize();
-			}
-
-			@Override
-			public int getScrollableUnitIncrement(Rectangle visibleRect,
-			                                      int orientation,
-			                                      int direction) {
-				return 50;
-			}
-
-			@Override
-			public int getScrollableBlockIncrement(Rectangle visibleRect,
-			                                       int orientation,
-			                                       int direction) {
-				return 50;
-			}
-
-			@Override
-			public boolean getScrollableTracksViewportWidth() { return true; }
-			@Override
-			public boolean getScrollableTracksViewportHeight() { return false; }
-			
-		}
-	
-	
 }
