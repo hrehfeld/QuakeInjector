@@ -44,6 +44,7 @@ import javax.swing.event.ChangeListener;
 import de.haukerehfeld.quakeinjector.gui.ErrorEvent;
 import de.haukerehfeld.quakeinjector.gui.ErrorListener;
 import de.haukerehfeld.quakeinjector.gui.JPathPanel;
+import de.haukerehfeld.quakeinjector.gui.OkayCancelApplyPanel;
 
 public class EngineConfigDialog extends JDialog {
 	private final static String windowTitle = "Engine Configuration";
@@ -230,14 +231,7 @@ public class EngineConfigDialog extends JDialog {
 			});
 
 		{
-			JPanel okayCancelPanel = new JPanel();
-			okayCancelPanel.setLayout(new BoxLayout(okayCancelPanel, BoxLayout.LINE_AXIS));
-			okayCancelPanel.add(Box.createHorizontalGlue());
-			okayCancelPanel.add(okay);
-			okayCancelPanel.add(Box.createRigidArea(new Dimension(10,0)));
-			okayCancelPanel.add(cancel);
-			okayCancelPanel.add(Box.createHorizontalGlue());
-			
+			JPanel okayCancelPanel = new OkayCancelApplyPanel(okay, cancel, null, false);
 			add(okayCancelPanel, BorderLayout.PAGE_END);
 		}
 		
