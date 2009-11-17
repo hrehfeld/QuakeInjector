@@ -17,6 +17,7 @@
   <property name="quakeinjector.dist"  location="${quakeinjector.basedir}/dist"/>
   <property name="quakeinjector.doc"  location="${quakeinjector.basedir}/doc"/>
   <property name="quakeinjector.res"  location="${quakeinjector.basedir}/res"/>
+  <property name="quakeinjector.release"  location="${quakeinjector.basedir}/release"/>
   <property name="quakeinjector.webstart"  location="${quakeinjector.basedir}/webstart"/>
 
   <!--
@@ -35,10 +36,16 @@
   </path>
   <property name="quakeinjector.library.path" refid="quakeinjector.library.path"/>
 
-  <target name="clean" depends="quakeinjector.init">
+  <target name="clean.dist" depends="quakeinjector.init">
         <delete includeemptydirs="true">
-		  <fileset dir="${quakeinjector.build}" includes="**/*" />
 		  <fileset dir="${quakeinjector.dist}" includes="**/*" />
+		</delete>
+        <mkdir dir="${quakeinjector.dist}" />
+  </target>
+
+  <target name="clean" depends="quakeinjector.init,clean.dist">
+        <delete includeemptydirs="true">
+		  <fileset dir="${quakeinjector.build}" includes="**/*.class" />
 		  <fileset dir="${quakeinjector.webstart}" includes="**/*.jar" />
 		</delete>
   </target>
@@ -123,10 +130,14 @@ public final class BuildCommit {
 	</java>
   </target>
 
-  <target name="quakeinjector.jar" depends="quakeinjector.compile">
+  <target name="quakeinjector.jar" depends="clean.dist,quakeinjector.compile">
+
+    <copy todir="${quakeinjector.dist}">
+      <fileset dir="${quakeinjector.lib}" includes="*.jar" />
+    </copy>
 
 	<jar destfile="${quakeinjector.dist}/quakeinjector-res.jar">
-	  <fileset dir="${quakeinjector.res}/" excludes="*.lwo"/>
+	  <fileset dir="${quakeinjector.res}/" />
 	</jar>
 
 
@@ -134,11 +145,11 @@ public final class BuildCommit {
 		 they're created above -->
 	<path id="jars">
       <fileset dir="${quakeinjector.dist}" includes="*.jar"/>
-      <fileset dir="${quakeinjector.lib}" includes="*.jar"/>
+      <!--<fileset dir="${quakeinjector.lib}" includes="*.jar"/>-->
 	</path>
 
 	<pathconvert dirsep="/" pathsep=" " property="jars" refid="jars">
-      <map from="${quakeinjector.basedir}" to=".."/>
+      <map from="${quakeinjector.dist}" to="."/>
     </pathconvert>
 
 	<jar destfile="${quakeinjector.dist}/quakeinjector.jar"
@@ -154,6 +165,12 @@ public final class BuildCommit {
 		<attribute name="Implementation-Version" value="alpha1"/>
       </manifest>
 	</jar>
+  </target>
+
+  <target name="release" description="Build jar and zip for release"
+     depends="quakeinjector.jar,getversion">
+     <zip destfile="${quakeinjector.release}/quakeinjector-${quakeinjector.buildcommit}.zip"
+          basedir="${quakeinjector.dist}" />
   </target>
 
   <target name="javadoc" 
