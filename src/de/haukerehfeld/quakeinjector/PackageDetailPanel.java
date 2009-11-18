@@ -45,6 +45,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.border.EmptyBorder;
 import java.net.URL;
 
@@ -89,7 +90,10 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 	private BrowserLauncher launcher = null;
 
-	private SwingWorker<ImageIcon,Void> lastImageDownload = null;
+	/**
+	 * Holds the currently valid screenshot url, for threading reasons
+	 */
+	private String supposedImageUrl = null;
 
 	/**
 	 * @todo 2009-11-05 19:18 hrehfeld     remove, duplicate from packagelistmodel
@@ -256,10 +260,6 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		date.setText(toString(current.getDate()));
 		size.setText(current.getSize() / 1000f + "mb");
 
-		if (lastImageDownload != null) {
-			lastImageDownload.cancel(true);
-		}
-
 		if (!imageDisplayed) {
 			addImage();
 		}
@@ -268,16 +268,17 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 		image.setIcon(null);
 
+		supposedImageUrl = "http://www.quaddicted.com/reviews/screenshots/" + current.getId()
+		    +"_injector.jpg";
+		
 		//load image in bg thread
-		lastImageDownload = new SwingWorker<ImageIcon,Void>() {
+		new SwingWorker<ImageIcon,Void>() {
+			private final String url = supposedImageUrl;
+			
 			@Override
 			public ImageIcon doInBackground() {
 				try {
-					ImageIcon icon = new ImageIcon(new URL("http://www.quaddicted.com/reviews/"
-					                                       + "screenshots/"
-					                                       + current.getId() +"_injector.jpg"),
-					                               current.getId());
-					return icon;
+					return new ImageIcon(new URL(url), current.getId());
 				}
 				catch (java.net.MalformedURLException e) {
 				}
@@ -285,7 +286,8 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 			}
 			@Override
 			public void done() {
-				if (isCancelled()) {
+				//threading: is the image still valid?
+				if (isCancelled() || !supposedImageUrl.equals(url)) {
 					return;
 				}
 				
@@ -299,7 +301,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 				catch (java.util.concurrent.ExecutionException e) {
 					icon = null;
 				}
-				
+
 				if (icon.getImageLoadStatus() != java.awt.MediaTracker.COMPLETE) {
 					removeImage();
 					System.err.println("Couldn't load image " + current.getId());
@@ -311,10 +313,8 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 				
 				revalidate();
 				repaint();
-				lastImageDownload = null;
 			}
-		};
-		lastImageDownload.execute();
+		}.execute();
 
 		description.getEditorKit().createDefaultDocument();
 		description.setText(current.getDescription()
