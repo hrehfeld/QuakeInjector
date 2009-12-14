@@ -76,6 +76,7 @@ public class EngineOutputDialog extends JDialog {
 		this.engineOut = engineOut;
 
 		output = new JTextArea(30, 80);
+		output.setLineWrap(true);
 
 		JScrollPane panelScroll = new JScrollPane(output);
 		panelScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -103,7 +104,7 @@ public class EngineOutputDialog extends JDialog {
 					
 					String line;
 					while ((line = b.readLine()) != null) {
-						output.append(line + "\n");
+						output.append(line.trim() + "\n");
 					}
 
 				}
