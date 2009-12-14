@@ -469,15 +469,21 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 			return;
 		}
 		String startmap = (String) startmaps.getSelectedItem();
-		System.out.println("startmap: " + startmap);
+		//System.out.println("startmap: " + startmap);
 
 		try {
-			starter.start(selectedMap.getCommandline(), startmap);
+			Process p = starter.start(selectedMap.getCommandline(), startmap);
+			EngineOutputDialog e = new EngineOutputDialog(main, p.getInputStream());
+			e.pack();
+			e.setLocationRelativeTo(main);
+			e.show();
+
 		}
 		catch (java.io.IOException e) {
 			/** @todo 2009-05-04 14:28 hrehfeld    pop up dialogue */
 			System.out.println("Couldn't start quake engine: " + e.getMessage());
 		}
+
 	}
 
 	public void setSelection(Package map) {

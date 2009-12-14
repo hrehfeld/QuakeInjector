@@ -33,7 +33,7 @@ public class EngineStarter {
 		this.quakeCmdline = quakeCmdline.get();
 	}
 
-	public void start(String mapCmdline, String startmap) throws java.io.IOException {
+	public Process start(String mapCmdline, String startmap) throws java.io.IOException {
 		ArrayList<String> cmd = new ArrayList<String>(5);
 
 		cmd.add(quakeExe.getAbsolutePath());
@@ -52,7 +52,8 @@ public class EngineStarter {
 
 		System.out.println(cmd);
 		
-		Process p = pb.start();		
+		Process p = pb.start();
+		return p;
 	}
 
 	public void setQuakeDirectory(File dir) {
