@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutionException;
@@ -71,7 +72,25 @@ public class Installer {
 		}
 		return downloadDirectory.get().canWrite();
 	}
+
+	public void cancelAll() {
+		synchronized (queue) {
+			for (Package inQueue: getQueue()) {
+				cancel(inQueue);
+				System.out.println("Canceling " + inQueue);
+			}
+		}
+	}
 	
+
+	public boolean working() {
+		return !queue.isEmpty();
+	}
+
+	public Set<Package> getQueue() {
+		return queue.keySet();
+	}
+
 	public boolean alreadyQueued(final Package map) {
 		return queue.get(map) != null;
 	}
@@ -212,7 +231,8 @@ public class Installer {
 						out.close();
 						System.out.print("Error downloading file, removing...");
 						if (!downloadFile.delete()) {
-							System.err.print("Couldn't delete file! ");
+							System.err.print("Couldn't delete partially downloaded file ("
+							                 + downloadFile + ")! ");
 						}
 						System.out.println("done.");
 						throw e;
@@ -268,6 +288,9 @@ public class Installer {
 				error = e;
 			}
 			catch (IOException e) {
+				error = e;
+			}
+			catch (java.util.concurrent.CancellationException e) {
 				error = e;
 			}
 			catch (java.util.concurrent.ExecutionException e) {

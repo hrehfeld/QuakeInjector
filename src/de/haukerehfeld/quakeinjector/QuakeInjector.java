@@ -616,6 +616,32 @@ public class QuakeInjector extends JFrame {
 	{
 		@Override
 		public void windowClosing(WindowEvent e) {
+			if (installer.working()) {
+				String msg = "There are maps left in the install queue. Wait until they are finished installing?";
+
+				Object[] options = {"Wait",
+				                    "Close immediately"};
+				int optionDialog =
+				    JOptionPane.showOptionDialog(QuakeInjector.this,
+				                                 msg,
+				                                 "Maps still installing",
+				                                 JOptionPane.YES_NO_OPTION,
+				                                 JOptionPane.WARNING_MESSAGE,
+				                                 null,
+				                                 options,
+				                                 options[0]);
+				if (optionDialog == 0) {
+					setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+					return;
+				}
+				else {
+					for (Package inQueue: installer.getQueue()) {
+						installer.cancel(inQueue);
+						System.out.println("Canceling " + inQueue);
+					}
+					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				}
+			}
 			windowClosed(e);
 		}
 		@Override
