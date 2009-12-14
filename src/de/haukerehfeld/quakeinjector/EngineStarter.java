@@ -49,6 +49,7 @@ public class EngineStarter {
 		
 		ProcessBuilder pb = new ProcessBuilder(cmd);
 		pb.directory(quakeDir);
+		pb.redirectErrorStream(true);
 
 		System.out.println(cmd);
 		
