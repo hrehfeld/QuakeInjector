@@ -160,6 +160,7 @@ public class Installer {
 		public void handle(OnlineFileNotFoundException error);
 		public void handle(FileNotWritableException error, PackageFileList alreadyInstalledFiles);
 		public void handle(IOException error, PackageFileList alreadyInstalledFiles);
+		public void handle(java.net.SocketException error, PackageFileList alreadyInstalledFiles);
 		public void handle(CancelledException error, PackageFileList alreadyInstalledFiles);
 	}
 
@@ -366,6 +367,9 @@ public class Installer {
 				}
 				catch (OnlineFileNotFoundException error) {
 					handler.handle((OnlineFileNotFoundException) error);
+				}
+				catch (java.net.SocketException error) {
+					handler.handle((java.net.SocketException) error, files);
 				}
 				catch (FileNotWritableException error) {
 					handler.handle((FileNotWritableException) error, files);

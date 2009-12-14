@@ -354,9 +354,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 							  }
 							  public void handle(java.io.IOException error,
 							                     PackageFileList alreadyInstalledFiles) {
-//								  if (!alreadyInstalledFiles.isEmpty()) {
-									  cleanup(alreadyInstalledFiles, "File Error");
-									  //								  }
+								  cleanup(alreadyInstalledFiles, "File Error");
 
 								  String msg = "Couldn't open file! "
 								      + error.getMessage();
@@ -365,6 +363,18 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 								                                "Couldn't open file!",
 								                                JOptionPane.ERROR_MESSAGE);
 							  }
+
+							  public void handle(java.net.SocketException error,
+							                     PackageFileList alreadyInstalledFiles) {
+								  cleanup(alreadyInstalledFiles, "Network Error");
+
+								  String msg = "Download failed! " + error.getMessage();
+								  JOptionPane.showMessageDialog(PackageInteractionPanel.this,
+								                                msg,
+								                                "Download failed!",
+								                                JOptionPane.ERROR_MESSAGE);
+							  }
+							  
 							  public void handle(Installer.CancelledException error,
 							                     PackageFileList alreadyInstalledFiles) {
 								  cleanup(alreadyInstalledFiles, "Canceled");
