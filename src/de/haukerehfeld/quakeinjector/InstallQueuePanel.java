@@ -74,7 +74,7 @@ public class InstallQueuePanel extends JPanel implements Scrollable {
 			remove(j.progressBar);
 			remove(j.cancelButton);
 			remove(j.finishedLabel);
-			System.out.println("removing finishedlabel");
+			//System.out.println("removing finishedlabel");
 
 			final int row_ = row;
 			if (!j.finished) {
@@ -83,7 +83,7 @@ public class InstallQueuePanel extends JPanel implements Scrollable {
 			}
 			else {
 				add(j.finishedLabel, new FinishedLabelConstraints() {{ gridy = row_; }});
-				System.out.println("adding finishedlabel");
+				//System.out.println("adding finishedlabel");
 			}
 			row++;
 		}
