@@ -80,8 +80,10 @@ public class OkayCancelApplyPanel extends JPanel {
 				weightx = 1;
 			}});
 		add(okay, new C() {{ gridx = 1; }});
-		add(cancel, new C() {{ gridx = 2; }});
-		if (useApply) {
+		if (cancel != null) {
+			add(cancel, new C() {{ gridx = 2; }});
+		}
+		if (apply != null && useApply) {
 			add(apply, new C() {{ gridx = 3; }});
 			apply.setEnabled(false);
 		}
