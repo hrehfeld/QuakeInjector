@@ -274,43 +274,58 @@ public class QuakeInjector extends JFrame {
 	/**
 	 * Tell maps what maps are already installed
 	 */
-	private Future<Void> setInstalledStatus(final Future<List<Requirement>> dbParse,
-	                                        final Future<List<PackageFileList>> packages) {
+	private void setInstalledStatus(final List<Requirement> dbParse,
+	                                final List<PackageFileList> packages) {
+		maps.setRequirements(dbParse);
+		
+		for (PackageFileList l: packages) {
+			maps.setInstalled(l);
+		}
+		
+		maps.notifyChangeListeners();
+	}
+
+	private Future<Void> parseDatabaseAndSetList() {
+		final Future<List<Requirement>> dbParse = parseDatabase();
+
 		SwingWorker<Void,Void> updateRequirementList = new SwingWorker<Void,Void>() {
+			List<Requirement> database;
+			List<PackageFileList> packages;
+			
 			@Override
 			public Void doInBackground() throws ExecutionException, InterruptedException {
-				dbParse.get();
+				database = dbParse.get();
+				packages = parseInstalled.get();
+
 				return null;
 			}
 			@Override
 			public void done() {
 				try {
-					maps.setRequirements(dbParse.get());
-
-					for (PackageFileList l: packages.get()) {
-						maps.setInstalled(l);
-					}
-
-					maps.notifyChangeListeners();
+					get();
 				}
 				catch (ExecutionException e) {
-					System.err.println("database parsing failed: " + e.getCause());
-					e.getCause().printStackTrace();
+					Throwable err = e.getCause();
+
+					String msg = "Database parsing failed! " + err.getMessage();
+					JOptionPane.showMessageDialog(QuakeInjector.this,
+					                              msg,
+					                              "Database parsing failed!",
+					                              JOptionPane.ERROR_MESSAGE);
 				}
 				catch (InterruptedException e) {
 					System.err.println("Waiting for database parsing failed: " + e);
 					e.printStackTrace();
 				}
+
+				if (database != null && packages != null) {
+					setInstalledStatus(database, packages);
+				}
 			}
 		};
 		updateRequirementList.execute();
+		
 		return updateRequirementList;
-	}
-
-	private Future<Void> parseDatabaseAndSetList() {
-		final Future<List<Requirement>> dbParse = parseDatabase();
-		final Future<Void> requirementsListUpdater = setInstalledStatus(dbParse, parseInstalled);
-		return requirementsListUpdater;
 	}
 
 
