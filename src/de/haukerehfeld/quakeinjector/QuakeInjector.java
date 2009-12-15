@@ -35,6 +35,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -443,6 +444,7 @@ public class QuakeInjector extends JFrame {
 			filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.LINE_AXIS));
 			JLabel filterText = new JLabel("Filter: ", SwingConstants.TRAILING);
 			filterPanel.add(filterText);
+			filterPanel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
 
 			final JTextField filter = new JTextField();
 			filter.getDocument().addDocumentListener(
