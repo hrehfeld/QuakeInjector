@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
+import javax.swing.JComponent;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 import javax.swing.JButton;
@@ -66,30 +67,55 @@ public class OkayCancelApplyPanel extends JPanel {
 		this.cancel = cancel;
 		this.apply = apply;
 
-		class C extends GridBagConstraints {{
-			insets = OTHERBORDER;
-			anchor = LINE_END;
-			fill = NONE;
-		}};
 
-		//right aligned
-		add(Box.createHorizontalGlue(),
-		    new GridBagConstraints() {{
-				insets = LEFTBORDER;
-				gridx = 0;
-				weightx = 1;
-			}});
-		add(okay, new C() {{ gridx = 1; }});
+		List<JComponent> components = new ArrayList<JComponent>(3);
+
+		components.add(okay);
+
 		if (cancel != null) {
-			add(cancel, new C() {{ gridx = 2; }});
+			components.add(cancel);
 		}
-		if (apply != null && useApply) {
-			add(apply, new C() {{ gridx = 3; }});
+
+		if (apply != null) {
 			apply.setEnabled(false);
+			components.add(apply);
 		}
+
+		OkayCancelApplyPanel.addRow(this, 0, components);
 	}
 
 	public void setApplyEnabled(boolean enabled) {
 		this.apply.setEnabled(enabled);
 	}
+
+	/**
+	 * Add some components right aligned to a gridbaglayout container
+	 * at a specific row, with proper borders.
+	 */
+	public static void addRow(final java.awt.Container container,
+	                          final int row,
+	                          final List<JComponent> components) {
+		//right aligned
+		container.add(Box.createHorizontalGlue(), new LeftConstraints());
+
+		int col = 1;
+		for (JComponent c: components) {
+			final int col_ = col;
+			container.add(c, new RightConstraints() {{ gridx = col_; gridy = row; }});
+			col++;
+		}
+	}
+
+	static class LeftConstraints extends GridBagConstraints {{
+		insets = LEFTBORDER;
+		gridx = 0;
+		weightx = 1;
+	}}
+
+	static class RightConstraints extends GridBagConstraints {{
+		insets = OTHERBORDER;
+		anchor = LINE_END;
+		fill = NONE;
+	}}
+	
 }
