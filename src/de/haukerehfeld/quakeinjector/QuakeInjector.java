@@ -387,8 +387,11 @@ public class QuakeInjector extends JFrame {
 								                 d.getHipnoticInstalled());
 				}
 			});
+
+		d.pack();
+		d.setLocationRelativeTo(this);
+		d.show();
 		
-		d.packAndShow();
 	}
 
 
