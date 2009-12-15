@@ -635,10 +635,7 @@ public class QuakeInjector extends JFrame {
 					return;
 				}
 				else {
-					for (Package inQueue: installer.getQueue()) {
-						installer.cancel(inQueue);
-						System.out.println("Canceling " + inQueue);
-					}
+					installer.cancelAll();
 					setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				}
 			}
