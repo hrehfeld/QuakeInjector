@@ -150,7 +150,7 @@ public class JPathPanel extends JPanel {
 
 	private boolean check() {
 		File f = getPath();
-		System.out.println(f);
+		//System.out.println(f);
 		errorLabel.setText(check.errorMessage(f));
 		return this.check.verify(f);
 	}
@@ -159,7 +159,7 @@ public class JPathPanel extends JPanel {
 		File oldFile = getPath();
 		boolean verifies = verifies();
 		this.basePath = basePath;
-		System.out.println("Changing basePath: " + oldFile + " to " + basePath);
+		//System.out.println("Changing basePath: " + oldFile + " to " + basePath);
 		if (verifies) {
 			setPath(oldFile);
 		}
