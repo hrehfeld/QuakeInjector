@@ -105,14 +105,20 @@ public class EngineOutputDialog extends JDialog {
 					String line;
 					while ((line = b.readLine()) != null) {
 						output.append(line.trim() + "\n");
-					}
 
+						//scroll on the event thread
+						javax.swing.SwingUtilities.invokeLater(new SwingWorker<Void,Void>() {
+						        public Void doInBackground() {
+									output.scrollRectToVisible(new Rectangle(0, output.getHeight(), 0, 10));
+									return null;
+								}
+						    });
+					}
 				}
 				catch (java.io.IOException e) {
 					output.append("Error: Couldn't read engine output from stream");
 				}
-				output.scrollRectToVisible(new Rectangle(0, output.getHeight(), 0, 10));
-				
+
 				return null;
 			}
 			@Override
