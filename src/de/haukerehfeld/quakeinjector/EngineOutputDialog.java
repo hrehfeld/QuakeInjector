@@ -104,6 +104,7 @@ public class EngineOutputDialog extends JDialog {
 					
 					String line;
 					while ((line = b.readLine()) != null) {
+						//append is thread safe
 						output.append(line.trim() + "\n");
 
 						//scroll on the event thread
