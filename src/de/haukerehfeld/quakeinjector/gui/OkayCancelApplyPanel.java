@@ -45,16 +45,15 @@ import javax.swing.Box;
 import java.awt.Insets;
 
 public class OkayCancelApplyPanel extends JPanel {
-	private static final int MARGIN = 7;
-	private static final Insets LEFTBORDER = new Insets(MARGIN,
-	                                                    MARGIN,
-	                                                    MARGIN,
-	                                                    MARGIN);
+	private static final Insets LEFTBORDER = new Insets(LookAndFeelDefaults.FRAMEPADDING,
+	                                                    LookAndFeelDefaults.FRAMEPADDING,
+	                                                    LookAndFeelDefaults.FRAMEPADDING,
+	                                                    LookAndFeelDefaults.FRAMEPADDING);
 
-	private static final Insets OTHERBORDER = new Insets(MARGIN,
+	private static final Insets OTHERBORDER = new Insets(LookAndFeelDefaults.FRAMEPADDING,
 	                                                     0,
-	                                                     MARGIN,
-	                                                     MARGIN);
+	                                                     LookAndFeelDefaults.FRAMEPADDING,
+	                                                     LookAndFeelDefaults.FRAMEPADDING);
 
 	private final JButton okay;
 	private final JButton cancel;
