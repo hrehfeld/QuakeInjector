@@ -25,9 +25,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -36,6 +40,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
@@ -44,6 +49,7 @@ import javax.swing.event.ChangeListener;
 import de.haukerehfeld.quakeinjector.gui.ErrorEvent;
 import de.haukerehfeld.quakeinjector.gui.ErrorListener;
 import de.haukerehfeld.quakeinjector.gui.JPathPanel;
+import de.haukerehfeld.quakeinjector.gui.LookAndFeelDefaults;
 import de.haukerehfeld.quakeinjector.gui.OkayCancelApplyPanel;
 
 public class EngineConfigDialog extends JDialog {
@@ -70,17 +76,19 @@ public class EngineConfigDialog extends JDialog {
 	                          boolean hipnoticInstalled) {
 		super(frame, windowTitle, true);
 
-		JLabel description = new JLabel("Configure engine specifics", SwingConstants.CENTER);
-		description.setLabelFor(this);
-		description.setPreferredSize(new Dimension(100, 50));
-		add(description, BorderLayout.PAGE_START);
-
 		JPanel configPanel = new JPanel();
+		configPanel.setBorder(LookAndFeelDefaults.PADDINGBORDER);
 		configPanel.setLayout(new GridBagLayout());
-		add(configPanel, BorderLayout.CENTER);
 
-		final JButton okay = new JButton("Save Changes");
+		JLabel description = new JLabel("Configure engine specific settings");
+		description.setLabelFor(this);
+		description.setBorder(LookAndFeelDefaults.DIALOGDESCRIPTIONBORDER);
+		configPanel.add(description, new GridBagConstraints());
+
+		final JButton okay = new JButton("Okay");
 		final JButton cancel = new JButton("Cancel");
+		final JButton apply = new JButton("Apply");
+
 
 		class LabelConstraints extends GridBagConstraints {{
 				anchor = LINE_START;
@@ -101,25 +109,42 @@ public class EngineConfigDialog extends JDialog {
 				weightx = 1;
 				weighty = 0;
 		}};
-		
+
+		int row = 1;
+
+		Border leftBorder = BorderFactory
+		    .createEmptyBorder(0, 0, 0, LookAndFeelDefaults.FRAMEPADDING);
+
 		{
+			
 			JLabel cmdlineLabel = new JLabel("Quake commandline options");
-			configPanel.add(cmdlineLabel, new LabelConstraints());
+			cmdlineLabel.setBorder(leftBorder);
+
 			this.engineCommandline = new JTextField(cmdlineDefault.get(), 40);
-			configPanel.add(engineCommandline, new InputConstraints());
+
+			final int row_ = row;
+			configPanel.add(cmdlineLabel, new LabelConstraints() {{ gridy = row_; }});
+			configPanel.add(engineCommandline, new InputConstraints() {{ gridy = row_; }});
 		}
-		//"Path to quake directory",
-		JLabel enginePathLabel = new JLabel("Quake Directory");
-		configPanel.add(enginePathLabel, new LabelConstraints() {{ gridy = 1; }});
+
+		++row;
+
 		{
+			//"Path to quake directory",
+			JLabel enginePathLabel = new JLabel("Quake Directory");
+			enginePathLabel.setBorder(leftBorder);
+			
 			enginePath = new JPathPanel(new JPathPanel.WritableDirectoryVerifier(),
 			                            enginePathDefault.get(),
 			                            javax.swing.JFileChooser.DIRECTORIES_ONLY);
-			configPanel.add(enginePath, new InputConstraints() {{ gridy = 1; }});
+			final int row_ = row;
+			configPanel.add(enginePathLabel, new LabelConstraints() {{ gridy = row_; }});
+			configPanel.add(enginePath, new InputConstraints() {{ gridy = row_; }});
 		}
+		++row;
 		
 		JLabel engineExeLabel = new JLabel("Quake Executable");
-		configPanel.add(engineExeLabel, new LabelConstraints() {{ gridy = 2; }});
+		engineExeLabel.setBorder(leftBorder);
 		engineExecutable = new JPathPanel(
 			new JPathPanel.Verifier() {
 				public boolean verify(File exe) {
@@ -144,102 +169,159 @@ public class EngineConfigDialog extends JDialog {
 			engineExeDefault.get(),
 			enginePathDefault.get(),
 			javax.swing.JFileChooser.FILES_ONLY);
-		configPanel.add(engineExecutable, new InputConstraints() {{ gridy = 2; }});
-
-		final ChangeListener enableOkay = new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
-					if (enginePath.verifies() && engineExecutable.verifies()) {
-						okay.setEnabled(true);
-					}
-				}
-			};
 
 		{
-			enginePath.addErrorListener(new ErrorListener() {
-					public void errorOccured(ErrorEvent e) {
-						okay.setEnabled(false);
-					}
-				});
-			//change basepath of the exe when quakedir changes
-			enginePath.addChangeListener(new ChangeListener() {
-					public void stateChanged(ChangeEvent e) {
-						engineExecutable.setBasePath(enginePath.getPath());
+			final int row_ = row;
+			configPanel.add(engineExeLabel, new LabelConstraints() {{ gridy = row_; }});
+			configPanel.add(engineExecutable, new InputConstraints() {{ gridy = row_; }});
+		}
 
-						enableOkay.stateChanged(e);
-					}
-				});
+
+		{
 		}
 		{
-			engineExecutable.addErrorListener(new ErrorListener() {
-					public void errorOccured(ErrorEvent e) {
-						okay.setEnabled(false);
-					}
-				});
-			engineExecutable.addChangeListener(enableOkay);
 		}
 
 		enginePath.verify();
 		engineExecutable.verify();
 
+		++row;
+
 		{
 			//"Path to quake directory",
-			configPanel.add(new JLabel("Download Directory"), new LabelConstraints() {{ gridy = 3; }});
+			JLabel downloadLabel = new JLabel("Download Directory");
+			downloadLabel.setBorder(leftBorder);
 			downloadPath = new JPathPanel(new JPathPanel.WritableDirectoryVerifier(),
 			                              downloadPathDefault.get(),
 			                              javax.swing.JFileChooser.DIRECTORIES_ONLY);
-			configPanel.add(downloadPath, new InputConstraints() {{ gridy = 3; }});
 			downloadPath.verify();
+
+			final int row_ = row;
+			configPanel.add(downloadLabel, new LabelConstraints() {{ gridy = row_; }});
+			configPanel.add(downloadPath, new InputConstraints() {{ gridy = row_; }});
 			
 		}
+		++row;
 
 
 		{
 			JLabel expansionsInstalled = new JLabel("Expansion packs installed");
-			configPanel.add(expansionsInstalled, new LabelConstraints() {{ gridy = 4; }});
+			expansionsInstalled.setBorder(leftBorder);
 
 			rogue = new JCheckBox("rogue");
 			rogue.setMnemonic(KeyEvent.VK_R);
 			rogue.setSelected(rogueInstalled);
-			configPanel.add(rogue, new InputConstraints() {{ gridy = 4; gridwidth = 1; }});
 
 			hipnotic = new JCheckBox("hipnotic");
 			hipnotic.setMnemonic(KeyEvent.VK_H);
 			hipnotic.setSelected(hipnoticInstalled);
+
+			final int row_ = row;
+			configPanel.add(expansionsInstalled, new LabelConstraints() {{ gridy = row_; }});
+			configPanel.add(rogue, new InputConstraints() {{ gridy = row_; gridwidth = 1; }});
 			configPanel.add(hipnotic, new InputConstraints() {{
-				gridy = 4;
+				gridy = row_;
 				gridx = 2;
 				gridwidth = 1;
 			}});
 		}
+
+		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane.setBorder(LookAndFeelDefaults.PADDINGBORDER);
+		tabbedPane.addTab("Engine Specifics", null, configPanel, "Configure Engine Specifics");
+		tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
+
+		add(tabbedPane, BorderLayout.CENTER);
+		
+
+		class EnableOkay implements ChangeListener, DocumentListener {
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				check();
+			}
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				check();
+			}
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				check();
+			}
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				check();
+			}
+			
+			private void check() {
+				if (enginePath.verifies() && engineExecutable.verifies()) {
+					okay.setEnabled(true);
+					apply.setEnabled(true);
+				}
+			}
+		};
+		
+		final EnableOkay enableOkay = new EnableOkay() ;
+		
+
+		engineCommandline.getDocument().addDocumentListener(enableOkay);
+		
+		enginePath.addErrorListener(new ErrorListener() {
+				public void errorOccured(ErrorEvent e) {
+					okay.setEnabled(false);
+					apply.setEnabled(false);
+				}
+			});
+		//change basepath of the exe when quakedir changes
+		enginePath.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					engineExecutable.setBasePath(enginePath.getPath());
+				}
+			});
+		enginePath.addChangeListener(enableOkay);
+
+		engineExecutable.addErrorListener(new ErrorListener() {
+				public void errorOccured(ErrorEvent e) {
+					okay.setEnabled(false);
+					apply.setEnabled(false);
+				}
+			});
+		engineExecutable.addChangeListener(enableOkay);
+
+		downloadPath.addChangeListener(enableOkay);
+
+		rogue.addChangeListener(enableOkay);
+		hipnotic.addChangeListener(enableOkay);
+
 		
 		
 
-		okay.addActionListener(new ActionListener() {
+		ActionListener save = new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					listeners.notifyChangeListeners(this);
-
-					setVisible(false);
-					dispose();
-
+					apply.setEnabled(false);
 				}
-			});
-		cancel.addActionListener(new ActionListener() {
+			};
+		
+
+		okay.addActionListener(save);
+		apply.addActionListener(save);
+
+		ActionListener close = new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					setVisible(false);
 					dispose();
 				}
-			});
+			};
+
+		okay.addActionListener(close);
+		cancel.addActionListener(close);
 
 		{
-			JPanel okayCancelPanel = new OkayCancelApplyPanel(okay, cancel, null, false);
+			JPanel okayCancelPanel = new OkayCancelApplyPanel(okay, cancel, apply, true);
 			add(okayCancelPanel, BorderLayout.PAGE_END);
 		}
 		
-	}
-
-	public void packAndShow() {
-		pack();
-		setVisible(true);
 	}
 
 	public File getEnginePath() {
