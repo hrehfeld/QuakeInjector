@@ -45,12 +45,16 @@ import javax.swing.SwingUtilities;
 public class Installer {
 	private static final int simultanousDownloads = 1;
 	private static final int simultanousInstalls = 1;
+	private static final int simultanousInspectors = 1;
+	private static final int simultanousWaiters = 15;
 
 	private Configuration.EnginePath installDirectory;
 	private Configuration.DownloadPath downloadDirectory;
 	
 	private ExecutorService activeDownloaders = Executors.newFixedThreadPool(simultanousDownloads);
+	private ExecutorService activeInspectors = Executors.newFixedThreadPool(simultanousInspectors);
 	private ExecutorService activeInstallers = Executors.newFixedThreadPool(simultanousInstalls);
+	private ExecutorService activeWaiters = Executors.newFixedThreadPool(simultanousWaiters);
 
 	private Map<Package,Worker> queue = new HashMap<Package,Worker>();
 
@@ -75,7 +79,7 @@ public class Installer {
 
 	public void cancelAll() {
 		synchronized (queue) {
-			for (Package inQueue: getQueue()) {
+			for (Package inQueue: new java.util.HashSet<Package>(getQueue())) {
 				cancel(inQueue);
 				System.out.println("Canceling " + inQueue);
 			}
@@ -111,8 +115,8 @@ public class Installer {
 		                                  errorHandler,
 		                                  downloadProgressListener);
 		synchronized (queue) { queue.put(selectedMap, saveInstalled); }
-		saveInstalled.execute();
-		
+		synchronized (activeWaiters) { activeWaiters.submit(saveInstalled); }
+
 	}
 
 	public void cancel(Package installerMap) {
@@ -243,7 +247,7 @@ public class Installer {
 					System.out.println("Skipping download, already existing with length " + downloadSize);
 				}
 
-				System.out.print("Inspecting downloaded archive...");
+				System.out.println("Inspecting downloaded archive..." + downloadFile);
 				FileInputStream in = new FileInputStream(downloadFile);
 				Map<String,File> existingFiles = inspect(in);
 				in.close();
@@ -293,6 +297,9 @@ public class Installer {
 			catch (java.util.concurrent.CancellationException e) {
 				error = e;
 			}
+			catch (java.lang.InterruptedException e) {
+				error = e;
+			}
 			catch (java.util.concurrent.ExecutionException e) {
 				error = e.getCause();
 			}
@@ -326,8 +333,9 @@ public class Installer {
 			//see what files the zip wants to extract
 
 			InspectZipWorker inspector = new InspectZipWorker(in);
-			inspector.execute();
+			synchronized (activeInspectors) { activeInspectors.submit(inspector); }
 
+			System.out.println("Waiting for inspection...");
 			final List<ZipEntry> entries = inspector.get();
 			
 			//check files
