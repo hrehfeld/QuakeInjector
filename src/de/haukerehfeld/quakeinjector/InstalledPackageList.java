@@ -37,11 +37,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class InstalledPackageList {
-	private final static String filename = "installedMaps.xml";
-	private final File file = new File(filename);
+	private final File file;
+
+	public InstalledPackageList(File file) {
+		this.file = file;
+	}
 	
+
 	public void write(Iterable<Requirement> list) throws java.io.IOException {
-		System.out.println("Writing " + filename);
+		System.out.println("Writing " + file);
 		
 		if (!file.exists()) {
 			file.createNewFile();
@@ -97,7 +101,7 @@ public class InstalledPackageList {
 	}
 
 	public List<PackageFileList> read() throws java.io.IOException {
-		System.out.println("Reading " + filename);
+		System.out.println("Reading " + file);
 
 		Document document;
 		try {
@@ -107,10 +111,10 @@ public class InstalledPackageList {
 			document = db.parse(file);
 		}
 		catch (javax.xml.parsers.ParserConfigurationException e) {
-			throw new java.io.IOException("Couldn't parse installedMaps xml: " + e.getMessage());
+			throw new java.io.IOException("Couldn't parse " + file + ": " + e.getMessage());
 		}
 		catch (org.xml.sax.SAXException e) {
-			throw new java.io.IOException("Couldn't parse installedMaps xml: " + e.getMessage());
+			throw new java.io.IOException("Couldn't parse " + file + ": " + e.getMessage());
 		}
 
 		Element root = document.getDocumentElement();

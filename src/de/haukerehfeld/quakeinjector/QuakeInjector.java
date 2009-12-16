@@ -65,6 +65,10 @@ public class QuakeInjector extends JFrame {
 	private static final int minWidth = 300;
 	private static final int minHeight = 300;
 
+	private final static String installedMapsFileName = "installedMaps.xml";
+
+	
+
 	private EngineStarter starter;
 
 	private PackageInteractionPanel interactionPanel;
@@ -338,7 +342,7 @@ public class QuakeInjector extends JFrame {
 		public List<PackageFileList> doInBackground() {
 			List<PackageFileList> files;
 			try {
-				files = new InstalledPackageList().read();
+				files = new InstalledPackageList(new File(installedMapsFileName)).read();
 			}
 			catch (java.io.FileNotFoundException e) {
 				System.out.println("Notice: InstalledMaps xml doesn't exist yet,"
