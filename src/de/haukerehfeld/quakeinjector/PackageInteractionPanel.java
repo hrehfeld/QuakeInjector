@@ -523,7 +523,12 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 			startmaps.setEnabled(enableList);
 		}
 		else {
-			installButton.setEnabled(true);
+			if (installer.alreadyQueued(selectedMap)) {
+				installButton.setEnabled(false);
+			}
+			else {
+				installButton.setEnabled(true);
+			}
 			playButton.setEnabled(false);
 			uninstallButton.setEnabled(false);
 			startmaps.setEnabled(false);
