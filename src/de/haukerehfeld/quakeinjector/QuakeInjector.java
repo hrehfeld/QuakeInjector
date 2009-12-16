@@ -191,8 +191,10 @@ public class QuakeInjector extends JFrame {
 		                          getConfig().DownloadPath);
 		interactionPanel.init(installer,
 		                      getConfig().RepositoryBasePath,
-		                      packages,
-		                      starter);
+		                      maps,
+		                      starter,
+		                      new InstalledPackageList(new File(installedMapsFileName))
+		    );
 
 		if (!installer.checkInstallDirectory()) {
 			//wait until database was loaded, then pop up config
@@ -431,7 +433,7 @@ public class QuakeInjector extends JFrame {
 		maps.get("hipnotic").setInstalled(hipnoticInstalled);
 		try {
 			synchronized (maps) {
-				maps.writeInstalled();
+				new InstalledPackageList(new File(installedMapsFileName)).write(maps);
 			}
 		}
 		catch (java.io.IOException e) {}

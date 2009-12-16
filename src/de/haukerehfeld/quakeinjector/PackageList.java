@@ -56,10 +56,6 @@ public class PackageList implements Iterable<Package>, ChangeListener {
 		java.util.Collections.sort(packages);
 	}
 
-	public void writeInstalled() throws java.io.IOException {
-		requirements.writeInstalled();
-	}
-
 	public Package get(int i) {
 		return packages.get(i);
 	}

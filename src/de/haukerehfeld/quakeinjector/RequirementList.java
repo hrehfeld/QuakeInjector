@@ -55,10 +55,6 @@ public class RequirementList implements Iterable<Requirement> {
 		}
 	}
 
-	public void writeInstalled() throws java.io.IOException {
-		new InstalledPackageList().write(this);
-	}
-
 	public Requirement get(int i) {
 		return requirements.get(i);
 	}

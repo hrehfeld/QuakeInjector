@@ -51,7 +51,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 	
 	private EngineStarter starter;
 	private Configuration.RepositoryBasePath paths;
-	private PackageList requirements;
+	private RequirementList requirements;
 	private InstallQueuePanel installQueue;
 
 	private JButton uninstallButton;
@@ -68,6 +68,8 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 	private Package selectedMap = null;
 
 	private Installer installer;
+
+	private InstalledPackageList installedMaps;
 	
 	public PackageInteractionPanel(QuakeInjector main, InstallQueuePanel installQueue) {
 		super(new GridBagLayout());
@@ -140,11 +142,13 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 
 	public void init(Installer installer,
 	                 Configuration.RepositoryBasePath paths,
-	                 PackageList requirements,
-	                 EngineStarter starter) {
+	                 RequirementList requirements,
+	                 EngineStarter starter,
+	                 InstalledPackageList installedMaps) {
 		this.paths = paths;
 		this.requirements = requirements;
 		this.starter = starter;
+		this.installedMaps = installedMaps;
 
 		this.installer = installer;
 		
@@ -326,10 +330,15 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 							  public void success(PackageFileList installedFiles) {
 								  Requirement r = requirements.get(installedFiles.getId());
 								  r.setInstalled(true);
-								  ((Package) r).setFileList(installedFiles);
+								  if (!(r instanceof Package)) {
+									  System.err.println(r + " isn't a Package!");
+								  }
+								  else {
+									  ((Package) r).setFileList(installedFiles);
+								  }
 
 								  try {
-									  requirements.writeInstalled();
+									  installedMaps.write(requirements);
 								  }
 								  catch (java.io.IOException e) {
 									  System.out.println("Couldn't write installed Maps file!"
@@ -430,7 +439,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 										public Void doInBackground() {
 											
 											try {
-												requirements.writeInstalled();
+												installedMaps.write(requirements);
 											}
 											catch (java.io.IOException e) {
 												System.out.println("Couldn't write installed Maps file!" + e.getMessage());
