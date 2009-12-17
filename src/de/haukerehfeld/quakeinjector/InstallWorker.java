@@ -114,7 +114,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 
 		boolean extracted = false;
 		while((entry = zis.getNextEntry()) != null) {
-			File f = Installer.getFile(entry, map, basedir.getAbsolutePath());
+			File f = new File(unzipdir + File.separator + entry.getName());
 			String filename = RelativePath.getRelativePath(basedir, f).toString();
 			
 			if (overwrites != null && overwrites.indexOf(f) < 0) {

@@ -123,7 +123,13 @@ public class ZipInspect {
 					zipFiles.add(e.getName());
 				}
 
+
 				String packageName = f.getName();
+
+				//hack of ".zip"
+				int ext = packageName.lastIndexOf(".");
+				packageName = packageName.substring(0, ext);
+				
 				
 				packageFiles.put(packageName, zipFiles);
 			}
@@ -137,18 +143,6 @@ public class ZipInspect {
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-		}
-	}
-
-	public static class PackageInfo extends ArrayList<String> {
-		private String name;
-
-		public void setName(String name) {
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
 		}
 	}
 }

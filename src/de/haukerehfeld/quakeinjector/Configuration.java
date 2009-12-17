@@ -36,6 +36,15 @@ public class Configuration {
 	private static final String CONFIGHEADER = "Quake Injector " + BuildCommit.buildCommit + " config file";
 	public class EnginePath extends FileValue {
 		private EnginePath() { super("enginePath", null); }
+		
+		public File getUnzipDir(Package map) {
+			String relativedir = map.getRelativeBaseDir();
+			String unzipdir = get().getAbsolutePath();
+			if (relativedir != null) {
+				unzipdir += File.separator + relativedir;
+			}
+			return new File(unzipdir);
+		}
 	}
 	public final EnginePath EnginePath = new EnginePath();
 
@@ -84,6 +93,13 @@ public class Configuration {
 				"http://www.quaddicted.com/reviews/quaddicted_database.xml"); }
 	}
 	public final RepositoryDatabasePath RepositoryDatabasePath = new RepositoryDatabasePath();
+
+	public class ZipContentsDatabaseUrl extends StringValue {
+		private ZipContentsDatabaseUrl() { super("ZipContentsDatabaseUrl",
+				"http://haukerehfeld.de/projects/quakeinjector/temp/zipContents.xml"); }
+	}
+	public final ZipContentsDatabaseUrl ZipContentsDatabaseUrl = new ZipContentsDatabaseUrl();
+	
 
 	public class RogueInstalled extends BooleanValue {
 		private RogueInstalled() { super("rogueInstalled", false); }

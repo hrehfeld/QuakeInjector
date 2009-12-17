@@ -192,6 +192,11 @@ public class Package extends SortableRequirement implements Requirement {
 		listeners.notifyChangeListeners(this);
 	}
 
+	@Override
+	public String toString() {
+		return getId() + " (" + isInstalled() + ")";
+	}
+
 	/**
 	 * get fileList
 	 */

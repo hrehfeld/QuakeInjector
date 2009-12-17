@@ -159,19 +159,6 @@ public class Installer {
 		}.execute();
 	}
 
-	public static String getUnzipDir(Package map, String baseDirectory) {
-		String relativedir = map.getRelativeBaseDir();
-		String unzipdir = baseDirectory;
-		if (relativedir != null) {
-			unzipdir += File.separator + relativedir;
-		}
-		return unzipdir;
-	}
-
-	public static File getFile(ZipEntry entry, Package map, String baseDirectory) {
-		return new File(Installer.getUnzipDir(map, baseDirectory) + File.separator + entry.getName());
-	}
-
 	public interface InstallErrorHandler {
 		/**
 		 * Decide which files in the package should be overwritten
@@ -263,7 +250,7 @@ public class Installer {
 				if (overwrites == null || !overwrites.isEmpty()) {
 					//and start install
 					System.out.println("Starting install");
-					String mapDir = Installer.getUnzipDir(map, installDirectory.get().getAbsolutePath());
+					String mapDir = installDirectory.getUnzipDir(map).getAbsolutePath();
 					in = new FileInputStream(downloadFile);
 					installer = new InstallWorker(in,
 					                              downloadSize,
@@ -345,7 +332,7 @@ public class Installer {
 				if (z.isDirectory()) {
 					continue;
 				}
-				File f = getFile(z, map, installDirectory.get().getAbsolutePath());
+				File f = new File(installDirectory.getUnzipDir(map).getAbsolutePath() + File.separator + z.getName());
 				String name
 				    = RelativePath.getRelativePath(installDirectory.get(), f).toString();
 				files.put(name, f);

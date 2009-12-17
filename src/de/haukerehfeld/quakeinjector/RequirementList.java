@@ -49,6 +49,10 @@ public class RequirementList implements Iterable<Requirement> {
 
 	public void setInstalled(PackageFileList l) {
 		Requirement r = get(l.getId());
+		if (r instanceof UnavailableRequirement) {
+			System.err.println("Can't set installed on UnavailableRequirement " + l.getId());
+			return;
+		}
 		r.setInstalled(true);
 		if (r instanceof Package) {
 			((Package) r).setFileList(l);

@@ -31,6 +31,7 @@ import javax.swing.KeyStroke;
 
 public class Menu extends JMenuBar {
 	public Menu(ActionListener databaseParser,
+	            ActionListener checkForInstalledMaps,
 	            ActionListener quitter,
 	            ActionListener showEngineConfig) {
 		setOpaque(true);
@@ -42,6 +43,10 @@ public class Menu extends JMenuBar {
 		JMenuItem reparseDatabase = new JMenuItem("Reload database", KeyEvent.VK_R);
 		reparseDatabase.addActionListener(databaseParser);
 		fileMenu.add(reparseDatabase);
+
+		JMenuItem checkInstalled = new JMenuItem("Check for installed maps (experimental!)", KeyEvent.VK_C);
+		checkInstalled.addActionListener(checkForInstalledMaps);
+		fileMenu.add(checkInstalled);
 		
 
 		JMenuItem quit = new JMenuItem("Quit", KeyEvent.VK_T);

@@ -31,9 +31,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import java.io.File;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import java.util.Collections;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -66,8 +73,9 @@ public class QuakeInjector extends JFrame {
 	private static final int minHeight = 300;
 
 	private final static String installedMapsFileName = "installedMaps.xml";
+	private final static String zipFilesXml = "zipFiles.xml";
 
-	
+
 
 	private EngineStarter starter;
 
@@ -117,6 +125,13 @@ public class QuakeInjector extends JFrame {
 				}
 			};
 
+		ActionListener checkInstalled = new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					checkForInstalledMaps();
+				}
+			};
+		
+
 		ActionListener quit = new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						setVisible(false);
@@ -130,7 +145,7 @@ public class QuakeInjector extends JFrame {
 						                 maps.get("hipnotic").isInstalled());
 					}};
 
-		return new Menu(parseDatabase, quit, showEngineConfig);
+		return new Menu(parseDatabase, checkInstalled, quit, showEngineConfig);
 	}
 
 	/**
@@ -165,7 +180,7 @@ public class QuakeInjector extends JFrame {
 		
 
 	private void parseInstalled() {
-		parseInstalled = new ParseInstalledWorker();
+		parseInstalled = new ParseInstalledWorker(new File(installedMapsFileName));
 		parseInstalled.execute();
 	}
 
@@ -279,17 +294,169 @@ public class QuakeInjector extends JFrame {
 	}
 
 	/**
+	 * See what maps are installed
+	 */
+	private Future<List<PackageFileList>> checkForInstalledMaps() {
+		final File enginePath = getConfig().EnginePath.get();
+
+		final File file = new File(zipFilesXml);
+
+		class CheckInstalled extends SwingWorker<List<PackageFileList>, Void> implements ProgressListener {
+			@Override
+			    public List<PackageFileList> doInBackground() throws java.lang.InterruptedException,
+			    java.util.concurrent.ExecutionException,
+				java.io.IOException {
+
+				//get download stream
+				Download d = Download.create(getConfig().ZipContentsDatabaseUrl.get());
+				d.connect();
+				InputStream dl = d.getStream();
+				
+				//ugly write to file first
+				OutputStream out = new FileOutputStream(file);
+				byte buf[] = new byte[1024];
+				int len;
+				while ((len = dl.read(buf)) > 0) {
+					out.write(buf, 0, len);
+				}
+				out.close();
+				dl.close();
+
+				final ParseInstalledWorker parser = new ParseInstalledWorker(file);
+				parser.execute();
+				
+
+				List<PackageFileList> packages = parser.get();
+				List<PackageFileList> installed = new ArrayList<PackageFileList>();
+
+				int i = 0;
+				for (PackageFileList list: packages) {
+					publish(i++ * 100 / packages.size());
+					Requirement r = maps.get(list.getId());
+					String basedir = getConfig().EnginePath + File.separator;
+					String relativeDir = "";
+					if (r instanceof Package) {
+						String dir = ((Package) r).getRelativeBaseDir();
+						if (dir != null) {
+							relativeDir += dir;
+						}
+					}
+					else if (r instanceof UnavailableRequirement) {
+						continue;
+					}
+
+					PackageFileList p = new PackageFileList(list.getId());
+					
+					List<String> missingFiles = new ArrayList<String>();
+					for (String entry: list) {
+						String file = basedir + relativeDir + entry;
+						File f = new File(file);
+						if (!f.exists()) {
+							missingFiles.add(file);
+						}
+						else {
+							p.add(relativeDir + entry);
+						}
+					}
+
+					if (missingFiles.isEmpty()) {
+						System.out.println(list.getId() + " seems to be installed.");
+						installed.add(p);
+					}
+				}
+
+				return installed;
+			}
+
+
+			@Override
+			    public void done() {
+				try {
+					setInstalledStatus(get());
+
+					synchronized (maps) {
+						new InstalledPackageList(new File(installedMapsFileName)).write(maps);
+					}
+				}
+				catch (java.lang.InterruptedException e) {
+					System.err.println("Interrupted: " + e);
+					e.printStackTrace();
+				}
+				catch (java.util.concurrent.ExecutionException e) {
+					System.err.println("Exception: " + e);
+					e.printStackTrace();
+					try {
+						throw e.getCause();
+					}
+					catch (java.net.ConnectException err) {
+					}
+					catch (Throwable err) {
+					}
+				}
+				catch (java.util.concurrent.CancellationException e) {
+				}
+				catch (java.io.IOException e) {
+					System.err.println("Couldn't write " + installedMapsFileName + ": " + e);
+					e.printStackTrace();
+				}
+			}
+
+			public void publish(long progress) {
+				if (progress <= 100) {
+					setProgress((int) progress);
+				}
+			}
+			
+		}
+
+
+		final CheckInstalled checker = new CheckInstalled();
+
+		final ProgressPopup dbpopup =
+		    new ProgressPopup("Checking for installed maps",
+		                      new ActionListener() {
+
+								  public void actionPerformed(ActionEvent e) {
+									  checker.cancel(true);
+								  }
+							  },
+		                      QuakeInjector.this);
+
+		checker.addPropertyChangeListener(new PropertyChangeListener() {
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					if (evt.getPropertyName() == "progress") {
+						int p = (Integer) evt.getNewValue();
+						dbpopup.setProgress(p);
+					}
+					else if (evt.getPropertyName() == "state"
+					    && evt.getNewValue().equals(SwingWorker.StateValue.DONE)) {
+						dbpopup.close();
+					}
+				}
+			});
+		checker.execute();
+		dbpopup.pack();
+		dbpopup.show();
+
+		return checker;
+	}
+	
+
+	/**
 	 * Tell maps what maps are already installed
 	 */
-	private void setInstalledStatus(final List<Requirement> dbParse,
-	                                final List<PackageFileList> packages) {
-		maps.setRequirements(dbParse);
-		
+	private void setInstalledStatus(final List<PackageFileList> packages) {
 		for (PackageFileList l: packages) {
 			maps.setInstalled(l);
 		}
+		for (Requirement r: maps) {
+			//System.out.println(r);
+		}
 		
 		maps.notifyChangeListeners();
+
+		
 	}
 
 	private Future<Void> parseDatabaseAndSetList() {
@@ -326,7 +493,8 @@ public class QuakeInjector extends JFrame {
 				}
 
 				if (database != null && packages != null) {
-					setInstalledStatus(database, packages);
+					maps.setRequirements(database);
+					setInstalledStatus(packages);
 				}
 			}
 		};
@@ -340,24 +508,27 @@ public class QuakeInjector extends JFrame {
 	 * Thread worker to parse the installed maps in background
 	 */
 	private static class ParseInstalledWorker extends SwingWorker<List<PackageFileList>, Void> {
+		private final File file;
+
+		public ParseInstalledWorker(File file) {
+			this.file = file;
+		}
+		
 		@Override
 		public List<PackageFileList> doInBackground() {
 			List<PackageFileList> files;
 			try {
-				files = new InstalledPackageList(new File(installedMapsFileName)).read();
+				files = new InstalledPackageList(file).read();
 			}
 			catch (java.io.FileNotFoundException e) {
-				System.out.println("Notice: InstalledMaps xml doesn't exist yet,"
-				                   + " no maps installed?");
-				return new ArrayList<PackageFileList>();
+				System.out.println("Notice: " + file + " doesn't exist yet, no maps installed?");
+				files = Collections.emptyList();
 			}
 			catch (java.io.IOException e) {
-				System.out.println("Error: InstalledMaps xml couldn't be loaded: "
-				                   + e.getMessage());
+				System.out.println("Error: " + file + " couldn't be loaded: " + e.getMessage());
 				
-				return new ArrayList<PackageFileList>();
+				files = Collections.emptyList();
 			}
-				
 			return files;
 		}
 	}

@@ -176,29 +176,4 @@ public class InstalledPackageList {
 		return fileList;
 
 	}
-
-	public static class FileInfo {
-		private String name;
-		private long size;
-
-		/**
-		 * get name
-		 */
-		public String getName() { return name; }
-		
-/**
- * set name
- */
-		public void setName(String name) { this.name = name; }
-
-		/**
-		 * get size
-		 */
-		public long getSize() { return size; }
-		
-/**
- * set size
- */
-		public void setSize(long size) { this.size = size; }
-	}
 }
