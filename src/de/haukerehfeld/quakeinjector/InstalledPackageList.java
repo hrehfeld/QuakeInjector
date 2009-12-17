@@ -20,8 +20,15 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 package de.haukerehfeld.quakeinjector;
 
 import java.io.File;
+
+import java.util.Collections;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import java.util.HashMap;
+import java.util.Map;
+
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -37,14 +44,33 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class InstalledPackageList {
+	private final static String ROOTNODE = "maps"; 
 	private final File file;
 
 	public InstalledPackageList(File file) {
 		this.file = file;
 	}
-	
 
 	public void write(Iterable<Requirement> list) throws java.io.IOException {
+		Map<String,Iterable<String>> files = new HashMap<String,Iterable<String>>();
+
+		for (Requirement r: list) {
+			if (!r.isInstalled()) {
+				continue;
+			}
+			
+			Iterable<String> l = r.getFileList();
+			if (l == null) {
+				l = Collections.emptyList();
+			}
+
+			files.put(r.getId(), l);
+		}
+
+		write(files);
+	}
+
+	public void write(Map<String,Iterable<String>> files) throws java.io.IOException {
 		System.out.println("Writing " + file);
 		
 		if (!file.exists()) {
@@ -60,22 +86,15 @@ public class InstalledPackageList {
 			Document doc = docBuilder.newDocument();
 
 			//create the root element and add it to the document
-			Element root = doc.createElement("installedmaps");
+			Element root = doc.createElement(ROOTNODE);
 			doc.appendChild(root);
 
-			for (Requirement r: list) {
-				if (!r.isInstalled()) {
-					continue;
-				}
+			for (String id: files.keySet()) {
 				Element mapNode = doc.createElement("map");
-				mapNode.setAttribute("id", r.getId());
+				mapNode.setAttribute("id", id);
 				root.appendChild(mapNode);
 
-				PackageFileList l = r.getFileList();
-				if (l == null) {
-					continue;
-				}
-				for (String filename: l) {
+				for (String filename: files.get(id)) {
 					Element fileNode = doc.createElement("file");
 					fileNode.setAttribute("name", filename);
 					mapNode.appendChild(fileNode);
@@ -156,5 +175,30 @@ public class InstalledPackageList {
 
 		return fileList;
 
+	}
+
+	public static class FileInfo {
+		private String name;
+		private long size;
+
+		/**
+		 * get name
+		 */
+		public String getName() { return name; }
+		
+/**
+ * set name
+ */
+		public void setName(String name) { this.name = name; }
+
+		/**
+		 * get size
+		 */
+		public long getSize() { return size; }
+		
+/**
+ * set size
+ */
+		public void setSize(long size) { this.size = size; }
 	}
 }
