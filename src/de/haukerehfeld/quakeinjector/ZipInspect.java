@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -75,30 +77,56 @@ public class ZipInspect {
 		final PackageDatabaseParserWorker requirementsParser = new PackageDatabaseParserWorker(config.RepositoryDatabasePath.get());
 		requirementsParser.execute();
 
-		File parentDir = new File(args[0]);
+		String parentDir = args[0];
 
 		List<File> files = new ArrayList<File>();
-		files.add(parentDir);
+		//files.add(parentDir);
 
-		int i = 0;
-		while (i < files.size()) {
-			File dir = files.get(i);
+		// int i = 0;
+		// while (i < files.size()) {
+		// 	File dir = files.get(i);
 			
-			if (dir.isDirectory()) {
-				File[] zips = dir.listFiles(new java.io.FileFilter() {
-						@Override
-						public boolean accept(File file) {
-							return file.isDirectory() || file.getName().endsWith(".zip");
-						}
-					});
+		// 	if (dir.isDirectory()) {
+		// 		File[] zips = dir.listFiles(new java.io.FileFilter() {
+		// 				@Override
+		// 				public boolean accept(File file) {
+		// 					return file.isDirectory() || file.getName().endsWith(".zip");
+		// 				}
+		// 			});
 
-				for (File f: zips) {
-					files.add(f);
-				}
-			}
-			i++;
+		// 		for (File f: zips) {
+		// 			files.add(f);
+		// 		}
+		// 	}
+		// 	i++;
 
+		// }
+
+		
+		boolean checkDuplicates = true;
+		List<Requirement> requirements;
+		try {
+			requirements = requirementsParser.get();
+			java.util.Collections.sort(requirements);
 		}
+		catch (Exception e) {
+			System.err.println("COuldn't get packages " + e);
+			requirements = null;
+			checkDuplicates = false;
+		}
+
+
+		for (Requirement r: requirements) {
+			if (r instanceof Package) {
+				File f = new File(parentDir + File.separator + r.getId() + ".zip");
+				if (!f.exists()) {
+					System.out.println("ERROR: " + f + " doesn't exist!");
+					continue;
+				}
+				files.add(f);
+			}
+		}
+		
 
 		Map<String, Iterable<FileInfo>> packageFiles = new HashMap<String,Iterable<FileInfo>>();
 
@@ -111,7 +139,7 @@ public class ZipInspect {
 				continue;
 			}
 			
-			System.out.println(f);
+			System.out.println(f + "");
 
 			try {
 				FileInputStream in = new FileInputStream(f);
@@ -140,18 +168,9 @@ public class ZipInspect {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("");
 
 		{
-			boolean checkDuplicates = true;
-			List<Requirement> requirements;
-			try {
-				requirements = requirementsParser.get();
-			}
-			catch (Exception e) {
-				System.err.println("COuldn't get packages " + e);
-				requirements = null;
-				checkDuplicates = false;
-			}
 
 			if (checkDuplicates) {
 				Map<String, String> dirs = new HashMap<String, String>(requirements.size());
@@ -162,7 +181,7 @@ public class ZipInspect {
 				}
 				requirements = null;
 
-				Map<String, List<String>> duplicateFiles = new HashMap<String, List<String>>();
+				SortedMap<String, List<String>> duplicateFiles = new TreeMap<String, List<String>>();
 				for (String id: packageFiles.keySet()) {
 					for (FileInfo info: packageFiles.get(id)) {
 						String dir = dirs.get(id);
