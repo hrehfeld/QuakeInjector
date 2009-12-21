@@ -124,45 +124,55 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 
 			//create dirs
 			List<File> createdDirs = Utils.mkdirs(f);
-			for (File dirname: createdDirs) {
-				//save relative paths to files so we can delete dirs later
-				files.add(RelativePath.getRelativePath(basedir, dirname).toString());
-			}
 
 			//do nothing for directories other than creating them
-			if (entry.isDirectory()) {
-				continue;
-			}
+			if (!entry.isDirectory()) {
+				File original = f;
+				if (f.exists()) {
+					//create Temp file and rename later
+					f = f.createTempFile("quakeinjector", ".tmp", f.getParentFile());
+					System.out.println("create Temp file " + f);
+				}
 
-			files.add(filename);
-			System.out.println("Writing " + filename + " (" + entry.getCompressedSize() + "b)");
+				System.out.println("Writing " + filename + " (" + entry.getCompressedSize() + "b)");
 
-			File original = f;
-			if (f.exists()) {
-				//create Temp file and rename later
-				f = f.createTempFile("quakeinjector", ".tmp", f.getParentFile());
-				System.out.println("create Temp file " + f);
-			}
+				long crc;
+				try {
+					crc = Utils.writeFile(zis,
+					                      f,
+					                      new CompressedProgressListener(entry.getCompressedSize()
+					                                                     / (double) entry.getSize(),
+					                                                     progress));
+				}
+				catch (FileNotFoundException e) {
+					throw new FileNotWritableException(e.getMessage());
+				}
 
-			try {
-				Utils.writeFile(zis,
-				                f,
-				                new CompressedProgressListener(entry.getCompressedSize()
-				                                               / (double) entry.getSize(),
-				                                               progress));
-			}
-			catch (FileNotFoundException e) {
-				files.remove(filename);
-				throw new FileNotWritableException(e.getMessage());
-			}
-			
-			if (!f.equals(original)) {
-				original.delete();
-				System.out.println("moving Temp file to " + original);
-				f.renameTo(original);
-			}
+				if (crc != entry.getCrc()) {
+					System.err.println("Crc32 didn't match on extraction of " + original + ", removing...");
+					f.delete();
+					continue;
+				}
 
-			extracted = true;
+				/** @todo 2009-12-19 03:03 hrehfeld    add crc calculation */
+				FileInfo info = new FileInfo(filename, crc);
+				files.add(info);
+
+
+				for (File dirname: createdDirs) {
+					//save relative paths to files so we can delete dirs later
+					files.add(new FileInfo(RelativePath.getRelativePath(basedir, dirname).toString(), 0));
+				}
+
+				//if we extracted to temp, rename
+				if (!f.equals(original)) {
+					original.delete();
+					System.out.println("moving Temp file to " + original);
+					f.renameTo(original);
+				}
+
+				extracted = true;
+			}
 		}
 
 		if (!extracted) {

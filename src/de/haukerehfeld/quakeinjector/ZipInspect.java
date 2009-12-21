@@ -71,6 +71,9 @@ public class ZipInspect {
 	private final static String file = "zipFiles.xml";
 
 	public static void main(String[] args) {
+		Configuration config = new Configuration();
+		final PackageDatabaseParserWorker requirementsParser = new PackageDatabaseParserWorker(config.RepositoryDatabasePath.get());
+		requirementsParser.execute();
 
 		File parentDir = new File(args[0]);
 
@@ -97,7 +100,7 @@ public class ZipInspect {
 
 		}
 
-		Map<String, Iterable<String>> packageFiles = new HashMap<String,Iterable<String>>();
+		Map<String, Iterable<FileInfo>> packageFiles = new HashMap<String,Iterable<FileInfo>>();
 
 		int j = 0;
 		for (File f: files) {
@@ -117,10 +120,10 @@ public class ZipInspect {
 
 				final List<ZipEntry> entries = inspector.get();
 
-				final List<String> zipFiles = new ArrayList<String>(entries.size());
+				final List<FileInfo> zipFiles = new ArrayList<FileInfo>(entries.size());
 
 				for (ZipEntry e: entries) {
-					zipFiles.add(e.getName());
+					zipFiles.add(new FileInfo(e.getName(), e.getCrc()));
 				}
 
 
@@ -137,6 +140,58 @@ public class ZipInspect {
 				e.printStackTrace();
 			}
 		}
+
+		{
+			boolean checkDuplicates = true;
+			List<Requirement> requirements;
+			try {
+				requirements = requirementsParser.get();
+			}
+			catch (Exception e) {
+				System.err.println("COuldn't get packages " + e);
+				requirements = null;
+				checkDuplicates = false;
+			}
+
+			if (checkDuplicates) {
+				Map<String, String> dirs = new HashMap<String, String>(requirements.size());
+				for (Requirement r: requirements) {
+					if (r instanceof Package) {
+						dirs.put(r.getId(), ((Package) r).getRelativeBaseDir());
+					}
+				}
+				requirements = null;
+
+				Map<String, List<String>> duplicateFiles = new HashMap<String, List<String>>();
+				for (String id: packageFiles.keySet()) {
+					for (FileInfo info: packageFiles.get(id)) {
+						String dir = dirs.get(id);
+						String file = "";
+						if (dir != null) {
+							file = dir;
+						}
+						file += info.getName();
+						List<String> dupMaps = duplicateFiles.get(file);
+						if (dupMaps == null) {
+							dupMaps = new ArrayList<String>();
+							duplicateFiles.put(file, dupMaps);
+						}
+						dupMaps.add(id);
+					}
+				}
+				
+
+				for (String file: duplicateFiles.keySet()) {
+					List<String> dups = duplicateFiles.get(file);
+					int count = dups.size();
+					if (count > 1) {
+						System.out.println(file + " has " + count + " duplicates: " + Utils.join(dups, ", "));
+					}
+				}
+			}
+		}
+
+		
 
 		try {
 			new InstalledPackageList(new File(file)).write(packageFiles);

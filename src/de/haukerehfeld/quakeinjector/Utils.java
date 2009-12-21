@@ -26,11 +26,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.zip.CRC32;
+
 public class Utils {
+	public static final int BUFFERSIZE = 4096;
+
 	public static <T> String join(final Iterable<T> objs, final String delimiter) {
 		Iterator<T> iter = objs.iterator();
 		if (!iter.hasNext())
@@ -73,30 +78,55 @@ public class Utils {
 	 *
 	 * doesn't do any checks.
 	 */
-	public static void writeFile(InputStream in, File file, ProgressListener progress)
+	public static long writeFile(InputStream in, File file, ProgressListener progress)
 		throws IOException {
-		writeFile(in, file, 2048, progress);
+		return writeFile(in, file, 2048, progress);
 	}
 
 	/**
 	 * Write stream to file
+	 * @return crc32 checksum
 	 */
-	public static void writeFile(final InputStream in,
+	public static long writeFile(final InputStream in,
 	                       final File file,
 	                       final int BUFFERSIZE,
 	                       final ProgressListener progress) throws IOException {
-		byte data[] = new byte[BUFFERSIZE];
 		final BufferedOutputStream dest = new BufferedOutputStream(new FileOutputStream(file),
 		                                                           BUFFERSIZE);
-		int readcount;
-		while ((readcount = in.read(data, 0, BUFFERSIZE)) != -1) {
-			progress.publish(readcount);
-			dest.write(data, 0, readcount);
-		}
-		dest.flush();
+
+		long crc = copy(in, dest, BUFFERSIZE, progress);
 		dest.close();
+
+		return crc;
 	}
 
+	public static long copy(final InputStream in,
+	                        final OutputStream out,
+	                        final int BUFFERSIZE,
+	                        final ProgressListener progress) throws IOException {
+		byte data[] = new byte[BUFFERSIZE];
+		CRC32 crc = new CRC32();
+
+		int readcount;
+		while ((readcount = in.read(data, 0, BUFFERSIZE)) != -1) {
+			if (progress != null) {
+				progress.publish(readcount);
+			}
+			out.write(data, 0, readcount);
+			crc.update(data, 0, readcount);
+		}
+		out.flush();
+		return crc.getValue();
+	}
+
+
+	public static long getCrc32(final InputStream in, final ProgressListener progress) throws IOException {
+		return copy(in, new NoOutputStream(), BUFFERSIZE, progress);
+	}
 	
-	
+	public static class NoOutputStream extends OutputStream {
+		public void write(int b) {}
+		public void write(byte[] b) {}
+		public void write(byte[] b, int off, int len) {}
+	}
 }

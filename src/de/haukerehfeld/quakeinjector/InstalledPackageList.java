@@ -52,14 +52,14 @@ public class InstalledPackageList {
 	}
 
 	public void write(Iterable<Requirement> list) throws java.io.IOException {
-		Map<String,Iterable<String>> files = new HashMap<String,Iterable<String>>();
+		Map<String,Iterable<FileInfo>> files = new HashMap<String,Iterable<FileInfo>>();
 
 		for (Requirement r: list) {
 			if (!r.isInstalled()) {
 				continue;
 			}
 			
-			Iterable<String> l = r.getFileList();
+			Iterable<FileInfo> l = r.getFileList();
 			if (l == null) {
 				l = Collections.emptyList();
 			}
@@ -70,7 +70,7 @@ public class InstalledPackageList {
 		write(files);
 	}
 
-	public void write(Map<String,Iterable<String>> files) throws java.io.IOException {
+	public void write(Map<String,Iterable<FileInfo>> files) throws java.io.IOException {
 		System.out.println("Writing " + file);
 		
 		if (!file.exists()) {
@@ -94,9 +94,13 @@ public class InstalledPackageList {
 				mapNode.setAttribute("id", id);
 				root.appendChild(mapNode);
 
-				for (String filename: files.get(id)) {
+				for (FileInfo file: files.get(id)) {
 					Element fileNode = doc.createElement("file");
-					fileNode.setAttribute("name", filename);
+					fileNode.setAttribute("name", file.getName());
+					long crc = file.getChecksum();
+					if (crc != 0) {
+						fileNode.setAttribute("crc", Long.toString(crc));
+					}
 					mapNode.appendChild(fileNode);
 				}
 			}
@@ -169,7 +173,14 @@ public class InstalledPackageList {
 		for (int i = 0; i < files.getLength(); ++i) {
 			Node file = files.item(i);
 			if (file.getNodeType() == Node.ELEMENT_NODE) {
-				fileList.add(((Element) file).getAttribute("name"));
+				Element e = (Element) file;
+				String name = e.getAttribute("name");
+
+				long crc = 0;
+				if (e.hasAttribute("crc")) {
+					crc = Long.parseLong(e.getAttribute("crc"));
+				}
+				fileList.add(new FileInfo(name, crc));
 			}
 		}
 
@@ -177,3 +188,4 @@ public class InstalledPackageList {
 
 	}
 }
+	

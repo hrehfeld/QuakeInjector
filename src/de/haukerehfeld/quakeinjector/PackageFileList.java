@@ -22,11 +22,11 @@ package de.haukerehfeld.quakeinjector;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-public class PackageFileList implements Iterable<String> {
+public class PackageFileList implements Iterable<FileInfo>, Comparable<PackageFileList> {
 	/**
 	 * other classes rely on the sorted iteration this provides
 	 */
-	private TreeSet<String> files = new TreeSet<String>();
+	private TreeSet<FileInfo> files = new TreeSet<FileInfo>();
 
 	private String id;
 
@@ -34,12 +34,14 @@ public class PackageFileList implements Iterable<String> {
 		this.id = id;
 	}
 
-	public void add(String file) {
-		files.add(clean(file));
+	public void add(FileInfo file) {
+		file.clean();
+		files.add(file);
 	}
 
-	public void remove(String file) {
-		files.remove(clean(file));
+	public void remove(FileInfo file) {
+		file.clean();
+		files.remove(file);
 	}
 
 	public int size() {
@@ -49,11 +51,11 @@ public class PackageFileList implements Iterable<String> {
 	/**
 	 * iterate the files in ascending order by their filename
 	 */
-	public Iterator<String> iterator() {
+	public Iterator<FileInfo> iterator() {
 		return files.iterator();
 	}
 
-	public Iterator<String> descendingIterator() {
+	public Iterator<FileInfo> descendingIterator() {
 		return files.descendingIterator();
 	}
 	
@@ -61,7 +63,7 @@ public class PackageFileList implements Iterable<String> {
 		return id;
 	}
 
-	public String clean(String file) {
-		return file.replace('\\', '/');		
+	public int compareTo(PackageFileList o) {
+		return -(o.id.compareTo(id));
 	}
 }

@@ -90,7 +90,8 @@ public final class BuildCommit {
 		   source="1.6" fork="true">
 	  <classpath refid="quakeinjector.class.path"/>
 <!--	  <compilerarg value="-Xlint"/> -->
-	  <compilerarg value="-Xlint:unchecked"/><!--
+	  <compilerarg value="-Xlint:unchecked"/>
+	  <compilerarg value="-Xlint:deprecation"/><!--
 	  <compilerarg value="-Xlint:finally"/>
 	  <compilerarg value="-Xlint:fallthrough"/> -->
 	</javac>
@@ -104,6 +105,19 @@ public final class BuildCommit {
 	  <classpath refid="quakeinjector.class.path"/>
 	</java>
   </target>
+
+  <target name="zipinspect" depends="quakeinjector.compile"
+	  description="Inspect filebase">
+	<java fork="true" classname="de.haukerehfeld.quakeinjector.ZipInspect" dir="${quakeinjector.build}">
+	  <jvmarg value="-Djava.library.path=${quakeinjector.library.path}" />
+	  <jvmarg value="-Xshare:off" />
+	  <jvmarg value="-ea" />
+	  <classpath refid="quakeinjector.class.path"/>
+	  <arg value="${filebase}" />
+	</java>
+  </target>
+
+
 
   <target name="benchmark" depends="quakeinjector.compile" description="Start the application">
 	<java fork="true" classname="${quakeinjector.main-class}" dir="${quakeinjector.build}">

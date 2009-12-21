@@ -34,6 +34,8 @@ import java.beans.PropertyChangeListener;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.BufferedInputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 
@@ -327,9 +329,10 @@ public class QuakeInjector extends JFrame {
 				
 
 				List<PackageFileList> packages = parser.get();
-				List<PackageFileList> installed = new ArrayList<PackageFileList>();
+				Collections.sort(packages);
 
 				int i = 0;
+				List<PackageFileList> installed = new ArrayList<PackageFileList>();
 				for (PackageFileList list: packages) {
 					publish(i++ * 100 / packages.size());
 					Requirement r = maps.get(list.getId());
@@ -348,14 +351,30 @@ public class QuakeInjector extends JFrame {
 					PackageFileList p = new PackageFileList(list.getId());
 					
 					List<String> missingFiles = new ArrayList<String>();
-					for (String entry: list) {
-						String file = basedir + relativeDir + entry;
+					for (FileInfo entry: list) {
+						if (missingFiles.size() > 0.3f * list.size()) {
+							break;
+						}
+						String filename = entry.getName();
+						String file = basedir + relativeDir + filename;
+						long supposedCrc = entry.getChecksum();
 						File f = new File(file);
 						if (!f.exists()) {
 							missingFiles.add(file);
 						}
 						else {
-							p.add(relativeDir + entry);
+							if (!f.isDirectory()) {
+								long crc = Utils.getCrc32(new BufferedInputStream(new FileInputStream(f)), null);
+								if (supposedCrc != 0 && crc != entry.getChecksum()) {
+									System.err.println("Crc differs for file " + file);
+									missingFiles.add(file);
+									continue;
+								}
+								// else {
+								// 	System.out.println("Crc matches for " + f + " (" + crc + ")");
+								// }
+							}
+							p.add(new FileInfo(relativeDir + filename, supposedCrc));
 						}
 					}
 
@@ -389,6 +408,12 @@ public class QuakeInjector extends JFrame {
 						throw e.getCause();
 					}
 					catch (java.net.ConnectException err) {
+						String msg = "Downloading file database failed, " + err.getMessage() + "!";
+						JOptionPane.showMessageDialog(QuakeInjector.this,
+						                              msg,
+						                              "Downloading failed!",
+						                              JOptionPane.ERROR_MESSAGE);
+						
 					}
 					catch (Throwable err) {
 					}
