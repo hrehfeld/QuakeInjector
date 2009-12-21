@@ -51,7 +51,7 @@ public class InstalledPackageList {
 		this.file = file;
 	}
 
-	public void write(Iterable<Requirement> list) throws java.io.IOException {
+	public void write(Iterable<? extends Requirement> list) throws java.io.IOException {
 		Map<String,Iterable<FileInfo>> files = new HashMap<String,Iterable<FileInfo>>();
 
 		for (Requirement r: list) {
@@ -66,7 +66,9 @@ public class InstalledPackageList {
 
 			files.put(r.getId(), l);
 		}
-
+		if (files.isEmpty()) {
+			System.out.println("WARNING: writing empty maplist");
+		}
 		write(files);
 	}
 
@@ -96,11 +98,17 @@ public class InstalledPackageList {
 
 				for (FileInfo file: files.get(id)) {
 					Element fileNode = doc.createElement("file");
+					//System.out.println("adding node " + file.getName());
 					fileNode.setAttribute("name", file.getName());
 					long crc = file.getChecksum();
 					if (crc != 0) {
 						fileNode.setAttribute("crc", Long.toString(crc));
 					}
+
+					if (!file.getEssential()) {
+						fileNode.setAttribute("essential", Boolean.toString(false));
+					}
+					
 					mapNode.appendChild(fileNode);
 				}
 			}

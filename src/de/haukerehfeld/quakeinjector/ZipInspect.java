@@ -37,6 +37,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -69,10 +70,20 @@ import java.util.zip.ZipInputStream;
 
 import java.beans.XMLEncoder;
 
+import java.io.Console;
+
+
 public class ZipInspect {
 	private final static String file = "zipFiles.xml";
 
 	public static void main(String[] args) {
+		Console con = System.console();
+		if (con == null) {
+			System.err.println("Don't start from ant!");
+			System.exit(1);
+		}
+
+
 		Configuration config = new Configuration();
 		final PackageDatabaseParserWorker requirementsParser = new PackageDatabaseParserWorker(config.RepositoryDatabasePath.get());
 		requirementsParser.execute();
@@ -116,104 +127,115 @@ public class ZipInspect {
 		}
 
 
+		Map<Package, Iterable<FileInfo>> packageFiles = new TreeMap<Package,Iterable<FileInfo>>();
+		SortedMap<String, List<Map.Entry<Package,FileInfo>>> duplicateFiles
+		    = new TreeMap<String, List<Map.Entry<Package,FileInfo>>>();
+		
+		int j = 0;
 		for (Requirement r: requirements) {
 			if (r instanceof Package) {
+				Package p = (Package) r;
+				p.setInstalled(true);
+				
 				File f = new File(parentDir + File.separator + r.getId() + ".zip");
 				if (!f.exists()) {
 					System.out.println("ERROR: " + f + " doesn't exist!");
 					continue;
 				}
-				files.add(f);
-			}
-		}
-		
-
-		Map<String, Iterable<FileInfo>> packageFiles = new HashMap<String,Iterable<FileInfo>>();
-
-		int j = 0;
-		for (File f: files) {
-			if (j++ > 10) {
-				//break;
-			}
-			if (f.isDirectory()) {
-				continue;
-			}
-			
-			System.out.println(f + "");
-
-			try {
-				FileInputStream in = new FileInputStream(f);
-				InspectZipWorker inspector = new InspectZipWorker(in);
-				inspector.execute();
-
-				final List<ZipEntry> entries = inspector.get();
-
-				final List<FileInfo> zipFiles = new ArrayList<FileInfo>(entries.size());
-
-				for (ZipEntry e: entries) {
-					zipFiles.add(new FileInfo(e.getName(), e.getCrc()));
+				if (j++ > 10) {
+					//break;
 				}
+				System.out.println(f);
 
+				try {
+					FileInputStream in = new FileInputStream(f);
+					InspectZipWorker inspector = new InspectZipWorker(in);
+					inspector.execute();
 
-				String packageName = f.getName();
+					final List<ZipEntry> entries = inspector.get();
 
-				//hack of ".zip"
-				int ext = packageName.lastIndexOf(".");
-				packageName = packageName.substring(0, ext);
-				
-				
-				packageFiles.put(packageName, zipFiles);
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		System.out.println("");
+					final PackageFileList zipFiles = new PackageFileList(p.getId());
+					String dir = p.getRelativeBaseDir();
 
-		{
-
-			if (checkDuplicates) {
-				Map<String, String> dirs = new HashMap<String, String>(requirements.size());
-				for (Requirement r: requirements) {
-					if (r instanceof Package) {
-						dirs.put(r.getId(), ((Package) r).getRelativeBaseDir());
-					}
-				}
-				requirements = null;
-
-				SortedMap<String, List<String>> duplicateFiles = new TreeMap<String, List<String>>();
-				for (String id: packageFiles.keySet()) {
-					for (FileInfo info: packageFiles.get(id)) {
-						String dir = dirs.get(id);
+					for (ZipEntry e: entries) {
 						String file = "";
 						if (dir != null) {
 							file = dir;
 						}
-						file += info.getName();
-						List<String> dupMaps = duplicateFiles.get(file);
+						file += e.getName();
+
+						FileInfo info = new FileInfo(file, e.getCrc());
+						zipFiles.add(info);
+
+						List<Map.Entry<Package,FileInfo>> dupMaps = duplicateFiles.get(file);
 						if (dupMaps == null) {
-							dupMaps = new ArrayList<String>();
+							dupMaps = new ArrayList<Map.Entry<Package,FileInfo>>();
 							duplicateFiles.put(file, dupMaps);
 						}
-						dupMaps.add(id);
+						dupMaps.add(new AbstractMap.SimpleEntry<Package,FileInfo>(p, info));
+						
 					}
+					p.setFileList(zipFiles);
+					packageFiles.put(p, zipFiles);
 				}
-				
-
-				for (String file: duplicateFiles.keySet()) {
-					List<String> dups = duplicateFiles.get(file);
-					int count = dups.size();
-					if (count > 1) {
-						System.out.println(file + " has " + count + " duplicates: " + Utils.join(dups, ", "));
-					}
+				catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}
 
-		
+		for (String file: duplicateFiles.keySet()) {
+			List<Map.Entry<Package,FileInfo>> dups = duplicateFiles.get(file);
+			int count = dups.size();
+			if (count > 1) {
+				List<String> packages = new ArrayList<String>();
+				boolean crcDiffers = false;
+				long crc = -1;
+				for (Map.Entry<Package,FileInfo> e: dups) {
+					if (crc != -1 && crc != e.getValue().getChecksum()) {
+						crcDiffers = true;
+					}
+					crc = e.getValue().getChecksum();
+					
+					packages.add(e.getKey().getId() + " (crc: " + crc + ")");
+				}
 
+				boolean essential = true;
+				if (!crcDiffers && crc == 0) {
+					System.out.println(file + " has duplicates, but all with crc == 0, setting to inessential");
+					essential = false;
+				}
+				else {
+					System.out.println(file + " has " + (crcDiffers ? " differing CRC " : " equal ") + "duplicates in "
+					                   + Utils.join(packages, ", "));
+
+					{
+						System.out.println("Is this an essential file? (n + RETURN for no, default yes)");
+						String yes = con.readLine();
+						if (yes != null && yes.equals("n")) {
+							essential = false;
+						}
+					}
+					// boolean incompatible = crcDiffers;
+					// if (essential && crcDiffers) {
+					// 	System.out.println("Are these files incompatible? (n + RETURN for no, default yes)");
+					// 	String yes = con.readLine();
+					// 	if (yes != null && yes.equals("n")) {
+					// 		incompatible = false;
+					// 	}
+					// }
+				}
+				
+				for (Map.Entry<Package,FileInfo> e: dups) {
+					e.getValue().setEssential(essential);
+					// e.getValue().setIncompatible(incompatible);
+				}
+
+			}
+		}
+		
 		try {
-			new InstalledPackageList(new File(file)).write(packageFiles);
+			new InstalledPackageList(new File(file)).write(packageFiles.keySet());
 		}
 		catch (Exception e) {
 			e.printStackTrace();
