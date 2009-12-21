@@ -34,6 +34,10 @@ public class PackageFileList implements Iterable<FileInfo>, Comparable<PackageFi
 		this.id = id;
 	}
 
+	public boolean isEmpty() {
+		return files.isEmpty();
+	}
+
 	public void add(FileInfo file) {
 		file.clean();
 		files.add(file);
