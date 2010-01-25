@@ -72,7 +72,9 @@ import java.beans.XMLEncoder;
 
 import java.io.Console;
 
-
+/**
+ * Create an xml of all the files in the zips
+ */
 public class ZipInspect {
 	private final static String file = "zipFiles.xml";
 
@@ -85,35 +87,13 @@ public class ZipInspect {
 
 
 		Configuration config = new Configuration();
-		final PackageDatabaseParserWorker requirementsParser = new PackageDatabaseParserWorker(config.RepositoryDatabasePath.get());
+		final PackageDatabaseParserWorker requirementsParser
+		    = new PackageDatabaseParserWorker(config.RepositoryDatabasePath.get());
 		requirementsParser.execute();
 
 		String parentDir = args[0];
 
 		List<File> files = new ArrayList<File>();
-		//files.add(parentDir);
-
-		// int i = 0;
-		// while (i < files.size()) {
-		// 	File dir = files.get(i);
-			
-		// 	if (dir.isDirectory()) {
-		// 		File[] zips = dir.listFiles(new java.io.FileFilter() {
-		// 				@Override
-		// 				public boolean accept(File file) {
-		// 					return file.isDirectory() || file.getName().endsWith(".zip");
-		// 				}
-		// 			});
-
-		// 		for (File f: zips) {
-		// 			files.add(f);
-		// 		}
-		// 	}
-		// 	i++;
-
-		// }
-
-		
 		boolean checkDuplicates = true;
 		List<Requirement> requirements;
 		try {
@@ -170,7 +150,8 @@ public class ZipInspect {
 					FileInfo info = new FileInfo(file, e.getCrc());
 					zipFiles.add(info);
 
-					List<Map.Entry<Package,FileInfo>> dupMaps = duplicateFiles.get(file.toLowerCase());
+					List<Map.Entry<Package,FileInfo>> dupMaps =
+					    duplicateFiles.get(file.toLowerCase());
 					if (dupMaps == null) {
 						dupMaps = new ArrayList<Map.Entry<Package,FileInfo>>();
 						duplicateFiles.put(file.toLowerCase(), dupMaps);
@@ -204,35 +185,28 @@ public class ZipInspect {
 
 				boolean essential = true;
 				if (!crcDiffers && crc == 0) {
-					System.out.println(file + " has duplicates, but all with crc == 0, setting to inessential");
+					System.out.println(file
+					                   + " has duplicates, but all with crc == 0,"
+					                   + " setting to inessential");
 					essential = false;
 				}
 				else {
-					System.out.println(file + " has " + (crcDiffers ? " differing CRC " : " equal ") + "duplicates in "
+					System.out.println(file
+					                   + " has "
+					                   + (crcDiffers ? " differing CRC " : " equal ")
+					                   + "duplicates in "
 					                   + Utils.join(packages, ", "));
 
-					{
-						System.out.println("Is this an essential file? (n + RETURN for no, default yes)");
-						String yes = con.readLine();
-						if (yes != null && yes.equals("n")) {
-							essential = false;
-						}
+					System.out.println("Is this an essential file? (No: n + RETURN, Yes: RETURN)");
+					String yes = con.readLine();
+					if (yes != null && yes.equals("n")) {
+						essential = false;
 					}
-					// boolean incompatible = crcDiffers;
-					// if (essential && crcDiffers) {
-					// 	System.out.println("Are these files incompatible? (n + RETURN for no, default yes)");
-					// 	String yes = con.readLine();
-					// 	if (yes != null && yes.equals("n")) {
-					// 		incompatible = false;
-					// 	}
-					// }
 				}
 				
 				for (Map.Entry<Package,FileInfo> e: dups) {
 					e.getValue().setEssential(essential);
-					// e.getValue().setIncompatible(incompatible);
 				}
-
 			}
 		}
 		
