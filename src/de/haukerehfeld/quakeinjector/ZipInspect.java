@@ -34,6 +34,11 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +82,7 @@ import java.io.Console;
  */
 public class ZipInspect {
 	private final static String file = "zipFiles.xml";
+	private final static String oldSelectionsFile = "essentialfiles.cfg";
 
 	public static void main(String[] args) {
 		Console con = System.console();
@@ -120,7 +126,6 @@ public class ZipInspect {
 		SortedMap<String, List<Map.Entry<Package,FileInfo>>> duplicateFiles
 		    = new TreeMap<String, List<Map.Entry<Package,FileInfo>>>();
 		
-		int j = 0;
 		for (Requirement r: requirements) {
 			//only check where package exists
 			if (!(r instanceof Package)) {
@@ -134,9 +139,6 @@ public class ZipInspect {
 			if (!f.exists()) {
 				System.out.println("ERROR: " + f + " doesn't exist!");
 				continue;
-			}
-			if (j++ > 10) {
-				//break;
 			}
 			System.out.println(f);
 
@@ -177,7 +179,26 @@ public class ZipInspect {
 			}
 		}
 
+		Map<String, Boolean> oldSelections = new HashMap<String, Boolean>();
+		if (new File(oldSelectionsFile).exists()) {
+			//load old selections
+			try {
+				BufferedReader in = new BufferedReader(new FileReader(oldSelectionsFile));
+				String line;
+				while ((line = in.readLine()) != null) {
+					String[] l = line.split(",");
+					oldSelections.put(l[0], Boolean.parseBoolean(l[1]));
+				}
+				in.close();
+			} catch (java.io.IOException e) {
+				System.err.println("Couldn't read old selections file");
+			}
+		}
+			    
+		StringBuilder selectionsFile = new StringBuilder();
+		
 		for (String file: duplicateFiles.keySet()) {
+
 			List<Map.Entry<Package,FileInfo>> dups = duplicateFiles.get(file);
 			int count = dups.size();
 			if (count > 1) {
@@ -200,6 +221,12 @@ public class ZipInspect {
 					                   + " setting to inessential");
 					essential = false;
 				}
+				else if (oldSelections.get(file) != null) {
+					essential = oldSelections.get(file);
+					System.out.println(file
+					                   + " has duplicates, but was previously declared:"
+					                   + " essential = " + essential);
+				}
 				else {
 					System.out.println(file
 					                   + " has "
@@ -213,13 +240,25 @@ public class ZipInspect {
 						essential = false;
 					}
 				}
-				
+
 				for (Map.Entry<Package,FileInfo> e: dups) {
 					e.getValue().setEssential(essential);
 				}
+
+				selectionsFile.append(file + "," + essential + "\n");
 			}
 		}
-		
+
+		//write old selections
+		try {
+			BufferedWriter out = new BufferedWriter(new FileWriter(oldSelectionsFile));
+			out.write(selectionsFile.toString());
+			out.close();
+		}
+		catch (java.io.IOException e) {
+			System.err.println("Couldn't write selections to outfile! " + e);
+		}
+
 		try {
 			new InstalledPackageList(new File(file)).write(packageFiles.keySet());
 		}
