@@ -133,54 +133,56 @@ public class ZipInspect {
 		
 		int j = 0;
 		for (Requirement r: requirements) {
-			if (r instanceof Package) {
-				Package p = (Package) r;
-				p.setInstalled(true);
-				
-				File f = new File(parentDir + File.separator + r.getId() + ".zip");
-				if (!f.exists()) {
-					System.out.println("ERROR: " + f + " doesn't exist!");
-					continue;
-				}
-				if (j++ > 10) {
-					//break;
-				}
-				System.out.println(f);
+			if (!(r instanceof Package)) {
+				continue;
+			}
 
-				try {
-					FileInputStream in = new FileInputStream(f);
-					InspectZipWorker inspector = new InspectZipWorker(in);
-					inspector.execute();
+			Package p = (Package) r;
+			p.setInstalled(true);
+			
+			File f = new File(parentDir + File.separator + r.getId() + ".zip");
+			if (!f.exists()) {
+				System.out.println("ERROR: " + f + " doesn't exist!");
+				continue;
+			}
+			if (j++ > 10) {
+				//break;
+			}
+			System.out.println(f);
 
-					final List<ZipEntry> entries = inspector.get();
+			try {
+				FileInputStream in = new FileInputStream(f);
+				InspectZipWorker inspector = new InspectZipWorker(in);
+				inspector.execute();
 
-					final PackageFileList zipFiles = new PackageFileList(p.getId());
-					String dir = p.getRelativeBaseDir();
+				final List<ZipEntry> entries = inspector.get();
 
-					for (ZipEntry e: entries) {
-						String file = "";
-						if (dir != null) {
-							file = dir;
-						}
-						file += e.getName();
+				final PackageFileList zipFiles = new PackageFileList(p.getId());
+				String dir = p.getRelativeBaseDir();
 
-						FileInfo info = new FileInfo(file, e.getCrc());
-						zipFiles.add(info);
-
-						List<Map.Entry<Package,FileInfo>> dupMaps = duplicateFiles.get(file);
-						if (dupMaps == null) {
-							dupMaps = new ArrayList<Map.Entry<Package,FileInfo>>();
-							duplicateFiles.put(file, dupMaps);
-						}
-						dupMaps.add(new AbstractMap.SimpleEntry<Package,FileInfo>(p, info));
-						
+				for (ZipEntry e: entries) {
+					String file = "";
+					if (dir != null) {
+						file = dir;
 					}
-					p.setFileList(zipFiles);
-					packageFiles.put(p, zipFiles);
+					file += e.getName();
+
+					FileInfo info = new FileInfo(file, e.getCrc());
+					zipFiles.add(info);
+
+					List<Map.Entry<Package,FileInfo>> dupMaps = duplicateFiles.get(file.toLowerCase());
+					if (dupMaps == null) {
+						dupMaps = new ArrayList<Map.Entry<Package,FileInfo>>();
+						duplicateFiles.put(file.toLowerCase(), dupMaps);
+					}
+					dupMaps.add(new AbstractMap.SimpleEntry<Package,FileInfo>(p, info));
+					
 				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
+				p.setFileList(zipFiles);
+				packageFiles.put(p, zipFiles);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 

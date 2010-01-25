@@ -303,7 +303,8 @@ public class QuakeInjector extends JFrame {
 
 		final File file = new File(zipFilesXml);
 
-		class CheckInstalled extends SwingWorker<List<PackageFileList>, Void> implements ProgressListener {
+		class CheckInstalled extends SwingWorker<List<PackageFileList>, Void>
+		    implements ProgressListener {
 			@Override
 			    public List<PackageFileList> doInBackground() throws java.lang.InterruptedException,
 			    java.util.concurrent.ExecutionException,
