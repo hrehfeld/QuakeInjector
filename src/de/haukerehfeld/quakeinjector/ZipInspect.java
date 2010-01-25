@@ -81,31 +81,40 @@ public class ZipInspect {
 	public static void main(String[] args) {
 		Console con = System.console();
 		if (con == null) {
-			System.err.println("Don't start from ant!");
+			System.err.println("Don't start from ant, it doesn't support an interactive console!");
 			System.exit(1);
 		}
 
-
-		Configuration config = new Configuration();
-		final PackageDatabaseParserWorker requirementsParser
-		    = new PackageDatabaseParserWorker(config.RepositoryDatabasePath.get());
-		requirementsParser.execute();
-
+		if (args.length < 1) {
+			System.err.println("First parameter need's to be a valid directory!");
+			System.exit(1);
+		}
 		String parentDir = args[0];
 
-		List<File> files = new ArrayList<File>();
-		boolean checkDuplicates = true;
-		List<Requirement> requirements;
-		try {
-			requirements = requirementsParser.get();
-			java.util.Collections.sort(requirements);
-		}
-		catch (Exception e) {
-			System.err.println("COuldn't get packages " + e);
-			requirements = null;
-			checkDuplicates = false;
+		if (!(new File(parentDir).exists())) {
+			System.err.println("First parameter need's to be a valid directory!");
+			System.exit(1);
 		}
 
+		Configuration config = new Configuration();
+
+		List<Requirement> requirements = null;
+		{
+			final PackageDatabaseParserWorker requirementsParser
+			    = new PackageDatabaseParserWorker(config.RepositoryDatabasePath.get());
+			requirementsParser.execute();
+
+
+			try {
+				requirements = requirementsParser.get();
+			}
+			catch (Exception e) {
+				System.err.println("Couldn't get packages " + e);
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+		java.util.Collections.sort(requirements);
 
 		Map<Package, Iterable<FileInfo>> packageFiles = new TreeMap<Package,Iterable<FileInfo>>();
 		SortedMap<String, List<Map.Entry<Package,FileInfo>>> duplicateFiles
@@ -113,6 +122,7 @@ public class ZipInspect {
 		
 		int j = 0;
 		for (Requirement r: requirements) {
+			//only check where package exists
 			if (!(r instanceof Package)) {
 				continue;
 			}
