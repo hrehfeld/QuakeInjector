@@ -34,6 +34,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.BufferedWriter;
@@ -260,7 +261,8 @@ public class ZipInspect {
 		}
 
 		try {
-			new InstalledPackageList(new File(file)).write(packageFiles.keySet());
+			new InstalledPackageList().write(new BufferedOutputStream(new FileOutputStream(file)),
+			                                 packageFiles.keySet());
 		}
 		catch (Exception e) {
 			e.printStackTrace();

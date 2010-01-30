@@ -21,6 +21,13 @@ package de.haukerehfeld.quakeinjector;
 
 import java.io.File;
 
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
+
 import java.util.Collections;
 
 import java.util.ArrayList;
@@ -44,14 +51,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class InstalledPackageList {
-	private final static String ROOTNODE = "maps"; 
-	private final File file;
+	private final static String ROOTNODE = "maps";
 
-	public InstalledPackageList(File file) {
-		this.file = file;
-	}
-
-	public void write(Iterable<? extends Requirement> list) throws java.io.IOException {
+	public void write(OutputStream out, Iterable<? extends Requirement> list)
+		throws java.io.IOException {
 		Map<String,Iterable<FileInfo>> files = new HashMap<String,Iterable<FileInfo>>();
 
 		for (Requirement r: list) {
@@ -69,22 +72,22 @@ public class InstalledPackageList {
 		if (files.isEmpty()) {
 			System.out.println("WARNING: writing empty maplist");
 		}
-		write(files);
+		write(out, files);
 	}
 
-	public void write(Map<String,Iterable<FileInfo>> files) throws java.io.IOException {
-		System.out.println("Writing " + file);
-		
-		if (!file.exists()) {
-			file.createNewFile();
-		}
-		if (!file.canWrite()) {
-			throw new RuntimeException("Can't write installed maps file!");
-		}
+	public void write(OutputStream out, Map<String,Iterable<FileInfo>> files)
+		throws java.io.IOException {
 
-		try {
-			DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
-			DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
+		//try {
+			DocumentBuilder docBuilder = null;
+			try {
+				docBuilder
+				    = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			}
+			catch (javax.xml.parsers.ParserConfigurationException e) {
+				System.err.println("Couldn't instantiate Document Builder: " + e);
+				e.printStackTrace();
+			}
 			Document doc = docBuilder.newDocument();
 
 			//create the root element and add it to the document
@@ -116,36 +119,43 @@ public class InstalledPackageList {
 			//Output the XML
 
 			//set up a transformer
-			TransformerFactory transfac = TransformerFactory.newInstance();
-			Transformer trans = transfac.newTransformer();
+			Transformer trans = null;
+			try {
+				trans = TransformerFactory.newInstance().newTransformer();
+			}
+			catch (javax.xml.transform.TransformerConfigurationException e) {
+				System.err.println(e);
+				e.printStackTrace();
+			}
+			
 			trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 			trans.setOutputProperty(OutputKeys.INDENT, "yes");
 
 			//create string from xml tree
-			StreamResult result = new StreamResult(file);
+			StreamResult result = new StreamResult(out);
 			DOMSource source = new DOMSource(doc);
-			trans.transform(source, result);
-		}
-		catch (Exception e) {
-            System.out.println(e);
-        }
+			try {
+				trans.transform(source, result);
+			}
+			catch (javax.xml.transform.TransformerException e) {
+			}
 	}
 
-	public List<PackageFileList> read() throws java.io.IOException {
-		System.out.println("Reading " + file);
-
+	public List<PackageFileList> read(InputStream in) throws java.io.IOException {
 		Document document;
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			DocumentBuilder db = dbf.newDocumentBuilder();
 	 
-			document = db.parse(file);
+			document = db.parse(in);
 		}
 		catch (javax.xml.parsers.ParserConfigurationException e) {
-			throw new java.io.IOException("Couldn't parse " + file + ": " + e.getMessage());
+			throw new java.io.IOException("Couldn't parse installed package list: "
+			                              + e.getMessage());
 		}
 		catch (org.xml.sax.SAXException e) {
-			throw new java.io.IOException("Couldn't parse " + file + ": " + e.getMessage());
+			throw new java.io.IOException("Couldn't parse Installed Package List: "
+			                              + e.getMessage());
 		}
 
 		Element root = document.getDocumentElement();

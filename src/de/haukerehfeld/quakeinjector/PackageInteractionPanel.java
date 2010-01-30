@@ -69,7 +69,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 
 	private Installer installer;
 
-	private InstalledPackageList installedMaps;
+	private SaveInstalled installedMaps;
 	
 	public PackageInteractionPanel(QuakeInjector main, InstallQueuePanel installQueue) {
 		super(new GridBagLayout());
@@ -144,7 +144,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 	                 Configuration.RepositoryBasePath paths,
 	                 RequirementList requirements,
 	                 EngineStarter starter,
-	                 InstalledPackageList installedMaps) {
+	                 SaveInstalled installedMaps) {
 		this.paths = paths;
 		this.requirements = requirements;
 		this.starter = starter;

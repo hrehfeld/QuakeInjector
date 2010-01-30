@@ -36,12 +36,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.Collections;
 
 import javax.swing.BorderFactory;
@@ -63,6 +62,8 @@ import javax.swing.event.DocumentListener;
 import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
 
+import de.haukerehfeld.quakeinjector.database.InstalledMapsParser;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -75,6 +76,9 @@ public class QuakeInjector extends JFrame {
 	private static final int minHeight = 300;
 
 	private final static String installedMapsFileName = "installedMaps.xml";
+	private final static File installedMapsFile = new File(installedMapsFileName);
+	private final SaveInstalled saveInstalled = new SaveInstalled(installedMapsFile);
+	
 	private final static String zipFilesXml = "zipFiles.xml";
 
 
@@ -87,17 +91,22 @@ public class QuakeInjector extends JFrame {
 	private final PackageListModel maplist;
 	private Installer installer;
 
-	/**
-	 * Thread worker to parse the installed maps in background
-	 */
-	private SwingWorker<List<PackageFileList>,Void> parseInstalled;
 
+	private final InstalledPackages installedMaps = new InstalledPackages();
+	
 
+	private final Configuration config;
+	
 	public QuakeInjector() {
 		super(applicationName);
 
-		loadConfig.execute();
+		//load config
+		final Future<Configuration> config = new SwingWorker<Configuration,Void>() {
+			@Override public Configuration doInBackground() { return new Configuration(); }
+		};
+		((SwingWorker<?,?>) config).execute();
 
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		setLayout(new BoxLayout(getContentPane(),
@@ -115,14 +124,31 @@ public class QuakeInjector extends JFrame {
 
 		addWindowListener(new QuakeInjectorWindowListener());
 
+
+		Configuration cfg = null;
+		try {
+			cfg = config.get();
+		}
+		catch (ExecutionException e) {
+			System.err.println("Couldn't load config: " + e.getCause());
+			e.getCause().printStackTrace();
+		}
+		catch (InterruptedException e) {
+			System.err.println("Interrupted: " + e);
+		}
+		this.config = cfg;		
+
+		//config needed here
 		setWindowSize();
 	}
 
+	/**
+	 * main menu
+	 */
 	private Menu createMenuBar() {
-
 		ActionListener parseDatabase = new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					parseInstalled();
+					doParseInstalled();
 					parseDatabaseAndSetList();
 				}
 			};
@@ -181,13 +207,12 @@ public class QuakeInjector extends JFrame {
 	}
 		
 
-	private void parseInstalled() {
-		parseInstalled = new ParseInstalledWorker(new File(installedMapsFileName));
-		parseInstalled.execute();
-	}
-
+	/**
+	 * Do everything that may happen after the initial window is shown
+	 */
 	private void init() {
-		parseInstalled();
+		doParseInstalled();
+
 		final Future<Void> requirementsListUpdater = parseDatabaseAndSetList();
 
 		Configuration.EnginePath enginePathV = getConfig().EnginePath;
@@ -206,11 +231,12 @@ public class QuakeInjector extends JFrame {
 		                            getConfig().EngineCommandLine);
 		installer = new Installer(enginePathV,
 		                          getConfig().DownloadPath);
+
 		interactionPanel.init(installer,
 		                      getConfig().RepositoryBasePath,
 		                      maps,
 		                      starter,
-		                      new InstalledPackageList(new File(installedMapsFileName))
+		                      new SaveInstalled(installedMapsFile)
 		    );
 
 		if (!installer.checkInstallDirectory()) {
@@ -233,41 +259,50 @@ public class QuakeInjector extends JFrame {
 		}
 	}
 
-	/**
-	 * Thread worker to parse the config file in background
-	 */
-	private final SwingWorker<Configuration,Void> loadConfig
-	    = new SwingWorker<Configuration,Void>() {
-		@Override
-		public Configuration doInBackground() {
-			return new Configuration();
-		}
-	};
 
-	private synchronized Configuration getConfig() {
-		try {
-			return loadConfig.get();
-		}
-		catch (InterruptedException e) {
-			System.out.println(e);
-			e.printStackTrace();
-		}
-		catch (java.util.concurrent.ExecutionException e) {
-			System.out.println(e);
-			e.printStackTrace();
-		}
-		throw new RuntimeException("Couldn't Load config!");
+	private void doParseInstalled() {
+		installedMaps.parse(installedMapsFile);
+	}
+
+
+	private List<Requirement> parseDatabase(String databaseUrl)
+		throws IOException, org.xml.sax.SAXException {
+		//get download stream
+		Download d = Download.create(databaseUrl);
+		d.connect();
+		int size = d.getSize();
+		InputStream dl;
+		// if (size > 0) {
+		// 	ProgressListener progress =
+		// 	    new SumProgressListener(new PercentageProgressListener(size, this));
+		// 	dl = d.getStream(progress);
+		// }
+		// else {
+			dl = d.getStream(null);
+			//}
+		
+		final PackageDatabaseParser parser = new PackageDatabaseParser();
+		List<Requirement> all = parser.parse(XmlUtils.getDocument(dl));
+
+		return all;
 	}
 
 	/**
 	 * Parse the online database
 	 */
-	private Future<List<Requirement>> parseDatabase() {
-		final PackageDatabaseParserWorker dbParse
-		    = new PackageDatabaseParserWorker(getConfig().RepositoryDatabasePath.get());
+	private Future<List<Requirement>> doParseDatabase() {
+		
+		final String databaseUrl = getConfig().RepositoryDatabasePath.get();
+		
+		final SwingWorker<List<Requirement>, Void> dbParse
+		    = new SwingWorker<List<Requirement>,Void>() {
+			@Override
+			public List<Requirement> doInBackground() throws IOException, org.xml.sax.SAXException {
+				return parseDatabase(databaseUrl);
+			}
+		};
 
-		final ProgressPopup dbpopup =
-		    new ProgressPopup("Downloading package database",
+		final ProgressPopup dbpopup = new ProgressPopup("Downloading package database",
 		                      new ActionListener() {
 								  public void actionPerformed(ActionEvent e) {
 									  dbParse.cancel(true);
@@ -295,6 +330,8 @@ public class QuakeInjector extends JFrame {
 		return dbParse;
 	}
 
+
+
 	/**
 	 * See what maps are installed
 	 */
@@ -310,28 +347,27 @@ public class QuakeInjector extends JFrame {
 			    java.util.concurrent.ExecutionException,
 				java.io.IOException {
 
-				//get download stream
-				Download d = Download.create(getConfig().ZipContentsDatabaseUrl.get());
-				d.connect();
-				InputStream dl = d.getStream();
-				
-				//ugly write to file first
-				OutputStream out = new FileOutputStream(file);
-				byte buf[] = new byte[1024];
-				int len;
-				while ((len = dl.read(buf)) > 0) {
-					out.write(buf, 0, len);
+				List<PackageFileList> packages = Collections.emptyList();
+				{
+					//get download stream
+					Download d = Download.create(getConfig().ZipContentsDatabaseUrl.get());
+					d.connect();
+					final InputStream dl = d.getStream();
+
+					try {
+						packages = new InstalledPackageList().read(dl);
+						Collections.sort(packages);
+					}
+					catch (java.io.FileNotFoundException e) {
+						System.out.println("Notice: installed maps file doesn't exist yet,"
+						                   + " no maps installed? " + e);
+					}
+					catch (java.io.IOException e) {
+						System.err.println("Error: installed maps file couldn't be loaded: " + e);
+						e.printStackTrace();
+					}
 				}
-				out.close();
-				dl.close();
-
-				final ParseInstalledWorker parser = new ParseInstalledWorker(file);
-				parser.execute();
 				
-
-				List<PackageFileList> packages = parser.get();
-				Collections.sort(packages);
-
 				int i = 0;
 				List<PackageFileList> installed = new ArrayList<PackageFileList>();
 				for (PackageFileList list: packages) {
@@ -395,7 +431,7 @@ public class QuakeInjector extends JFrame {
 					setInstalledStatus(get());
 
 					synchronized (maps) {
-						new InstalledPackageList(new File(installedMapsFileName)).write(maps);
+						saveInstalled.write(maps);
 					}
 				}
 				catch (java.lang.InterruptedException e) {
@@ -486,90 +522,67 @@ public class QuakeInjector extends JFrame {
 	}
 
 	private Future<Void> parseDatabaseAndSetList() {
-		final Future<List<Requirement>> dbParse = parseDatabase();
+		final Future<List<Requirement>> dbParse = doParseDatabase();
 
-		SwingWorker<Void,Void> updateRequirementList = new SwingWorker<Void,Void>() {
-			List<Requirement> database;
-			List<PackageFileList> packages;
-			
-			@Override
-			public Void doInBackground() throws ExecutionException, InterruptedException {
-				database = dbParse.get();
-				packages = parseInstalled.get();
+		SwingWorker<Void,Void> waitForInstalledMapsAndDb = new SwingWorker<Void,Void>() {
+			@Override public Void doInBackground() throws Exception {
+				//just wait
+				installedMaps.get();
+				dbParse.get();
 
 				return null;
 			}
-			@Override
-			public void done() {
-				try {
-					get();
-				}
-				catch (ExecutionException e) {
-					Throwable err = e.getCause();
 
-					String msg = "Database parsing failed! " + err.getMessage();
-					JOptionPane.showMessageDialog(QuakeInjector.this,
-					                              msg,
-					                              "Database parsing failed!",
-					                              JOptionPane.ERROR_MESSAGE);
+			public void done() {
+				List<Requirement> packages = null;
+				try {
+					packages = dbParse.get();
 				}
 				catch (InterruptedException e) {
-					System.err.println("Waiting for database parsing failed: " + e);
-					e.printStackTrace();
+					throw new RuntimeExecutionException("parsing database", e);
+				}
+				catch (ExecutionException e) {
+					String ERROR_MESSAGE = "Database parsing failed!";
+					JOptionPane.showMessageDialog(QuakeInjector.this,
+					                              ERROR_MESSAGE + " " + e.getMessage(),
+					                              ERROR_MESSAGE,
+					                              JOptionPane.ERROR_MESSAGE);
+					return;
 				}
 
-				if (database != null && packages != null) {
-					maps.setRequirements(database);
-					setInstalledStatus(packages);
+				maps.setRequirements(packages);
+				System.out.println("Setting Requirements");
+
+				try {
+					setInstalledStatus(installedMaps.get());
+				}
+				catch (InterruptedException e) {
+					System.err.println("Interrupted while getting installed maps" + e);
+					e.printStackTrace();
+				}
+				catch (ExecutionException err) {
+					maps.notifyChangeListeners();
+					
+					try {
+						throw err.getCause();
+					}
+					catch (InstalledPackages.NoInstalledPackagesFileException e) {
+						System.err.println(e.getMessage());
+					}
+					catch (Throwable e) {
+						String ERROR_MESSAGE = "Reading installed maps failed!";
+						JOptionPane.showMessageDialog(QuakeInjector.this,
+						                              ERROR_MESSAGE + " " + e.getMessage(),
+						                              ERROR_MESSAGE,
+						                              JOptionPane.ERROR_MESSAGE);
+					}
 				}
 			}
 		};
-		updateRequirementList.execute();
-		
-		return updateRequirementList;
+		waitForInstalledMapsAndDb.execute();
+		return waitForInstalledMapsAndDb;
 	}
 
-
-	/**
-	 * Thread worker to parse the installed maps in background
-	 */
-	private static class ParseInstalledWorker extends SwingWorker<List<PackageFileList>, Void> {
-		private final File file;
-
-		public ParseInstalledWorker(File file) {
-			this.file = file;
-		}
-		
-		@Override
-		public List<PackageFileList> doInBackground() {
-			List<PackageFileList> files;
-			try {
-				files = new InstalledPackageList(file).read();
-			}
-			catch (java.io.FileNotFoundException e) {
-				System.out.println("Notice: " + file + " doesn't exist yet, no maps installed?");
-				files = Collections.emptyList();
-			}
-			catch (java.io.IOException e) {
-				System.out.println("Error: " + file + " couldn't be loaded: " + e.getMessage());
-				
-				files = Collections.emptyList();
-			}
-			return files;
-		}
-	}
-
-	private List<PackageFileList> getInstalledFileLists() {
-		try {
-			synchronized (parseInstalled) {
-				return parseInstalled.get();
-			}
-		}
-		catch (InterruptedException e) { }
-		catch (java.util.concurrent.ExecutionException e) {}
-		return new ArrayList<PackageFileList>();
-	}
-	
 	private void showEngineConfig(boolean rogueInstalled, boolean hipnoticInstalled) {
 		final EngineConfigDialog d
 		    = new EngineConfigDialog(QuakeInjector.this,
@@ -630,7 +643,7 @@ public class QuakeInjector extends JFrame {
 		maps.get("hipnotic").setInstalled(hipnoticInstalled);
 		try {
 			synchronized (maps) {
-				new InstalledPackageList(new File(installedMapsFileName)).write(maps);
+				saveInstalled.write(maps);
 			}
 		}
 		catch (java.io.IOException e) {}
@@ -762,6 +775,13 @@ public class QuakeInjector extends JFrame {
 	private void display() {
 		//pack();
 		setVisible(true);
+	}
+
+	private Configuration getConfig() {
+		if (config == null) {
+			throw new RuntimeException("Config not initialised!");
+		}
+		return config;
 	}
 
 	/**
