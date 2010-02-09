@@ -85,9 +85,18 @@ public class QuakeInjector extends JFrame {
 
 	private EngineStarter starter;
 
+	/**
+	 * @todo 2010-02-09 12:11 hrehfeld    member variable seems unnecessary
+	 */
 	private PackageInteractionPanel interactionPanel;
 	private RequirementList maps;
+	/**
+	 * @todo 2010-02-09 12:11 hrehfeld    member variable seems unnecessary
+	 */
 	private PackageList packages;
+	/**
+	 * @todo 2010-02-09 12:11 hrehfeld    member variable seems unnecessary
+	 */
 	private final PackageListModel maplist;
 	private Installer installer;
 
@@ -630,6 +639,9 @@ public class QuakeInjector extends JFrame {
 		c.write();
 	}
 
+	/**
+	 * @todo 2010-02-09 12:19 hrehfeld    Let this use configuration values to their full extent
+	 */
 	private void setEngineConfig(File enginePath,
 								 File engineExecutable,
 	                             Configuration.EngineCommandLine commandline,
