@@ -59,6 +59,7 @@ public class Package extends SortableRequirement implements Requirement {
 	private List<Requirement> requirements;
 
 	private PackageFileList fileList;
+	private PackageFileList supposedFileList;
 
 	public Package(String id,
 				   String author,
@@ -201,11 +202,21 @@ public class Package extends SortableRequirement implements Requirement {
 	 * get fileList
 	 */
 	public PackageFileList getFileList() { return fileList; }
-    
+	
 /**
  * set fileList
  */
 	public void setFileList(PackageFileList fileList) { this.fileList = fileList; }
+
+	/**
+	 * get supposedFileList
+	 */
+	public PackageFileList getSupposedFileList() { return supposedFileList; }
+    
+/**
+ * set supposedFileList
+ */
+	public void setSupposedFileList(PackageFileList supposedFileList) { this.supposedFileList = supposedFileList; }
 
 	public static enum Rating {
 		Unrated(0),
