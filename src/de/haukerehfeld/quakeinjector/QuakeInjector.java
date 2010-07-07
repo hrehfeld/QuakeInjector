@@ -225,14 +225,11 @@ public class QuakeInjector extends JFrame {
 		final Future<Void> requirementsListUpdater = parseDatabaseAndSetList();
 
 		Configuration.EnginePath enginePath = getConfig().EnginePath;
-		File engineExe;
+		File engineExe = new File("");
 		if (getConfig().EngineExecutable.existsOrDefault()) {
 			engineExe = new File(enginePath.get()
 			                          + File.separator
 			                          + getConfig().EngineExecutable);
-		}
-		else {
-			engineExe = new File("");
 		}
 		starter = new EngineStarter(enginePath.get(),
 		                            engineExe,
