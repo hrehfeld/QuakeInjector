@@ -101,11 +101,15 @@ public class EngineOutputDialog extends JDialog {
 				try {
 					InputStreamReader in = new  InputStreamReader(engineOut);
 					BufferedReader b = new BufferedReader(in);
+
 					
+					output.append("Starting engine...\n");
 					String line;
+					int lineCount = 0;
 					while ((line = b.readLine()) != null) {
 						//append is thread safe
 						output.append(line.trim() + "\n");
+						lineCount++;
 
 						//scroll on the event thread
 						javax.swing.SwingUtilities.invokeLater(new SwingWorker<Void,Void>() {
@@ -115,6 +119,13 @@ public class EngineOutputDialog extends JDialog {
 								}
 						    });
 					}
+					if (lineCount == 0) {
+						output.append("Done with no output.\n");
+					}
+					else {
+						output.append("Done.\n");
+					}
+						
 				}
 				catch (java.io.IOException e) {
 					output.append("Error: Couldn't read engine output from stream");
