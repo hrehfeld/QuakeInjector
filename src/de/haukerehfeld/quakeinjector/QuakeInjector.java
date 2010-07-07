@@ -345,139 +345,12 @@ public class QuakeInjector extends JFrame {
 
 		final File file = new File(zipFilesXml);
 
-		class CheckInstalled extends SwingWorker<List<PackageFileList>, Void>
-		    implements ProgressListener {
-			@Override
-			    public List<PackageFileList> doInBackground() throws java.lang.InterruptedException,
-			    java.util.concurrent.ExecutionException,
-				java.io.IOException {
-
-				List<PackageFileList> packages = Collections.emptyList();
-				{
-					//get download stream
-					Download d = Download.create(getConfig().ZipContentsDatabaseUrl.get());
-					d.connect();
-					final InputStream dl = d.getStream();
-
-					try {
-						packages = new InstalledPackageList().read(dl);
-						Collections.sort(packages);
-					}
-					catch (java.io.FileNotFoundException e) {
-						System.out.println("Notice: installed maps file doesn't exist yet,"
-						                   + " no maps installed? " + e);
-					}
-					catch (java.io.IOException e) {
-						System.err.println("Error: installed maps file couldn't be loaded: " + e);
-						e.printStackTrace();
-					}
-				}
-				
-				int i = 0;
-				List<PackageFileList> installed = new ArrayList<PackageFileList>();
-				for (PackageFileList list: packages) {
-					publish(i++ * 100 / packages.size());
-					Requirement r = maps.get(list.getId());
-					String basedir = getConfig().EnginePath + File.separator;
-					String relativeDir = "";
-					if (r instanceof Package) {
-						String dir = ((Package) r).getRelativeBaseDir();
-						if (dir != null) {
-							relativeDir += dir;
-						}
-					}
-					else if (r instanceof UnavailableRequirement) {
-						continue;
-					}
-
-					PackageFileList p = new PackageFileList(list.getId());
-					
-					List<String> missingFiles = new ArrayList<String>();
-					for (FileInfo entry: list) {
-						if (missingFiles.size() > 0.3f * list.size()) {
-							break;
-						}
-						String filename = entry.getName();
-						String file = basedir + relativeDir + filename;
-						long supposedCrc = entry.getChecksum();
-						File f = new File(file);
-						if (!f.exists()) {
-							missingFiles.add(file);
-						}
-						else {
-							if (!f.isDirectory()) {
-								long crc = Utils.getCrc32(new BufferedInputStream(new FileInputStream(f)), null);
-								if (supposedCrc != 0 && crc != entry.getChecksum()) {
-									System.err.println("Crc differs for file " + file);
-									missingFiles.add(file);
-									continue;
-								}
-								// else {
-								// 	System.out.println("Crc matches for " + f + " (" + crc + ")");
-								// }
-							}
-							p.add(new FileInfo(relativeDir + filename, supposedCrc));
-						}
-					}
-
-					if (missingFiles.isEmpty()) {
-						System.out.println(list.getId() + " seems to be installed.");
-						installed.add(p);
-					}
-				}
-
-				return installed;
-			}
-
-
-			@Override
-			    public void done() {
-				try {
-					setInstalledStatus(get());
-
-					synchronized (maps) {
-						saveInstalled.write(maps);
-					}
-				}
-				catch (java.lang.InterruptedException e) {
-					System.err.println("Interrupted: " + e);
-					e.printStackTrace();
-				}
-				catch (java.util.concurrent.ExecutionException e) {
-					System.err.println("Exception: " + e);
-					e.printStackTrace();
-					try {
-						throw e.getCause();
-					}
-					catch (java.net.ConnectException err) {
-						String msg = "Downloading file database failed, " + err.getMessage() + "!";
-						JOptionPane.showMessageDialog(QuakeInjector.this,
-						                              msg,
-						                              "Downloading failed!",
-						                              JOptionPane.ERROR_MESSAGE);
-						
-					}
-					catch (Throwable err) {
-					}
-				}
-				catch (java.util.concurrent.CancellationException e) {
-				}
-				catch (java.io.IOException e) {
-					System.err.println("Couldn't write " + installedMapsFileName + ": " + e);
-					e.printStackTrace();
-				}
-			}
-
-			public void publish(long progress) {
-				if (progress <= 100) {
-					setProgress((int) progress);
-				}
-			}
-			
-		}
-
-
-		final CheckInstalled checker = new CheckInstalled();
+		final CheckInstalled checker
+		    = new CheckInstalled(this,
+		                         getConfig().ZipContentsDatabaseUrl.get(),
+		                         getConfig().EnginePath.get().toString(),
+		                         maps,
+		        saveInstalled);
 
 		final ProgressPopup dbpopup =
 		    new ProgressPopup("Checking for installed maps",
@@ -513,7 +386,7 @@ public class QuakeInjector extends JFrame {
 	/**
 	 * Tell maps what maps are already installed
 	 */
-	private void setInstalledStatus(final List<PackageFileList> packages) {
+	void setInstalledStatus(final List<PackageFileList> packages) {
 		for (PackageFileList l: packages) {
 			maps.setInstalled(l);
 		}
