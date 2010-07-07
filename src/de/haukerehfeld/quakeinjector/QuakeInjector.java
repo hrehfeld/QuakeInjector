@@ -217,7 +217,7 @@ public class QuakeInjector extends JFrame {
 		
 
 	/**
-	 * Do everything that may happen after the initial window is shown
+	 * Everything that may be run AFTER the initial window is shown should be run here
 	 */
 	private void init() {
 		doParseInstalled();
