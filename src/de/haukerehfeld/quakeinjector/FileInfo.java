@@ -68,7 +68,7 @@ public class FileInfo implements Comparable<FileInfo> {
 	public int compareTo(FileInfo o) {
 		int i = o.getName().compareTo(getName());
 		if (i == 0) {
-			i = new Long(o.getChecksum()).compareTo(new Long(getChecksum()));
+			i = Long.valueOf(o.getChecksum()).compareTo(Long.valueOf(getChecksum()));
 		}
 		return i;
 	}
@@ -78,7 +78,7 @@ public class FileInfo implements Comparable<FileInfo> {
 	}
 
 	public int hashCode() {
-		return name.hashCode() + 17 * new Long(checksum).hashCode();
+		return name.hashCode() + 17 * Long.valueOf(checksum).hashCode();
 	}
 
 	public void clean() {

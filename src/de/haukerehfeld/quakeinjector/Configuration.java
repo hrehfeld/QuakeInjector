@@ -167,12 +167,6 @@ public class Configuration {
 
 		init();
 	}
-	public Configuration clone() {
-		Configuration c = new Configuration();
-
-		c.set(this);
-		return c;
-	}
 
 	@SuppressWarnings("unchecked")
 	private void set(Configuration c) {
@@ -207,7 +201,9 @@ public class Configuration {
 		//config exists
 		if (configFile.canRead()) {
 			try {
-				properties.load(new FileInputStream(configFile));
+				FileInputStream in = new FileInputStream(configFile);
+				properties.load(in);
+				in.close();
 			}
 			catch (java.io.FileNotFoundException e) {
 				//this should never happen cause we just checked if we
@@ -260,7 +256,9 @@ public class Configuration {
 			try {
 				Properties properties = new Properties(defaults());
 				get(properties);
-				properties.store(new FileOutputStream(configFile), CONFIGHEADER);
+				FileOutputStream out = new FileOutputStream(configFile);
+				properties.store(out, CONFIGHEADER);
+				out.close();
 			}
 			catch (java.io.FileNotFoundException e) {
 				System.out.println("Can't write config file");

@@ -30,7 +30,7 @@ import de.haukerehfeld.quakeinjector.Package;
 public enum Column {
 		INSTALLED("") {
 		public Object getData(Package p) {
-			return new Boolean(p.isInstalled());
+			return Boolean.valueOf(p.isInstalled());
 		}
 		public Class<? extends Object> getColumnClass() { return Boolean.class; }
 		},
