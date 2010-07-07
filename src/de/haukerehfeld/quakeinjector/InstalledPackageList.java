@@ -198,7 +198,11 @@ public class InstalledPackageList {
 				if (e.hasAttribute("crc")) {
 					crc = Long.parseLong(e.getAttribute("crc"));
 				}
-				fileList.add(new FileInfo(name, crc));
+				boolean essential = true;
+				if (e.hasAttribute("essential") && e.getAttribute("essential").equals(Boolean.toString(false))) {
+					essential = false;
+				}
+				fileList.add(new FileInfo(name, crc, essential));
 			}
 		}
 

@@ -52,7 +52,6 @@ class CheckInstalled extends SwingWorker<List<PackageFileList>, Void>
 			try {
 				packages = new InstalledPackageList().read(dl);
 
-				System.out.println(packages);
 				Collections.sort(packages);
 			}
 			catch (java.io.FileNotFoundException e) {
@@ -121,6 +120,9 @@ class CheckInstalled extends SwingWorker<List<PackageFileList>, Void>
 				System.out.println(list.getId() + " seems to be installed.");
 				//if we would allow for missing files in an installed package, we'd need to have custom file lists!
 				installed.add(list);
+			}
+			else {
+				System.out.println(list.getId() + " has missing files, not installed.");
 			}
 		}
 
