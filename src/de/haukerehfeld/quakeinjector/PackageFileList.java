@@ -70,4 +70,8 @@ public class PackageFileList implements Iterable<FileInfo>, Comparable<PackageFi
 	public int compareTo(PackageFileList o) {
 		return -(o.id.compareTo(id));
 	}
+
+	@Override public String toString() {
+		return id + "[" + files.toString() + "]";
+	}
 }
