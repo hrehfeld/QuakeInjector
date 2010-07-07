@@ -81,21 +81,23 @@ class CheckInstalled extends SwingWorker<List<PackageFileList>, Void>
 					throw new java.util.concurrent.CancellationException();
 				}
 
-				if (missingFiles.size() > 0.3f * list.size()) {
+				if (list.size() > 7 && missingFiles.size() > 0.2f * list.size()) {
 					System.out.println("Too many missing files for " + list.getId()
 					                   + ", stopping search!");
 					break;
 				}
 
 				String filename = entry.getName();
-				System.out.println("Basedir: " + basedir + "; filename: " + filename);
+				//System.out.println("Basedir: " + basedir + "; filename: " + filename);
 				String file = basedir + filename;
 				long supposedCrc = entry.getChecksum();
 				File f = new File(file);
 				System.out.print("Checking for " + f + "...");
 				if (!f.exists()) {
-					missingFiles.add(file);
-					System.out.println("missing!");
+					if (entry.getEssential()) {
+						missingFiles.add(file);
+						System.out.println("missing!");
+					}
 				}
 				else {
 					System.out.println("found!");
@@ -103,8 +105,10 @@ class CheckInstalled extends SwingWorker<List<PackageFileList>, Void>
 						long crc = Utils.getCrc32(new BufferedInputStream(new FileInputStream(f)), null);
 						if (supposedCrc != 0 && crc != entry.getChecksum()) {
 							System.err.println("Crc differs for file " + file);
-							missingFiles.add(file);
-							continue;
+							if (entry.getEssential()) {
+								System.out.println("Counting as missing.");
+								missingFiles.add(file);
+							}
 						}
 						// else {
 						// 	System.out.println("Crc matches for " + f + " (" + crc + ")");
@@ -115,6 +119,7 @@ class CheckInstalled extends SwingWorker<List<PackageFileList>, Void>
 
 			if (missingFiles.isEmpty()) {
 				System.out.println(list.getId() + " seems to be installed.");
+				//if we would allow for missing files in an installed package, we'd need to have custom file lists!
 				installed.add(list);
 			}
 		}
