@@ -13,6 +13,7 @@ Features
 - Automatically installs dependencies (e.g. Quoth)
 - Cross-Platform
 - "Free, Open Source Software":http://github.com/hrehfeld/QuakeInjector/, released under the GPL.
+- Scan your Quake directory for already installed maps
  
 
 Installation
@@ -32,13 +33,9 @@ Quake Injector requires "Java 6":http://www.java.com/en/download/ and a Quake in
 Known Problems
 ***
 
-1) Quake Injector **cannot scan your existing Quake installation** for already existing files. That means if you installed e.g. Quoth manually and now tell the Injector to install it, it will (in this alpha version) **overwrite the existing files**. That's not a big deal unless you tinkered with the files that came with Quoth originally. Other files such as your config.cfg or savegames will not be affected.
+1) On **Linux/MacOS** and other case-sensitive operating systems you won’t have much joy as there is no engine that can ignore the case of filenames *yet*. There will be one and it will be a good one, but for now you're pretty much on your own, as **a lot of maps were packed with mixed case filenames** by the original authors.
 
-  For the true experience you should *try this tool with a virgin Quake installation* that has not been touched by filthy third party “packages” yet.
-
-2) On **Linux/MacOS** and other case-sensitive operating systems you won’t have much joy as there is no engine that can ignore the case of filenames *yet*. There will be one and it will be a good one, but for now you're pretty much on your own, as **a lot of maps were packed with mixed case filenames** by the original authors.
-
-3) Also be aware that most engines cannot run some of the latest and greatest maps, because those **maps break the original quake engine limits**. "Fitzquake":http://www.celephais.net/fitzquake/ is highly recommended.
+2) Also be aware that most engines cannot run some of the latest and greatest maps, because those **maps break the original quake engine limits**. "Fitzquake":http://www.celephais.net/fitzquake/ is highly recommended.
 
 Bug Reports, Help with Development, etc.
 ***
