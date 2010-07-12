@@ -35,6 +35,7 @@ import javax.swing.table.TableColumnModel;
 import de.haukerehfeld.quakeinjector.ChangeListenerList;
 import de.haukerehfeld.quakeinjector.PackageList;
 import de.haukerehfeld.quakeinjector.Package;
+import de.haukerehfeld.quakeinjector.Utils;
 
 import javax.swing.table.TableCellRenderer;
 import java.util.List;
@@ -220,15 +221,22 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		private static final int HORIZONTALGAP = 2;
 		private static final int ICONSIZE = 8;
 
-		private ImageIcon activeIcon = createImageIcon("/star_spirit_8.png",
-		                                               "activeStar");
-		private ImageIcon inactiveIcon = createImageIcon("/star_spirit_8_inactive.png",
-		                                                 "inactiveStar");
+		private ImageIcon activeIcon;
+		private ImageIcon inactiveIcon;
 
 		private List<JLabel> ratingLabels = new ArrayList<JLabel>(5);
 
 		public RatingRenderer() {
 			super();
+
+			try {
+				activeIcon = Utils.createImageIcon("/star_spirit_8.png", "activeStar");
+				inactiveIcon = Utils.createImageIcon("/star_spirit_8_inactive.png", "inactiveStar");
+			}
+			catch (java.io.IOException e) {
+				System.err.println("WARNING: Couldn't load rating image!");
+			}
+			
 			EmptyBorder border = new EmptyBorder(0,0,0,0);
 			setBorder(border);
 			((FlowLayout) getLayout()).setHgap(HORIZONTALGAP);
@@ -263,16 +271,6 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 				}
 			}
 			return this;
-		}
-
-		private ImageIcon createImageIcon(String path, String description) {
-			java.net.URL imgURL = getClass().getResource(path);
-			if (imgURL != null) {
-				return new ImageIcon(imgURL, description);
-			} else {
-				System.err.println("Couldn't find file: " + path);
-				return null;
-			}
 		}
 	}	
 

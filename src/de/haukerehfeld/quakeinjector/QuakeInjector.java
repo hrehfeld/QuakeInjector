@@ -72,7 +72,7 @@ public class QuakeInjector extends JFrame {
 	/**
 	 * Window title
 	 */
-	private static final String ICON_URL = "../res/Inject2_SIZE.png";
+	private static final String ICON_URL = "/Inject2_SIZE.png";
 	private static final String ICON_SIZE_PLACEHOLDER = "SIZE";
 	private static final int[] ICON_SIZES = { 16, 32, 48, 256 };
 	
@@ -780,9 +780,16 @@ public class QuakeInjector extends JFrame {
 
 	private static List<Image> createIconList(int[] iconSizes, String iconUrl, String sizeToken) {
 			List<Image> icons = new ArrayList<Image>(iconSizes.length);
-			for (int i: iconSizes) {
-				String path = iconUrl.replace(sizeToken, Integer.toString(i));
-				icons.add(new javax.swing.ImageIcon(path).getImage());
+			for (int size: iconSizes) {
+				String path = iconUrl.replace(sizeToken, Integer.toString(size));
+				System.out.println(path);
+				try {
+					javax.swing.ImageIcon icon = Utils.createImageIcon(path, "Icon" + size);
+					icons.add(icon.getImage());
+				}
+				catch (IOException e) {
+					System.err.println("WARNING: Couldn't load icon file " + path);
+				}
 			}
 			return icons;
 	}
