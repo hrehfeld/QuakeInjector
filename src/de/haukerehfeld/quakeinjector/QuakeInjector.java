@@ -25,6 +25,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -71,6 +72,10 @@ public class QuakeInjector extends JFrame {
 	/**
 	 * Window title
 	 */
+	private static final String ICON_URL = "../res/Inject2_SIZE.png";
+	private static final String ICON_SIZE_PLACEHOLDER = "SIZE";
+	private static final int[] ICON_SIZES = { 16, 32, 48, 256 };
+	
 	private static final String applicationName = "Quake Injector";
 	private static final int minWidth = 300;
 	private static final int minHeight = 300;
@@ -125,8 +130,13 @@ public class QuakeInjector extends JFrame {
 		packages = new PackageList(maps);
 		maplist = new PackageListModel(packages);
 
-		setJMenuBar(createMenuBar());
+		{
+			setIconImages(createIconList(ICON_SIZES, ICON_URL, ICON_SIZE_PLACEHOLDER));
+		}
 		
+		setJMenuBar(createMenuBar());
+
+
 		setMinimumSize(new Dimension(minWidth, minHeight));
 		
 		addMainPane(getContentPane());
@@ -766,6 +776,15 @@ public class QuakeInjector extends JFrame {
 			System.exit(0);
 		}
 
+	}
+
+	private static List<Image> createIconList(int[] iconSizes, String iconUrl, String sizeToken) {
+			List<Image> icons = new ArrayList<Image>(iconSizes.length);
+			for (int i: iconSizes) {
+				String path = iconUrl.replace(sizeToken, Integer.toString(i));
+				icons.add(new javax.swing.ImageIcon(path).getImage());
+			}
+			return icons;
 	}
 	
 }
