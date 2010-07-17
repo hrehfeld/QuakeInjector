@@ -207,16 +207,16 @@ public class QuakeInjector extends JFrame {
 			if (c.MainWindowPositionX.exists() && c.MainWindowPositionY.exists()) {
 				int posX = c.MainWindowPositionX.get();
 				int posY = c.MainWindowPositionY.get();
-				System.out.println("Setting window bounds: "
-				                   + posX + ", "
-				                   + posY + ", "
-				                   + width + ", "
-				                   + height);
+				// System.out.println("Setting window bounds: "
+				//                    + posX + ", "
+				//                    + posY + ", "
+				//                    + width + ", "
+				//                    + height);
 			
 				setBounds(posX, posY, width, height);
 			}
 			else {
-				System.out.println("Setting window size: " + width + ", " + height);
+				// System.out.println("Setting window size: " + width + ", " + height);
 				setSize(width, height);
 			}
 		}
@@ -770,8 +770,8 @@ public class QuakeInjector extends JFrame {
 			config.MainWindowWidth.set((int) bounds.getWidth());
 			config.MainWindowHeight.set((int) bounds.getHeight());
 			config.write();
-			System.out.println("Closing Window: " + (int) bounds.getWidth()
-			    + (int) bounds.getHeight());
+			//System.out.println("Closing Window: " + (int) bounds.getWidth()
+			//+ (int) bounds.getHeight());
 
 			System.exit(0);
 		}
@@ -782,7 +782,6 @@ public class QuakeInjector extends JFrame {
 			List<Image> icons = new ArrayList<Image>(iconSizes.length);
 			for (int size: iconSizes) {
 				String path = iconUrl.replace(sizeToken, Integer.toString(size));
-				System.out.println(path);
 				try {
 					javax.swing.ImageIcon icon = Utils.createImageIcon(path, "Icon" + size);
 					icons.add(icon.getImage());

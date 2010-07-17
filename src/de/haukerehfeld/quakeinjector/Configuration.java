@@ -196,7 +196,7 @@ public class Configuration {
 	 * Read the properties file or get default properties
 	 */
 	private void read() {
-		System.out.print("Reading configuration...");
+		System.out.println("Reading configuration...");
 		Properties properties = new Properties(defaults());
 		//config exists
 		if (configFile.canRead()) {
@@ -208,17 +208,17 @@ public class Configuration {
 			catch (java.io.FileNotFoundException e) {
 				//this should never happen cause we just checked if we
 				//can read -- but maybe another process fucks up...
-				System.out.println("Can't read config file even though i just checked if i can "
+				System.out.println("Can't read config file (" + e.getMessage() + ") even though i just checked if i can "
 								   + "read it. Using defaults...");
+
 			}
 			catch (java.io.IOException e) {
 				// if we can't read the config file, just use the defaults
-				System.out.println("Couldn't read config file. Using defaults...");
+				System.out.println("Couldn't read config file: " + e.getMessage() + ". Using defaults...");
 			}
 		}
 
 		set(properties);
-		System.out.println("done.");		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -239,7 +239,7 @@ public class Configuration {
 		for (String key: All.keySet()) {
 			Value v = All.get(key);
 			if (v.exists()) {
-				System.out.println("Writing " + key + " to " + v.toString() + " from " + v.getClass() + ": " + v);
+				//System.out.println("Writing " + key + " to " + v.toString() + " from " + v.getClass() + ": " + v);
 				p.setProperty(key, v.toString());
 			}
 			else {
@@ -252,7 +252,7 @@ public class Configuration {
 	
 
 	public void write() {
-		System.out.print("Writing configuration...");
+		System.out.println("Writing configuration...");
 			try {
 				Properties properties = new Properties(defaults());
 				get(properties);
@@ -261,10 +261,12 @@ public class Configuration {
 				out.close();
 			}
 			catch (java.io.FileNotFoundException e) {
-				System.out.println("Can't write config file");
+				System.err.println("Can't write config file: " + e.getMessage());
+				e.printStackTrace();
 			}
 			catch (java.io.IOException e) {
-				System.out.println("Couldn't write config file.");
+				System.err.println("Can't write config file: " + e.getMessage());
+				e.printStackTrace();
 			}
 			System.out.println("done.");
 	}
@@ -340,7 +342,7 @@ public class Configuration {
 
 		public void set(T v) {
 			if (v == null || v.equals(defaultValue())) {
-				System.out.println(getClass() + ": Setting to null or default");
+				//System.out.println(getClass() + ": Setting to null or default");
 				value = null;
 				return;
 			}
