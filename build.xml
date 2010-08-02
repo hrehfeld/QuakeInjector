@@ -1,5 +1,5 @@
 <project name="QuakeInjector"
-         default="quakeinjector.compile"
+         default="compile"
          basedir=".">
   <dirname property="quakeinjector.basedir" file="${ant.file.QuakeInjector}"/>
 
@@ -82,7 +82,7 @@ public final class BuildCommit {
 
 
   <!-- compile with cp -->
-  <target name="quakeinjector.compile" depends="quakeinjector.init,dumpversion"
+  <target name="compile" depends="quakeinjector.init,dumpversion"
           description="compile the source">
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${quakeinjector.src}" destdir="${quakeinjector.build}" 
@@ -97,7 +97,7 @@ public final class BuildCommit {
 	</javac>
   </target>
 
-  <target name="run" depends="quakeinjector.compile" description="Start the application">
+  <target name="run" depends="compile" description="Start the application">
 	<java fork="true" classname="${quakeinjector.main-class}" dir="${quakeinjector.build}">
 	  <jvmarg value="-Djava.library.path=${quakeinjector.library.path}" />
 	  <jvmarg value="-Xshare:off" />
@@ -106,7 +106,7 @@ public final class BuildCommit {
 	</java>
   </target>
 
-  <target name="zipinspect" depends="quakeinjector.compile"
+  <target name="zipinspect" depends="compile"
 	  description="Inspect filebase">
 	<java fork="true" classname="de.haukerehfeld.quakeinjector.ZipInspect" dir="${quakeinjector.build}">
 	  <jvmarg value="-Djava.library.path=${quakeinjector.library.path}" />
@@ -119,7 +119,7 @@ public final class BuildCommit {
 
 
 
-  <target name="benchmark" depends="quakeinjector.compile" description="Start the application">
+  <target name="benchmark" depends="compile" description="Start the application">
 	<java fork="true" classname="${quakeinjector.main-class}" dir="${quakeinjector.build}">
 	  <jvmarg value="-Djava.library.path=${quakeinjector.library.path}" />
 	  <arg value="benchmark" />
@@ -128,7 +128,7 @@ public final class BuildCommit {
   </target>
 
 
-  <target name="profile" depends="quakeinjector.compile" description="Start the application">
+  <target name="profile" depends="compile" description="Start the application">
 	<java fork="true" classname="${quakeinjector.main-class}" dir="${quakeinjector.build}">
 	  <jvmarg value="-javaagent:../shiftone-jrat.jar" />
 	  <jvmarg value="-Djava.library.path=${quakeinjector.library.path}" />
@@ -136,7 +136,7 @@ public final class BuildCommit {
 	</java>
   </target>
 
-  <target name="profileYK" depends="quakeinjector.compile" description="Start the application">
+  <target name="profileYK" depends="compile" description="Start the application">
 	<java fork="true" classname="${quakeinjector.main-class}" dir="${quakeinjector.build}">
 	  <jvmarg value="-agentlib:yjpagent" />
 	  <jvmarg value="-Djava.library.path=${quakeinjector.library.path}" />
@@ -144,7 +144,7 @@ public final class BuildCommit {
 	</java>
   </target>
 
-  <target name="quakeinjector.jar" depends="clean.dist,quakeinjector.compile">
+  <target name="quakeinjector.jar" depends="clean.dist,compile">
 
     <copy todir="${quakeinjector.dist}">
       <fileset dir="${quakeinjector.lib}" includes="*.jar" />
