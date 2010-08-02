@@ -147,9 +147,11 @@ public class Configuration {
 
 	public final Map<String,Value<?>> All = new HashMap<String,Value<?>>();
 	
-	private File configFile = new File("config.properties");
+	private File configFile;
 
-	public Configuration() {
+	public Configuration(File configFile) {
+		this.configFile = configFile;
+		
 		//assign all fields to all list;
 		Field[] fields = getClass().getDeclaredFields();
 		for (Field f: fields) {
@@ -166,12 +168,6 @@ public class Configuration {
 		}
 
 		init();
-	}
-	public Configuration clone() {
-		Configuration c = new Configuration();
-
-		c.set(this);
-		return c;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -255,20 +251,17 @@ public class Configuration {
 	}
 	
 
-	public void write() {
+	public void write() throws java.io.IOException {
+		if (!Utils.canWriteToDirectory(configFile.getParentFile())) {
+			System.out.println("Cannot write to config directory!");
+			throw new java.io.FileNotFoundException("Cannot write to config directory");
+		}
 		System.out.print("Writing configuration...");
-			try {
-				Properties properties = new Properties(defaults());
-				get(properties);
-				properties.store(new FileOutputStream(configFile), CONFIGHEADER);
-			}
-			catch (java.io.FileNotFoundException e) {
-				System.out.println("Can't write config file");
-			}
-			catch (java.io.IOException e) {
-				System.out.println("Couldn't write config file.");
-			}
-			System.out.println("done.");
+
+		Properties properties = new Properties(defaults());
+		get(properties);
+		properties.store(new FileOutputStream(configFile), CONFIGHEADER);
+		System.out.println("done.");
 	}
 
 	/**

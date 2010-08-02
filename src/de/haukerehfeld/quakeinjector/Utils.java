@@ -129,4 +129,22 @@ public class Utils {
 		public void write(byte[] b) {}
 		public void write(byte[] b, int off, int len) {}
 	}
+
+	/**
+	   Check if files can indeed be written inside a certain directory
+	   
+	   Tries to write a temp file in a dir.
+	   @param directory The directory to test
+	 */
+	public static boolean canWriteToDirectory(File directory) {
+		try {
+			File tmp = File.createTempFile("writeTest", null, directory);
+			tmp.delete();
+		}
+		catch (IOException e) {
+			System.out.println(e);
+			return false;
+		}
+		return true;
+	}
 }

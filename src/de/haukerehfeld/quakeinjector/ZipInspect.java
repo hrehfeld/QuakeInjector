@@ -103,7 +103,7 @@ public class ZipInspect {
 			System.exit(1);
 		}
 
-		Configuration config = new Configuration();
+		Configuration config = new Configuration(QuakeInjector.configFile);
 
 		List<Requirement> requirements = null;
 		{

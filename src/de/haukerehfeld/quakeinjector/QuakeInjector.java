@@ -81,6 +81,9 @@ public class QuakeInjector extends JFrame {
 	
 	private final static String zipFilesXml = "zipFiles.xml";
 
+	final static File configFile = new File("config.properties");
+
+
 
 
 	private EngineStarter starter;
@@ -105,13 +108,13 @@ public class QuakeInjector extends JFrame {
 	
 
 	private final Configuration config;
-	
+
 	public QuakeInjector() {
 		super(applicationName);
 
 		//load config
 		final Future<Configuration> config = new SwingWorker<Configuration,Void>() {
-			@Override public Configuration doInBackground() { return new Configuration(); }
+			@Override public Configuration doInBackground() { return new Configuration(configFile); }
 		};
 		((SwingWorker<?,?>) config).execute();
 
@@ -604,12 +607,17 @@ public class QuakeInjector extends JFrame {
 		        );
 		d.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
-								saveEngineConfig(d.getEnginePath(),
-								                 d.getEngineExecutable(),
-								                 d.getDownloadPath(),
-								                 d.getCommandline(),
-								                 d.getRogueInstalled(),
-								                 d.getHipnoticInstalled());
+					try {
+						saveEngineConfig(d.getEnginePath(),
+						                 d.getEngineExecutable(),
+						                 d.getDownloadPath(),
+						                 d.getCommandline(),
+						                 d.getRogueInstalled(),
+						                 d.getHipnoticInstalled());
+					}
+					catch (IOException err) {
+						savingFailedDialogue(err);
+					}
 				}
 			});
 
@@ -620,12 +628,23 @@ public class QuakeInjector extends JFrame {
 	}
 
 
+	private void savingFailedDialogue(IOException e) {
+		String msg = "Saving the configuration file failed: " + e.getMessage() + "\n"
+		    + "The directory is probably read-only and cannot be set writable automatically (Vista/Win7 bug), try to set write permissions manually." ;
+		JOptionPane.showMessageDialog(QuakeInjector.this,
+		                              msg,
+		                              "Saving configuration failed!",
+		                              JOptionPane.ERROR_MESSAGE);
+	}
+
 	private void saveEngineConfig(File enginePath,
 								  File engineExecutable,
 	                              File downloadPath,
 	                              String commandline,
 	                              boolean rogueInstalled,
-	                              boolean hipnoticInstalled) {
+	                              boolean hipnoticInstalled) throws IOException {
+		
+
 		Configuration c = getConfig();
 		c.EnginePath.set(enginePath);
 		c.EngineExecutable.set(RelativePath.getRelativePath(enginePath, engineExecutable));
@@ -635,8 +654,22 @@ public class QuakeInjector extends JFrame {
 
 		setEngineConfig(enginePath, engineExecutable, getConfig().EngineCommandLine, rogueInstalled, hipnoticInstalled);
 
-		
-		c.write();
+
+		try {
+			c.write();
+		}
+		catch (IOException e) {
+			File dir = configFile.getAbsoluteFile().getParentFile();
+			System.out.println("Trying to set directory (" + dir + ") writable..");
+			try {
+				dir.setWritable(true);
+			}
+			catch (SecurityException securityError) {
+				System.out.println("Couldn't set writable: " + securityError);
+			}
+
+			c.write();
+		}
 	}
 
 	/**
@@ -890,7 +923,12 @@ public class QuakeInjector extends JFrame {
 			config.MainWindowPositionY.set((int) bounds.getY());
 			config.MainWindowWidth.set((int) bounds.getWidth());
 			config.MainWindowHeight.set((int) bounds.getHeight());
-			config.write();
+			try {
+				config.write();
+			}
+			catch (IOException err) {
+				savingFailedDialogue(err);
+			}
 			System.out.println("Closing Window: " + (int) bounds.getWidth()
 			    + (int) bounds.getHeight());
 

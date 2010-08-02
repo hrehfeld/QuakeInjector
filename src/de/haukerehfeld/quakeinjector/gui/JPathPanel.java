@@ -38,6 +38,7 @@ import javax.swing.event.DocumentListener;
 
 import de.haukerehfeld.quakeinjector.ChangeListenerList;
 import de.haukerehfeld.quakeinjector.RelativePath;
+import de.haukerehfeld.quakeinjector.Utils;
 
 /**
  * A Panel to input paths
@@ -248,7 +249,7 @@ public class JPathPanel extends JPanel {
 			return (f.exists()
 			        && f.isDirectory()
 			        && f.canRead()
-			        && f.canWrite());
+			        && Utils.canWriteToDirectory(f));
 		}
 		public String errorMessage(File f) {
 			if (!f.exists()) {
@@ -257,7 +258,7 @@ public class JPathPanel extends JPanel {
 			else if (!f.isDirectory()) {
 				return "Is not a directory!";
 			}
-			else if (!f.canWrite()) {
+			else if (!Utils.canWriteToDirectory(f)) {
 				return "Cannot be written to!";
 			}
 			return null;
