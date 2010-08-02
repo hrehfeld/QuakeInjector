@@ -276,10 +276,8 @@ public class QuakeInjector extends JFrame {
 		installedMaps.parse(installedMapsFile);
 	}
 
-
-	private List<Requirement> parseDatabase(String databaseUrl)
-		throws IOException, org.xml.sax.SAXException {
-		//get download stream
+	private InputStream downloadDatabase(String databaseUrl) throws IOException {
+	//get download stream
 		Download d = Download.create(databaseUrl);
 		d.connect();
 		int size = d.getSize();
@@ -290,11 +288,18 @@ public class QuakeInjector extends JFrame {
 		// 	dl = d.getStream(progress);
 		// }
 		// else {
-			dl = d.getStream(null);
-			//}
+		dl = d.getStream(null);
+		//}
 		
+		return dl;
+	}
+
+
+	private List<Requirement> parseDatabase(InputStream database)
+		throws IOException, org.xml.sax.SAXException {
 		final PackageDatabaseParser parser = new PackageDatabaseParser();
-		List<Requirement> all = parser.parse(XmlUtils.getDocument(dl));
+		
+		List<Requirement> all = parser.parse(XmlUtils.getDocument(database));
 
 		return all;
 	}
@@ -310,7 +315,8 @@ public class QuakeInjector extends JFrame {
 		    = new SwingWorker<List<Requirement>,Void>() {
 			@Override
 			public List<Requirement> doInBackground() throws IOException, org.xml.sax.SAXException {
-				return parseDatabase(databaseUrl);
+				
+				return parseDatabase(downloadDatabase(databaseUrl));
 			}
 		};
 
