@@ -53,6 +53,11 @@ public class Configuration {
 	}
 	public final EngineExecutable EngineExecutable = new EngineExecutable();
 
+	public class LocalDatabaseFile extends FileValue {
+		private LocalDatabaseFile() { super("localDatabaseFile", new File("database.xml")); }
+	}
+	public final LocalDatabaseFile LocalDatabaseFile = new LocalDatabaseFile();
+	
 	public class DownloadPath extends FileValue {
 		private DownloadPath() { super("downloadPath", null); }
 		public File get() {
@@ -105,6 +110,17 @@ public class Configuration {
 		private RogueInstalled() { super("rogueInstalled", false); }
 	}
 	public final RogueInstalled RogueInstalled = new RogueInstalled();
+
+	public class OfflineMode extends BooleanValue {
+		private OfflineMode() { super("offlineMode", false); }
+
+		@Override
+		public void set(boolean b) {
+			super.set(b);
+			menu.setOfflineMode(b);
+		}
+	}
+	public final OfflineMode OfflineMode = new OfflineMode();
 
 	public class HipnoticInstalled extends BooleanValue {
 		private HipnoticInstalled() { super("hipnoticInstalled", false); }
@@ -302,7 +318,7 @@ public class Configuration {
 		public boolean existsOrDefault();
 	}
 
-	private abstract class AbstractValue<T> implements Value<T> {
+	public abstract class AbstractValue<T> implements Value<T> {
 		private String key;
 		private T defaultValue;
 		private T value;
@@ -351,7 +367,7 @@ public class Configuration {
 		}
 	}
 
-	private abstract class StringValue extends AbstractValue<String> {
+	public abstract class StringValue extends AbstractValue<String> {
 		protected StringValue(String key, String defaultValue) { super(key, defaultValue); }
 		
 		public String stringToValue(String v) {
@@ -363,7 +379,7 @@ public class Configuration {
 		}
 	}
 
-	private abstract class FileValue extends AbstractValue<File> {
+	public abstract class FileValue extends AbstractValue<File> {
 		protected FileValue(String key, File defaultValue) { super(key, defaultValue); }
 		
 		public File stringToValue(String v) {
@@ -372,7 +388,7 @@ public class Configuration {
 	}
 	
 
-	private abstract class BooleanValue extends AbstractValue<Boolean> {
+	public abstract class BooleanValue extends AbstractValue<Boolean> {
 		protected BooleanValue(String key, boolean defaultValue) { super(key, defaultValue); }
 		
 		public Boolean stringToValue(String v) {
@@ -380,7 +396,7 @@ public class Configuration {
 		}
 	}
 
-	private abstract class IntegerValue extends AbstractValue<Integer> {
+	public abstract class IntegerValue extends AbstractValue<Integer> {
 		protected IntegerValue(String key, Integer defaultValue) { super(key, defaultValue); }
 		
 		public Integer stringToValue(String v) {
