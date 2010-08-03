@@ -112,12 +112,18 @@ public class Configuration {
 	public final RogueInstalled RogueInstalled = new RogueInstalled();
 
 	public class OfflineMode extends BooleanValue {
+		private ChangeListenerList listeners = new ChangeListenerList();
+		
 		private OfflineMode() { super("offlineMode", false); }
+		
+		public void addChangeListener(javax.swing.event.ChangeListener l) {
+			listeners.addChangeListener(l);
+		}
 
 		@Override
-		public void set(boolean b) {
+		public void set(Boolean b) {
 			super.set(b);
-			menu.setOfflineMode(b);
+			listeners.notifyChangeListeners(this);
 		}
 	}
 	public final OfflineMode OfflineMode = new OfflineMode();

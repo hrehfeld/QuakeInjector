@@ -34,8 +34,11 @@ import java.beans.PropertyChangeListener;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -105,9 +108,13 @@ public class QuakeInjector extends JFrame {
 
 
 	private final InstalledPackages installedMaps = new InstalledPackages();
-	
+
+	/** is offline mode enabled? */
+	private Configuration.OfflineMode offline;
 
 	private final Configuration config;
+
+	private final Menu menu;
 
 	public QuakeInjector() {
 		super(applicationName);
@@ -128,7 +135,8 @@ public class QuakeInjector extends JFrame {
 		packages = new PackageList(maps);
 		maplist = new PackageListModel(packages);
 
-		setJMenuBar(createMenuBar());
+		menu = createMenuBar();
+		setJMenuBar(menu);
 		
 		setMinimumSize(new Dimension(minWidth, minHeight));
 		
@@ -148,7 +156,9 @@ public class QuakeInjector extends JFrame {
 		catch (InterruptedException e) {
 			System.err.println("Interrupted: " + e);
 		}
-		this.config = cfg;		
+		this.config = cfg;
+
+		this.offline = cfg.OfflineMode;
 
 		//config needed here
 		setWindowSize();
@@ -184,8 +194,12 @@ public class QuakeInjector extends JFrame {
 						showEngineConfig(maps.get("rogue").isInstalled(),
 						                 maps.get("hipnotic").isInstalled());
 					}};
+		ActionListener offlineModeChanged = new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						offline.set(!offline.get());
+					}};
 
-		return new Menu(parseDatabase, checkInstalled, quit, showEngineConfig);
+		return new Menu(parseDatabase, checkInstalled, quit, showEngineConfig, offlineModeChanged);
 	}
 
 	/**
@@ -277,7 +291,7 @@ public class QuakeInjector extends JFrame {
 	}
 
 	private InputStream downloadDatabase(String databaseUrl) throws IOException {
-	//get download stream
+		//get download stream
 		Download d = Download.create(databaseUrl);
 		d.connect();
 		int size = d.getSize();
@@ -313,10 +327,39 @@ public class QuakeInjector extends JFrame {
 		
 		final SwingWorker<List<Requirement>, Void> dbParse
 		    = new SwingWorker<List<Requirement>,Void>() {
+			/** we need to try to download the db to a tmp file first so the old one doesn't get overwritten */
+			private File tmpFile;
+			/** the cached database file */
+			private File cache;
+			
 			@Override
 			public List<Requirement> doInBackground() throws IOException, org.xml.sax.SAXException {
-				
-				return parseDatabase(downloadDatabase(databaseUrl));
+				cache = getConfig().LocalDatabaseFile.get();
+				InputStream db;
+				try {
+					//download database and dump to file
+					tmpFile = File.createTempFile(cache.getName(), "xml");
+					OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile));
+					db = new DumpInputStream(new BufferedInputStream(downloadDatabase(databaseUrl)), out);
+				}
+				catch (IOException e) {
+					System.err.println("Downloading the database failed.");
+					if (cache.exists() && cache.canRead()) {
+						System.err.println("Using cached database file (" + cache + ") instead.");
+						db = new BufferedInputStream(new FileInputStream(cache));
+					}
+					else {
+						System.err.println("using cached database file instead.");
+						throw e;
+					}
+				}
+				return parseDatabase(db);
+			}
+
+			@Override
+			public void done() {
+				cache.delete();
+				tmpFile.renameTo(cache);
 			}
 		};
 
@@ -561,8 +604,19 @@ public class QuakeInjector extends JFrame {
 				}
 				catch (ExecutionException e) {
 					String ERROR_MESSAGE = "Database parsing failed!";
+					Throwable err = e.getCause();
+					String msg = err.getMessage();
+					try {
+						throw err;
+					}
+					catch (java.net.UnknownHostException exc) {
+						msg = "Couldn't establish connection to the server (" + err.getMessage() + ").";
+						offline.set(true);
+					}
+					catch (Throwable any) { /*do nothing*/; }
+					
 					JOptionPane.showMessageDialog(QuakeInjector.this,
-					                              ERROR_MESSAGE + " " + e.getMessage(),
+					                              ERROR_MESSAGE + " " + msg,
 					                              ERROR_MESSAGE,
 					                              JOptionPane.ERROR_MESSAGE);
 					return;

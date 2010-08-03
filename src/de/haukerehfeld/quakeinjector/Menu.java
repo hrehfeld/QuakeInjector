@@ -27,39 +27,51 @@ import java.awt.event.KeyEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.KeyStroke;
 
 public class Menu extends JMenuBar {
-	public Menu(ActionListener databaseParser,
-	            ActionListener checkForInstalledMaps,
-	            ActionListener quitter,
-	            ActionListener showEngineConfig) {
-		setOpaque(true);
-// 		setPreferredSize(new Dimension(200, 20));
-
-		JMenu fileMenu = new JMenu("File");
-		add(fileMenu);
-
-		JMenuItem reparseDatabase = new JMenuItem("Reload database", KeyEvent.VK_R);
-		reparseDatabase.addActionListener(databaseParser);
-		fileMenu.add(reparseDatabase);
-
-		JMenuItem checkInstalled = new JMenuItem("Check for installed maps (experimental!)", KeyEvent.VK_C);
-		checkInstalled.addActionListener(checkForInstalledMaps);
-		fileMenu.add(checkInstalled);
+		private JCheckBoxMenuItem enableOfflineMode;
 		
+		public Menu(ActionListener databaseParser,
+		            ActionListener checkForInstalledMaps,
+		            ActionListener quitter,
+		            ActionListener showEngineConfig,
+		            ActionListener offlineAction) {
+				setOpaque(true);
+				// 		setPreferredSize(new Dimension(200, 20));
 
-		JMenuItem quit = new JMenuItem("Quit", KeyEvent.VK_T);
-		quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
-		quit.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
-		quit.addActionListener(quitter);
-		fileMenu.add(quit);
+				JMenu fileMenu = new JMenu("File");
+				add(fileMenu);
 
-		JMenu configM = new JMenu("Configuration");
-		add(configM);
+				JMenuItem reparseDatabase = new JMenuItem("Reload database", KeyEvent.VK_R);
+				reparseDatabase.addActionListener(databaseParser);
+				fileMenu.add(reparseDatabase);
 
-		JMenuItem engine = new JMenuItem("Engine Configuration");
-		configM.add(engine);
-		engine.addActionListener(showEngineConfig);
-	}
+				JMenuItem checkInstalled = new JMenuItem("Check for installed maps (experimental!)", KeyEvent.VK_C);
+				checkInstalled.addActionListener(checkForInstalledMaps);
+				fileMenu.add(checkInstalled);
+
+				enableOfflineMode = new JCheckBoxMenuItem("Offline Mode");
+				checkInstalled.addActionListener(offlineAction);
+				fileMenu.add(enableOfflineMode);
+				
+
+				JMenuItem quit = new JMenuItem("Quit", KeyEvent.VK_T);
+				quit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
+				quit.getAccessibleContext().setAccessibleDescription("This doesn't really do anything");
+				quit.addActionListener(quitter);
+				fileMenu.add(quit);
+
+				JMenu configM = new JMenu("Configuration");
+				add(configM);
+
+				JMenuItem engine = new JMenuItem("Engine Configuration");
+				configM.add(engine);
+				engine.addActionListener(showEngineConfig);
+		}
+
+		public void setOfflineMode(boolean offline) {
+				enableOfflineMode.setSelected(offline);
+		}
 }
