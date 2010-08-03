@@ -25,6 +25,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -74,6 +75,10 @@ public class QuakeInjector extends JFrame {
 	/**
 	 * Window title
 	 */
+	private static final String ICON_URL = "/Inject2_SIZE.png";
+	private static final String ICON_SIZE_PLACEHOLDER = "SIZE";
+	private static final int[] ICON_SIZES = { 16, 32, 48, 256 };
+	
 	private static final String applicationName = "Quake Injector";
 	private static final int minWidth = 300;
 	private static final int minHeight = 300;
@@ -135,9 +140,13 @@ public class QuakeInjector extends JFrame {
 		packages = new PackageList(maps);
 		maplist = new PackageListModel(packages);
 
+		{
+			setIconImages(createIconList(ICON_SIZES, ICON_URL, ICON_SIZE_PLACEHOLDER));
+		}
+
 		menu = createMenuBar();
 		setJMenuBar(menu);
-		
+
 		setMinimumSize(new Dimension(minWidth, minHeight));
 		
 		addMainPane(getContentPane());
@@ -214,16 +223,16 @@ public class QuakeInjector extends JFrame {
 			if (c.MainWindowPositionX.exists() && c.MainWindowPositionY.exists()) {
 				int posX = c.MainWindowPositionX.get();
 				int posY = c.MainWindowPositionY.get();
-				System.out.println("Setting window bounds: "
-				                   + posX + ", "
-				                   + posY + ", "
-				                   + width + ", "
-				                   + height);
+				// System.out.println("Setting window bounds: "
+				//                    + posX + ", "
+				//                    + posY + ", "
+				//                    + width + ", "
+				//                    + height);
 			
 				setBounds(posX, posY, width, height);
 			}
 			else {
-				System.out.println("Setting window size: " + width + ", " + height);
+				// System.out.println("Setting window size: " + width + ", " + height);
 				setSize(width, height);
 			}
 		}
@@ -234,28 +243,24 @@ public class QuakeInjector extends JFrame {
 		
 
 	/**
-	 * Do everything that may happen after the initial window is shown
+	 * Everything that may be run AFTER the initial window is shown should be run here
 	 */
 	private void init() {
 		doParseInstalled();
 
 		final Future<Void> requirementsListUpdater = parseDatabaseAndSetList();
 
-		Configuration.EnginePath enginePathV = getConfig().EnginePath;
-		File enginePath = enginePathV.get();
-		File engineExe;
+		Configuration.EnginePath enginePath = getConfig().EnginePath;
+		File engineExe = new File("");
 		if (getConfig().EngineExecutable.existsOrDefault()) {
-			engineExe = new File(enginePathV.get()
+			engineExe = new File(enginePath.get()
 			                          + File.separator
 			                          + getConfig().EngineExecutable);
 		}
-		else {
-			engineExe = new File("");
-		}
-		starter = new EngineStarter(enginePath,
+		starter = new EngineStarter(enginePath.get(),
 		                            engineExe,
 		                            getConfig().EngineCommandLine);
-		installer = new Installer(enginePathV,
+		installer = new Installer(enginePath,
 		                          getConfig().DownloadPath);
 
 		interactionPanel.init(installer,
@@ -401,139 +406,12 @@ public class QuakeInjector extends JFrame {
 
 		final File file = new File(zipFilesXml);
 
-		class CheckInstalled extends SwingWorker<List<PackageFileList>, Void>
-		    implements ProgressListener {
-			@Override
-			    public List<PackageFileList> doInBackground() throws java.lang.InterruptedException,
-			    java.util.concurrent.ExecutionException,
-				java.io.IOException {
-
-				List<PackageFileList> packages = Collections.emptyList();
-				{
-					//get download stream
-					Download d = Download.create(getConfig().ZipContentsDatabaseUrl.get());
-					d.connect();
-					final InputStream dl = d.getStream();
-
-					try {
-						packages = new InstalledPackageList().read(dl);
-						Collections.sort(packages);
-					}
-					catch (java.io.FileNotFoundException e) {
-						System.out.println("Notice: installed maps file doesn't exist yet,"
-						                   + " no maps installed? " + e);
-					}
-					catch (java.io.IOException e) {
-						System.err.println("Error: installed maps file couldn't be loaded: " + e);
-						e.printStackTrace();
-					}
-				}
-				
-				int i = 0;
-				List<PackageFileList> installed = new ArrayList<PackageFileList>();
-				for (PackageFileList list: packages) {
-					publish(i++ * 100 / packages.size());
-					Requirement r = maps.get(list.getId());
-					String basedir = getConfig().EnginePath + File.separator;
-					String relativeDir = "";
-					if (r instanceof Package) {
-						String dir = ((Package) r).getRelativeBaseDir();
-						if (dir != null) {
-							relativeDir += dir;
-						}
-					}
-					else if (r instanceof UnavailableRequirement) {
-						continue;
-					}
-
-					PackageFileList p = new PackageFileList(list.getId());
-					
-					List<String> missingFiles = new ArrayList<String>();
-					for (FileInfo entry: list) {
-						if (missingFiles.size() > 0.3f * list.size()) {
-							break;
-						}
-						String filename = entry.getName();
-						String file = basedir + relativeDir + filename;
-						long supposedCrc = entry.getChecksum();
-						File f = new File(file);
-						if (!f.exists()) {
-							missingFiles.add(file);
-						}
-						else {
-							if (!f.isDirectory()) {
-								long crc = Utils.getCrc32(new BufferedInputStream(new FileInputStream(f)), null);
-								if (supposedCrc != 0 && crc != entry.getChecksum()) {
-									System.err.println("Crc differs for file " + file);
-									missingFiles.add(file);
-									continue;
-								}
-								// else {
-								// 	System.out.println("Crc matches for " + f + " (" + crc + ")");
-								// }
-							}
-							p.add(new FileInfo(relativeDir + filename, supposedCrc));
-						}
-					}
-
-					if (missingFiles.isEmpty()) {
-						System.out.println(list.getId() + " seems to be installed.");
-						installed.add(p);
-					}
-				}
-
-				return installed;
-			}
-
-
-			@Override
-			    public void done() {
-				try {
-					setInstalledStatus(get());
-
-					synchronized (maps) {
-						saveInstalled.write(maps);
-					}
-				}
-				catch (java.lang.InterruptedException e) {
-					System.err.println("Interrupted: " + e);
-					e.printStackTrace();
-				}
-				catch (java.util.concurrent.ExecutionException e) {
-					System.err.println("Exception: " + e);
-					e.printStackTrace();
-					try {
-						throw e.getCause();
-					}
-					catch (java.net.ConnectException err) {
-						String msg = "Downloading file database failed, " + err.getMessage() + "!";
-						JOptionPane.showMessageDialog(QuakeInjector.this,
-						                              msg,
-						                              "Downloading failed!",
-						                              JOptionPane.ERROR_MESSAGE);
-						
-					}
-					catch (Throwable err) {
-					}
-				}
-				catch (java.util.concurrent.CancellationException e) {
-				}
-				catch (java.io.IOException e) {
-					System.err.println("Couldn't write " + installedMapsFileName + ": " + e);
-					e.printStackTrace();
-				}
-			}
-
-			public void publish(long progress) {
-				if (progress <= 100) {
-					setProgress((int) progress);
-				}
-			}
-			
-		}
-
-
-		final CheckInstalled checker = new CheckInstalled();
+		final CheckInstalled checker
+		    = new CheckInstalled(this,
+		                         getConfig().ZipContentsDatabaseUrl.get(),
+		                         getConfig().EnginePath.get().toString(),
+		                         maps,
+		        saveInstalled);
 
 		final ProgressPopup dbpopup =
 		    new ProgressPopup("Checking for installed maps",
@@ -569,7 +447,7 @@ public class QuakeInjector extends JFrame {
 	/**
 	 * Tell maps what maps are already installed
 	 */
-	private void setInstalledStatus(final List<PackageFileList> packages) {
+	void setInstalledStatus(final List<PackageFileList> packages) {
 		for (PackageFileList l: packages) {
 			maps.setInstalled(l);
 		}
@@ -983,18 +861,34 @@ public class QuakeInjector extends JFrame {
 			config.MainWindowPositionY.set((int) bounds.getY());
 			config.MainWindowWidth.set((int) bounds.getWidth());
 			config.MainWindowHeight.set((int) bounds.getHeight());
+
 			try {
 				config.write();
 			}
 			catch (IOException err) {
 				savingFailedDialogue(err);
 			}
-			System.out.println("Closing Window: " + (int) bounds.getWidth()
-			    + (int) bounds.getHeight());
+			//System.out.println("Closing Window: " + (int) bounds.getWidth() + (int) bounds.getHeight());
+
 
 			System.exit(0);
 		}
 
+	}
+
+	private static List<Image> createIconList(int[] iconSizes, String iconUrl, String sizeToken) {
+			List<Image> icons = new ArrayList<Image>(iconSizes.length);
+			for (int size: iconSizes) {
+				String path = iconUrl.replace(sizeToken, Integer.toString(size));
+				try {
+					javax.swing.ImageIcon icon = Utils.createImageIcon(path, "Icon" + size);
+					icons.add(icon.getImage());
+				}
+				catch (IOException e) {
+					System.err.println("WARNING: Couldn't load icon file " + path);
+				}
+			}
+			return icons;
 	}
 	
 }

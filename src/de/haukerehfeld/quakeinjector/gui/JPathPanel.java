@@ -47,7 +47,7 @@ public class JPathPanel extends JPanel {
 	private final ArrayList<ErrorListener> errorListeners = new ArrayList<ErrorListener>();
 	private final ChangeListenerList changeListeners = new ChangeListenerList();
 
-	private final int inputLength = 32;
+	private final static int inputLength = 32;
 
 	private File basePath;
 

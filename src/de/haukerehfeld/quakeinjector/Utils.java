@@ -130,6 +130,7 @@ public class Utils {
 		public void write(byte[] b, int off, int len) {}
 	}
 
+
 	/**
 	   Check if files can indeed be written inside a certain directory
 	   
@@ -146,5 +147,14 @@ public class Utils {
 			return false;
 		}
 		return true;
+	}
+
+	public static javax.swing.ImageIcon createImageIcon(String path, String description) throws java.io.IOException {
+		java.net.URL imgURL = Utils.class.getResource(path);
+		if (imgURL != null) {
+			return new javax.swing.ImageIcon(imgURL, description);
+		} else {
+			throw new java.io.IOException("Couldn't find file: " + path);
+		}
 	}
 }

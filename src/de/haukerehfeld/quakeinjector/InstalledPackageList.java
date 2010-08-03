@@ -94,12 +94,15 @@ public class InstalledPackageList {
 			Element root = doc.createElement(ROOTNODE);
 			doc.appendChild(root);
 
-			for (String id: files.keySet()) {
+			for (Map.Entry<String,Iterable<FileInfo>> e: files.entrySet()) {
+				String id = e.getKey();
+				Iterable<FileInfo> fileIterable = e.getValue();
+				
 				Element mapNode = doc.createElement("map");
 				mapNode.setAttribute("id", id);
 				root.appendChild(mapNode);
 
-				for (FileInfo file: files.get(id)) {
+				for (FileInfo file: fileIterable) {
 					Element fileNode = doc.createElement("file");
 					//System.out.println("adding node " + file.getName());
 					fileNode.setAttribute("name", file.getName());
@@ -198,7 +201,11 @@ public class InstalledPackageList {
 				if (e.hasAttribute("crc")) {
 					crc = Long.parseLong(e.getAttribute("crc"));
 				}
-				fileList.add(new FileInfo(name, crc));
+				boolean essential = true;
+				if (e.hasAttribute("essential") && e.getAttribute("essential").equals(Boolean.toString(false))) {
+					essential = false;
+				}
+				fileList.add(new FileInfo(name, crc, essential));
 			}
 		}
 

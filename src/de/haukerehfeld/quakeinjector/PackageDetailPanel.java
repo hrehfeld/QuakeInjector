@@ -302,7 +302,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 					icon = null;
 				}
 
-				if (icon.getImageLoadStatus() != java.awt.MediaTracker.COMPLETE) {
+				if (icon == null || icon.getImageLoadStatus() != java.awt.MediaTracker.COMPLETE) {
 					removeImage();
 					System.err.println("Couldn't load image " + current.getId());
 				}

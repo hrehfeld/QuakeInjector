@@ -220,27 +220,29 @@ public class Configuration {
 	 * Read the properties file or get default properties
 	 */
 	private void read() {
-		System.out.print("Reading configuration...");
+		System.out.println("Reading configuration...");
 		Properties properties = new Properties(defaults());
 		//config exists
 		if (configFile.canRead()) {
 			try {
-				properties.load(new FileInputStream(configFile));
+				FileInputStream in = new FileInputStream(configFile);
+				properties.load(in);
+				in.close();
 			}
 			catch (java.io.FileNotFoundException e) {
 				//this should never happen cause we just checked if we
 				//can read -- but maybe another process fucks up...
-				System.out.println("Can't read config file even though i just checked if i can "
+				System.out.println("Can't read config file (" + e.getMessage() + ") even though i just checked if i can "
 								   + "read it. Using defaults...");
+
 			}
 			catch (java.io.IOException e) {
 				// if we can't read the config file, just use the defaults
-				System.out.println("Couldn't read config file. Using defaults...");
+				System.out.println("Couldn't read config file: " + e.getMessage() + ". Using defaults...");
 			}
 		}
 
 		set(properties);
-		System.out.println("done.");		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -261,7 +263,7 @@ public class Configuration {
 		for (String key: All.keySet()) {
 			Value v = All.get(key);
 			if (v.exists()) {
-				System.out.println("Writing " + key + " to " + v.toString() + " from " + v.getClass() + ": " + v);
+				//System.out.println("Writing " + key + " to " + v.toString() + " from " + v.getClass() + ": " + v);
 				p.setProperty(key, v.toString());
 			}
 			else {
@@ -280,9 +282,21 @@ public class Configuration {
 		}
 		System.out.print("Writing configuration...");
 
-		Properties properties = new Properties(defaults());
-		get(properties);
-		properties.store(new FileOutputStream(configFile), CONFIGHEADER);
+		try {
+			Properties properties = new Properties(defaults());
+			get(properties);
+			FileOutputStream out = new FileOutputStream(configFile);
+			properties.store(out, CONFIGHEADER);
+			out.close();
+		}
+		catch (java.io.FileNotFoundException e) {
+			System.err.println("Can't write config file: " + e.getMessage());
+			e.printStackTrace();
+		}
+		catch (java.io.IOException e) {
+			System.err.println("Can't write config file: " + e.getMessage());
+			e.printStackTrace();
+		}
 		System.out.println("done.");
 	}
 
@@ -357,7 +371,7 @@ public class Configuration {
 
 		public void set(T v) {
 			if (v == null || v.equals(defaultValue())) {
-				System.out.println(getClass() + ": Setting to null or default");
+				//System.out.println(getClass() + ": Setting to null or default");
 				value = null;
 				return;
 			}

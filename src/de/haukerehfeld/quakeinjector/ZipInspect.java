@@ -138,7 +138,7 @@ public class ZipInspect {
 			
 			File f = new File(parentDir + File.separator + r.getId() + ".zip");
 			if (!f.exists()) {
-				System.out.println("ERROR: " + f + " doesn't exist!");
+				System.out.println("WARNING: " + f + " doesn't exist!");
 				continue;
 			}
 			System.out.println(f);

@@ -92,22 +92,22 @@ reverse order
 			j--;
 		}
 
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		// for each remaining level in the home path, add a ..
 		for(; i >= 0; i--) {
-			result += ".." + File.separator;
+			result.append(".." + File.separator);
 		}
 
 		// for each level in the file path, add the path
 		for(; j >= 1; j--) {
-			result += file.get(j).getName() + File.separator;
+			result.append(file.get(j).getName() + File.separator);
 		}
 
 		if (j >= 0) {
 			// file name doesn't need separator at the end
-			result += file.get(j).getName();
+			result.append(file.get(j).getName());
 		}
-		return new File(result);
+		return new File(result.toString());
 	}
 
 	/**
