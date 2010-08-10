@@ -336,18 +336,23 @@ public class QuakeInjector extends JFrame {
 			private File tmpFile;
 			/** the cached database file */
 			private File cache;
+			/** the stream to the temporary file */
+			private FileOutputStream cacheStream;
 			
 			@Override
 			public List<Requirement> doInBackground() throws IOException, org.xml.sax.SAXException {
 				cache = getConfig().LocalDatabaseFile.get();
+				cache = cache.getAbsoluteFile();
 				InputStream db;
 				try {
 					//download database and dump to file
-					tmpFile = File.createTempFile(cache.getName(), "xml");
-					OutputStream out = new BufferedOutputStream(new FileOutputStream(tmpFile));
+					tmpFile = File.createTempFile(cache.getName(), ".xml", cache.getParentFile());
+					cacheStream = new FileOutputStream(tmpFile);
+					OutputStream out = new BufferedOutputStream(cacheStream);
 					db = new DumpInputStream(new BufferedInputStream(downloadDatabase(databaseUrl)), out);
 				}
 				catch (IOException e) {
+					//try reading the cached version if downloading fails
 					System.err.println("Downloading the database failed.");
 					if (cache.exists() && cache.canRead()) {
 						System.err.println("Using cached database file (" + cache + ") instead.");
@@ -363,8 +368,19 @@ public class QuakeInjector extends JFrame {
 
 			@Override
 			public void done() {
-				cache.delete();
-				tmpFile.renameTo(cache);
+				try {
+					cacheStream.close();
+				}
+				catch (IOException e) {
+					System.out.println("Couldn't close tmp cache outputstream!" + e);
+				}
+
+				if (cache.exists() && !cache.delete()) {
+					System.err.println("Couldn't delete the real cache file!");
+				}
+				if (tmpFile.renameTo(cache) != true) {
+					System.err.println("Couldn't move the temporary cache file to the real cache file!");
+				}
 			}
 		};
 
