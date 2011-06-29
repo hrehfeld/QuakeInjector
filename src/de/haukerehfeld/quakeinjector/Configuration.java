@@ -98,6 +98,12 @@ public class Configuration {
 				"http://www.quaddicted.com/reviews/quaddicted_database.xml"); }
 	}
 	public final RepositoryDatabasePath RepositoryDatabasePath = new RepositoryDatabasePath();
+	
+	public class ScreenshotRepositoryPath extends StringValue {
+		private ScreenshotRepositoryPath() { super("screenshotRepositoryPath",
+				"http://www.quaddicted.com/reviews/screenshots/"); }
+	}
+	public final ScreenshotRepositoryPath ScreenshotRepositoryPath = new ScreenshotRepositoryPath();
 
 	public class ZipContentsDatabaseUrl extends StringValue {
 		private ZipContentsDatabaseUrl() { super("ZipContentsDatabaseUrl",
