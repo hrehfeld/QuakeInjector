@@ -55,8 +55,6 @@ import java.awt.Rectangle;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
 
-import edu.stanford.ejalbert.BrowserLauncher;
-
 import javax.swing.SwingWorker;
 import java.util.concurrent.Future;
 

@@ -55,12 +55,10 @@ import java.awt.Rectangle;
 
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
-
-import edu.stanford.ejalbert.BrowserLauncher;
-
 import javax.swing.SwingWorker;
 import java.util.concurrent.Future;
 
+import de.haukerehfeld.quakeinjector.gui.BrowserLauncher;
 import de.haukerehfeld.quakeinjector.gui.ScrollablePanel;
 
 /**
@@ -88,8 +86,6 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 	private JEditorPane description;
 
-	private BrowserLauncher launcher = null;
-
 	/**
 	 * Holds the currently valid screenshot url, for threading reasons
 	 */
@@ -111,16 +107,6 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 	public PackageDetailPanel() {
 		super(new GridBagLayout());
-
-		{
-			try {
-				launcher = new BrowserLauncher();
-			}
-			catch (Exception e) {
-				System.err.println("Couldn't init browserlauncher: " + e.getMessage());
-				e.printStackTrace();
-			}
-		}
 
 		content = new ScrollablePanel(50, 50) {{
 			setLayout(new GridBagLayout());
@@ -161,15 +147,15 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		description.setEditable(false);
 		description.addHyperlinkListener(new HyperlinkListener() {
 				@Override public void hyperlinkUpdate(HyperlinkEvent e) {
-					if (launcher != null && e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+					if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
 						java.net.URL url = e.getURL();
 						if (url != null) {
-							launcher.openURLinBrowser(url.toString());
+							BrowserLauncher.openURL(url.toString());							
 						}
 						else {
 							System.err.println("Weird hyperlink with null URL: " + e.getDescription());
 							String link = "http://www.quaddicted.com/reviews/" + e.getDescription();
-							launcher.openURLinBrowser(link);
+							BrowserLauncher.openURL(link);
 						}
 					}
 				}
