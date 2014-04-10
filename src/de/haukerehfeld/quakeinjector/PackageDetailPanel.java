@@ -124,7 +124,8 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		title.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent arg0) {
 				if (current != null) {
-					BrowserLauncher.openURL("http://www.quaddicted.com/reviews/" + current.getId() + ".html");
+					// TODO: Refactor; get the URL from Configuration
+					BrowserLauncher.openURL("https://www.quaddicted.com/reviews/" + current.getId() + ".html");
 				}
 			}
 		});
