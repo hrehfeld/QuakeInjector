@@ -19,6 +19,7 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector;
 
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -52,6 +53,8 @@ import java.net.URL;
 import javax.swing.Scrollable;
 import java.awt.Rectangle;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
@@ -139,6 +142,13 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
  		EmptyBorder border = new EmptyBorder(0,0,0,0);
  		image.setBorder(border);
  		image.setHorizontalAlignment(SwingConstants.CENTER);
+ 		image.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+ 		image.addMouseListener(new MouseAdapter() {
+ 			@Override
+ 			public void mouseClicked(MouseEvent e) {
+ 				BrowserLauncher.openURL(PackageDetailPanel.this.screenshotRepositoryPath + current.getId() + ".jpg");
+ 			}		
+		});
  		imagePanel.add(image);
 
  		
