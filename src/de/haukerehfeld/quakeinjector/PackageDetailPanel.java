@@ -120,6 +120,15 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		title = new JLabel();
 		title.setHorizontalAlignment(SwingConstants.CENTER);
 		title.setOpaque(true);
+		title.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		title.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				if (current != null) {
+					BrowserLauncher.openURL("http://www.quaddicted.com/reviews/" + current.getId() + ".html");
+				}
+			}
+		});
+		
 		content.add(title, new GridBagConstraints() {{
 			weightx = 1;
 			weighty = 0;
