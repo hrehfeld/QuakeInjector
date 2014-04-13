@@ -251,13 +251,23 @@ public class QuakeInjector extends JFrame {
 		final Future<Void> requirementsListUpdater = parseDatabaseAndSetList();
 
 		Configuration.EnginePath enginePath = getConfig().EnginePath;
+		boolean workingDirAtExecutable = false;
 		File engineExe = new File("");
 		if (getConfig().EngineExecutable.existsOrDefault()) {
 			engineExe = new File(enginePath.get()
 			                          + File.separator
 			                          + getConfig().EngineExecutable);
+			workingDirAtExecutable = getConfig().WorkingDirAtExecutable.get();
 		}
-		starter = new EngineStarter(enginePath.get(),
+		File workingDir;
+		if (workingDirAtExecutable) {
+			workingDir = engineExe.getParentFile();
+		}
+		else {
+			workingDir = enginePath.get();
+		}
+
+		starter = new EngineStarter(workingDir,
 		                            engineExe,
 		                            getConfig().EngineCommandLine);
 		installer = new Installer(enginePath,
@@ -554,6 +564,7 @@ public class QuakeInjector extends JFrame {
 		    = new EngineConfigDialog(QuakeInjector.this,
 		                             getConfig().EnginePath,
 		                             getConfig().EngineExecutable,
+		                             getConfig().WorkingDirAtExecutable,
 		                             getConfig().DownloadPath,
 		                             getConfig().EngineCommandLine,
 		                             rogueInstalled,
@@ -564,6 +575,7 @@ public class QuakeInjector extends JFrame {
 					try {
 						saveEngineConfig(d.getEnginePath(),
 						                 d.getEngineExecutable(),
+						                 d.getWorkingDirAtExecutable(),
 						                 d.getDownloadPath(),
 						                 d.getCommandline(),
 						                 d.getRogueInstalled(),
@@ -593,6 +605,7 @@ public class QuakeInjector extends JFrame {
 
 	private void saveEngineConfig(File enginePath,
 								  File engineExecutable,
+								  boolean workingDirAtExecutable,
 	                              File downloadPath,
 	                              String commandline,
 	                              boolean rogueInstalled,
@@ -602,11 +615,20 @@ public class QuakeInjector extends JFrame {
 		Configuration c = getConfig();
 		c.EnginePath.set(enginePath);
 		c.EngineExecutable.set(RelativePath.getRelativePath(enginePath, engineExecutable));
+		c.WorkingDirAtExecutable.set(workingDirAtExecutable);
 		c.EngineCommandLine.set(commandline);
 
 		c.DownloadPath.set(downloadPath);
 
-		setEngineConfig(enginePath, engineExecutable, getConfig().EngineCommandLine, rogueInstalled, hipnoticInstalled);
+		File workingDir;
+		if (workingDirAtExecutable) {
+			workingDir = engineExecutable.getParentFile();
+		}
+		else {
+			workingDir = enginePath;
+		}
+
+		setEngineConfig(workingDir, engineExecutable, getConfig().EngineCommandLine, rogueInstalled, hipnoticInstalled);
 
 
 		try {
@@ -629,12 +651,12 @@ public class QuakeInjector extends JFrame {
 	/**
 	 * @todo 2010-02-09 12:19 hrehfeld    Let this use configuration values to their full extent
 	 */
-	private void setEngineConfig(File enginePath,
+	private void setEngineConfig(File workingDir,
 								 File engineExecutable,
 	                             Configuration.EngineCommandLine commandline,
 	                             boolean rogueInstalled,
 	                             boolean hipnoticInstalled) {
-		starter.setQuakeDirectory(enginePath);
+		starter.setWorkingDirectory(workingDir);
 		starter.setQuakeExecutable(engineExecutable);
 		starter.setQuakeCommandline(commandline);
 
