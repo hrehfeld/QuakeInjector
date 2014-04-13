@@ -370,13 +370,13 @@ public class EngineConfigDialog extends JDialog {
 			sepConstraints.insets = new Insets(10, 0, 10, 0);
 			sepConstraints.weightx = 1;
 			// Explanatory text
-			String workdingDirBlurb =
+			String workingDirBlurb =
 				"<html><body><nobr>" +
 				"<b>Notice:</b> your Quake Executable is not located in " +
 				"your Quake Directory.<br/>Choose where the runtime " +
 				"\"working directory\" for Quake should be located:" +
 				"</nobr></body></html>";
-			workingDirTitle = new JLabel(workdingDirBlurb);
+			workingDirTitle = new JLabel(workingDirBlurb);
 			titleConstraints = new GridBagConstraints();
 			titleConstraints.gridx = 0;
 			titleConstraints.gridy = configPanelRow + 1;
