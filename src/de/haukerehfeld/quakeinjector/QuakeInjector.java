@@ -63,6 +63,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import com.codyaray.StartcomCA;
+
 import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
 
@@ -817,6 +819,8 @@ public class QuakeInjector extends JFrame {
 
 
 	public static void main(String[] args) {
+		StartcomCA.trustStartcom();
+		
 		try {
         // Set System L&F
 			javax.swing.UIManager.setLookAndFeel(
