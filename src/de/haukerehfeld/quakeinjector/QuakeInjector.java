@@ -63,6 +63,8 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
+import com.codyaray.StartcomCA;
+
 import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
 
@@ -149,7 +151,6 @@ public class QuakeInjector extends JFrame {
 
 		setMinimumSize(new Dimension(minWidth, minHeight));
 		
-		addMainPane(getContentPane());
 
 		addWindowListener(new QuakeInjectorWindowListener());
 
@@ -171,6 +172,7 @@ public class QuakeInjector extends JFrame {
 
 		//config needed here
 		setWindowSize();
+		addMainPane(getContentPane());
 	}
 
 	/**
@@ -195,7 +197,7 @@ public class QuakeInjector extends JFrame {
 					public void actionPerformed(ActionEvent e) {
 						setVisible(false);
 						dispose();
-					}
+					}        
 			};
 
 		ActionListener showEngineConfig = new ActionListener() {
@@ -353,7 +355,7 @@ public class QuakeInjector extends JFrame {
 				}
 				catch (IOException e) {
 					//try reading the cached version if downloading fails
-					System.err.println("Downloading the database failed.");
+					System.err.println("Downloading the database failed. "+databaseUrl);
 					if (cache.exists() && cache.canRead()) {
 						System.err.println("Using cached database file (" + cache + ") instead.");
 						db = new BufferedInputStream(new FileInputStream(cache));
@@ -708,8 +710,10 @@ public class QuakeInjector extends JFrame {
 		this.interactionPanel = new PackageInteractionPanel(this, installQueue);
 
 		JPanel infoPanel = new JPanel(new GridBagLayout());
-
-		PackageDetailPanel details = new PackageDetailPanel();
+		
+		Configuration config = getConfig();
+		PackageDetailPanel details = new PackageDetailPanel(config.ScreenshotRepositoryPath.get());
+		
 		infoPanel.add(details, new GridBagConstraints() {{
 			anchor = PAGE_START;
 			fill = BOTH;
@@ -815,6 +819,8 @@ public class QuakeInjector extends JFrame {
 
 
 	public static void main(String[] args) {
+		StartcomCA.trustStartcom();
+		
 		try {
         // Set System L&F
 			javax.swing.UIManager.setLookAndFeel(

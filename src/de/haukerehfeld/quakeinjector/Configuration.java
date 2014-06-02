@@ -95,9 +95,15 @@ public class Configuration {
 
 	public class RepositoryDatabasePath extends StringValue {
 		private RepositoryDatabasePath() { super("repositoryDatabase",
-				"http://www.quaddicted.com/reviews/quaddicted_database.xml"); }
+				"https://www.quaddicted.com/reviews/quaddicted_database.xml"); }
 	}
 	public final RepositoryDatabasePath RepositoryDatabasePath = new RepositoryDatabasePath();
+	
+	public class ScreenshotRepositoryPath extends StringValue {
+		private ScreenshotRepositoryPath() { super("screenshotRepositoryPath",
+				"https://www.quaddicted.com/reviews/screenshots/"); }
+	}
+	public final ScreenshotRepositoryPath ScreenshotRepositoryPath = new ScreenshotRepositoryPath();
 
 	public class ZipContentsDatabaseUrl extends StringValue {
 		private ZipContentsDatabaseUrl() { super("ZipContentsDatabaseUrl",
