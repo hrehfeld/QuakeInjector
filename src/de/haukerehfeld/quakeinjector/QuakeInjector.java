@@ -818,6 +818,12 @@ public class QuakeInjector extends JFrame {
 
 	public static void main(String[] args) {
 		try {
+			CABundleLoader.loadCertificateAuthorities();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		try {
         // Set System L&F
 			javax.swing.UIManager.setLookAndFeel(
 				javax.swing.UIManager.getSystemLookAndFeelClassName());
