@@ -39,18 +39,23 @@ public class EngineStarter {
 		return System.getProperty("os.name").startsWith("Mac OS X");
 	}
 	
-	public static boolean isApp(File app) {
-		if (isMacOSX()) {
-			return (app.exists()
-				&& app.isDirectory()
-				&& app.canRead()
-				&& app.getName().endsWith(".app"));
-		} else {
-			return (app.exists()
-					&& !app.isDirectory()
-					&& app.canRead()
-					&& app.canExecute());
-		}
+	private static boolean isMacApp(File app) {
+		return app.isDirectory()
+				&& app.getName().endsWith(".app");
+	}
+	
+	private static boolean isExecutable(File exe) {
+		return !exe.isDirectory() && exe.canExecute();
+	}
+	
+	public static boolean isValidApp(File app) {
+		if (!app.exists() || !app.canRead())
+			return false;
+		
+		if (isMacOSX()  && isMacApp(app))
+			return true;
+		
+		return isExecutable(app);
 	}
 	
 	public static String errorMessageForApp(File app) {
@@ -59,8 +64,8 @@ public class EngineStarter {
 		}
 		
 		if (isMacOSX()) {
-			if (!app.isDirectory() || !app.getName().endsWith(".app")) {
-				return "Must be an app bundle!";
+			if (!isMacApp(app) && !isExecutable(app)) {
+				return "Must be an application or executable!";
 			}
 			return null;
 			
@@ -76,27 +81,28 @@ public class EngineStarter {
 	}
 	
 	private static File executableForApp(File app) {
-		if (!isMacOSX())
-			return app;
+		if (app != null && isMacApp(app)) {
+			try {
+				File contents = new File(app, "Contents");
+				File plist = new File(contents, "Info.plist");
+				File macOS = new File(contents, "MacOS");
 
-		try {
-			File contents = new File(app, "Contents");
-			File plist = new File(contents, "Info.plist");
-			File macOS = new File(contents, "MacOS");
-			
-		    DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		    Document document = builder.parse(plist);
-			    		    
-		    XPath xpath = XPathFactory.newInstance().newXPath();
-		    XPathExpression expr = xpath.compile("/plist/dict/key/text()[.='CFBundleExecutable']/../following-sibling::string[1]/text()");
-		    String cfBundleExecutable = (String)expr.evaluate(document);
-		    
-		    File executable = new File(macOS, cfBundleExecutable);		    
-		    return executable;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+				DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+				Document document = builder.parse(plist);
+
+				XPath xpath = XPathFactory.newInstance().newXPath();
+				XPathExpression expr = xpath.compile("/plist/dict/key/text()[.='CFBundleExecutable']/../following-sibling::string[1]/text()");
+				String cfBundleExecutable = (String) expr.evaluate(document);
+
+				File executable = new File(macOS, cfBundleExecutable);
+				return executable;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
 		}
+
+		return app;
 	}
 	
 	public EngineStarter(File quakeDir, File quakeApp, Configuration.EngineCommandLine quakeCmdline) {
