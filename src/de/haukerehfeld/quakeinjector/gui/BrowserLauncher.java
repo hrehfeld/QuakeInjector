@@ -22,13 +22,26 @@ package de.haukerehfeld.quakeinjector.gui;
 import java.awt.Desktop;
 import java.net.URI;
 
-public class BrowserLauncher {
+public class BrowserLauncher {	
+	private static edu.stanford.ejalbert.BrowserLauncher fallback = null;
+
 	public static void openURL(String url) {
 		try {
 			Desktop.getDesktop().browse(URI.create(url));
 		} catch (Exception e) {
-			System.err.println("Error browsing URL: " + url);
-			e.printStackTrace(System.err);
+			System.err.println("Error calling Desktop#browse(URI): " + e.getMessage());
+			
+			if (fallback == null) {
+				try {
+					fallback = new edu.stanford.ejalbert.BrowserLauncher();
+				} catch (Exception e2) {
+					System.err.println("Couldn't init browserlauncher: " + e2.getMessage());
+				}
+			}
+			
+			if (fallback != null) {
+				fallback.openURLinBrowser(url);
+			}
 		}		
 	}
 }
