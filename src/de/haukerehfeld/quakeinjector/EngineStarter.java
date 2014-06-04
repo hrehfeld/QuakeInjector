@@ -39,15 +39,26 @@ public class EngineStarter {
 		return System.getProperty("os.name").startsWith("Mac OS X");
 	}
 	
+	/**	
+	 * Checks whether the given File is a Mac OS X application bundle.
+	 */
 	private static boolean isMacApp(File app) {
 		return app.isDirectory()
 				&& app.getName().endsWith(".app");
 	}
 	
+	/**
+	 * Checks whether exe is an executable file.
+	 */
 	private static boolean isExecutable(File exe) {
 		return !exe.isDirectory() && exe.canExecute();
 	}
 	
+	/**
+	 * Checks whether app is a valid application. On Mac OS X it can
+	 * either be an executable or an app bundle, on other platforms
+	 * it must be an executable.
+	 */
 	public static boolean isValidApp(File app) {
 		if (!app.exists() || !app.canRead())
 			return false;
@@ -58,6 +69,12 @@ public class EngineStarter {
 		return isExecutable(app);
 	}
 	
+	/**
+	 * Returns an error message to display when the user picks app
+	 * as the engine, or returns null if it is a valid application.
+	 * 
+	 * @see #isValidApp(File)
+	 */
 	public static String errorMessageForApp(File app) {
 		if (!app.exists()) {
 			return "Doesn't exist!";
@@ -80,6 +97,11 @@ public class EngineStarter {
 		}
 	}
 	
+	/**
+	 * If app is a Mac OS X app bundle (e.g. ~/quake/QuakeSpasm.app), returns
+	 * the executable inside the app bundle (e.g. ~/quake/QuakeSpasm.app/Contents/MacOS/QuakeSpasm).
+	 * Otherwise, returns app. 
+	 */
 	private static File executableForApp(File app) {
 		if (app != null && isMacApp(app)) {
 			try {
