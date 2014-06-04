@@ -22,14 +22,86 @@ package de.haukerehfeld.quakeinjector;
 import java.io.File;
 import java.util.ArrayList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Document;
+
 public class EngineStarter {
 	private File quakeDir;
 	private File quakeExe;
 	private String quakeCmdline;
 
-	public EngineStarter(File quakeDir, File quakeExe, Configuration.EngineCommandLine quakeCmdline) {
+	private static boolean isMacOSX() {
+		return System.getProperty("os.name").startsWith("Mac OS X");
+	}
+	
+	public static boolean isApp(File app) {
+		if (isMacOSX()) {
+			return (app.exists()
+				&& app.isDirectory()
+				&& app.canRead()
+				&& app.getName().endsWith(".app"));
+		} else {
+			return (app.exists()
+					&& !app.isDirectory()
+					&& app.canRead()
+					&& app.canExecute());
+		}
+	}
+	
+	public static String errorMessageForApp(File app) {
+		if (!app.exists()) {
+			return "Doesn't exist!";
+		}
+		
+		if (isMacOSX()) {
+			if (!app.isDirectory() || !app.getName().endsWith(".app")) {
+				return "Must be an app bundle!";
+			}
+			return null;
+			
+		} else {
+			if (app.isDirectory()) {
+				return "Must be an executable file!";
+			}
+			else if (!app.canExecute()) {
+				return "Cannot be executed!";
+			}
+			return null;
+		}
+	}
+	
+	private static File executableForApp(File app) {
+		if (!isMacOSX())
+			return app;
+
+		try {
+			File contents = new File(app, "Contents");
+			File plist = new File(contents, "Info.plist");
+			File macOS = new File(contents, "MacOS");
+			
+		    DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+		    Document document = builder.parse(plist);
+			    		    
+		    XPath xpath = XPathFactory.newInstance().newXPath();
+		    XPathExpression expr = xpath.compile("/plist/dict/key/text()[.='CFBundleExecutable']/../following-sibling::string[1]/text()");
+		    String cfBundleExecutable = (String)expr.evaluate(document);
+		    
+		    File executable = new File(macOS, cfBundleExecutable);		    
+		    return executable;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public EngineStarter(File quakeDir, File quakeApp, Configuration.EngineCommandLine quakeCmdline) {
 		this.quakeDir = quakeDir;
-		this.quakeExe = quakeExe;
+		setQuakeApp(quakeApp);
 		this.quakeCmdline = quakeCmdline.get();
 	}
 
@@ -61,8 +133,8 @@ public class EngineStarter {
 		this.quakeDir = dir;
 	}
 
-	public void setQuakeExecutable(File exe) {
-		this.quakeExe = exe;
+	public void setQuakeApp(File quakeApp) {
+		this.quakeExe = executableForApp(quakeApp);
 	}
 
 	public void setQuakeCommandline(Configuration.EngineCommandLine cmdline) {

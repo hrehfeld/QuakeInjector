@@ -148,22 +148,10 @@ public class EngineConfigDialog extends JDialog {
 		engineExecutable = new JPathPanel(
 			new JPathPanel.Verifier() {
 				public boolean verify(File exe) {
-					return (exe.exists()
-							&& !exe.isDirectory()
-							&& exe.canRead()
-							&& exe.canExecute());
+					return EngineStarter.isApp(exe);
 				}
 				public String errorMessage(File f) {
-					if (!f.exists()) {
-						return "Doesn't exist!";
-					}
-					else if (f.isDirectory()) {
-						return "Must be an executable file!";
-					}
-					else if (!f.canExecute()) {
-						return "Cannot be executed!";
-					}
-					return null;
+					return EngineStarter.errorMessageForApp(f);
 				}
 			},
 			engineExeDefault.get(),
