@@ -162,7 +162,7 @@ public class Configuration {
 	public class RepositoryBasePath extends StringValue {
 		private final static String onlineRepositoryExtension = ".zip";
 		
-		private RepositoryBasePath() { super("repositoryBase", "http://www.quaddicted.com/filebase/"); }
+		private RepositoryBasePath() { super("repositoryBase", "https://www.quaddicted.com/filebase/"); }
 
 		/**
 		 * Get a complete Url to a map archive file in the repo

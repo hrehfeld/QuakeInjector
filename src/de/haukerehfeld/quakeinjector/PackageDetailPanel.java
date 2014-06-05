@@ -172,7 +172,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 						}
 						else {
 							System.err.println("Weird hyperlink with null URL: " + e.getDescription());
-							String link = "http://www.quaddicted.com/reviews/" + e.getDescription();
+							String link = "https://www.quaddicted.com/reviews/" + e.getDescription();
 							launcher.openURLinBrowser(link);
 						}
 					}
