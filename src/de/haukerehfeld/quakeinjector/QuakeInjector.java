@@ -149,10 +149,6 @@ public class QuakeInjector extends JFrame {
 
 		setMinimumSize(new Dimension(minWidth, minHeight));
 		
-
-		addWindowListener(new QuakeInjectorWindowListener());
-
-
 		Configuration cfg = null;
 		try {
 			cfg = config.get();
@@ -169,8 +165,11 @@ public class QuakeInjector extends JFrame {
 		this.offline = cfg.OfflineMode;
 
 		//config needed here
-		setWindowSize();
 		addMainPane(getContentPane());
+
+		addWindowListener(new QuakeInjectorWindowListener());
+		
+		setWindowSize();
 	}
 
 	/**
@@ -195,7 +194,7 @@ public class QuakeInjector extends JFrame {
 					public void actionPerformed(ActionEvent e) {
 						setVisible(false);
 						dispose();
-					}        
+					}
 			};
 
 		ActionListener showEngineConfig = new ActionListener() {
