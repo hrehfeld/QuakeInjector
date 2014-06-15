@@ -53,6 +53,11 @@ public class Configuration {
 	}
 	public final EngineExecutable EngineExecutable = new EngineExecutable();
 
+	public class WorkingDirAtExecutable extends BooleanValue {
+		private WorkingDirAtExecutable() { super("workingDirAtExecutable", false); }
+	}
+	public final WorkingDirAtExecutable WorkingDirAtExecutable = new WorkingDirAtExecutable();
+
 	public class LocalDatabaseFile extends FileValue {
 		private LocalDatabaseFile() { super("localDatabaseFile", new File("database.xml")); }
 	}
