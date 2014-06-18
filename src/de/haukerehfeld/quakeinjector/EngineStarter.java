@@ -42,7 +42,7 @@ public class EngineStarter {
 	/**	
 	 * Checks whether the given File is a Mac OS X application bundle.
 	 */
-	private static boolean isMacApp(File app) {
+	private static boolean isMacApplication(File app) {
 		return app.isDirectory()
 				&& app.getName().endsWith(".app");
 	}
@@ -59,11 +59,11 @@ public class EngineStarter {
 	 * either be an executable or an app bundle, on other platforms
 	 * it must be an executable.
 	 */
-	public static boolean isValidApp(File app) {
+	public static boolean isValidApplication(File app) {
 		if (!app.exists() || !app.canRead())
 			return false;
 		
-		if (isMacOSX()  && isMacApp(app))
+		if (isMacOSX()  && isMacApplication(app))
 			return true;
 		
 		return isExecutable(app);
@@ -73,15 +73,15 @@ public class EngineStarter {
 	 * Returns an error message to display when the user picks app
 	 * as the engine, or returns null if it is a valid application.
 	 * 
-	 * @see #isValidApp(File)
+	 * @see #isValidApplication(File)
 	 */
-	public static String errorMessageForApp(File app) {
+	public static String errorMessageForApplication(File app) {
 		if (!app.exists()) {
 			return "Doesn't exist!";
 		}
 		
 		if (isMacOSX()) {
-			if (!isMacApp(app) && !isExecutable(app)) {
+			if (!isMacApplication(app) && !isExecutable(app)) {
 				return "Must be an application or executable!";
 			}
 			return null;
@@ -102,8 +102,8 @@ public class EngineStarter {
 	 * the executable inside the app bundle (e.g. ~/quake/QuakeSpasm.app/Contents/MacOS/QuakeSpasm).
 	 * Otherwise, returns app. 
 	 */
-	private static File executableForApp(File app) {
-		if (app != null && isMacApp(app)) {
+	private static File executableForApplication(File app) {
+		if (app != null && isMacApplication(app)) {
 			try {
 				File contents = new File(app, "Contents");
 				File plist = new File(contents, "Info.plist");
@@ -129,7 +129,7 @@ public class EngineStarter {
 	
 	public EngineStarter(File workingDir, File quakeApp, Configuration.EngineCommandLine quakeCmdline) {
 		this.workingDir = workingDir;
-		setQuakeApp(quakeApp);
+		setQuakeApplication(quakeApp);
 		this.quakeCmdline = quakeCmdline.get();
 	}
 
@@ -161,8 +161,8 @@ public class EngineStarter {
 		this.workingDir = dir;
 	}
 
-	public void setQuakeApp(File quakeApp) {
-		this.quakeExe = executableForApp(quakeApp);
+	public void setQuakeApplication(File quakeApp) {
+		this.quakeExe = executableForApplication(quakeApp);
 	}
 
 	public void setQuakeCommandline(Configuration.EngineCommandLine cmdline) {

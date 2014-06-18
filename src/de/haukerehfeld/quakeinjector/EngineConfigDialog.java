@@ -159,10 +159,10 @@ public class EngineConfigDialog extends JDialog {
 		engineExecutable = new JPathPanel(
 			new JPathPanel.Verifier() {
 				public boolean verify(File exe) {
-					return EngineStarter.isValidApp(exe);
+					return EngineStarter.isValidApplication(exe);
 				}
 				public String errorMessage(File f) {
-					return EngineStarter.errorMessageForApp(f);
+					return EngineStarter.errorMessageForApplication(f);
 				}
 			},
 			engineExeDefault.get(),
