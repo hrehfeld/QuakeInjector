@@ -53,6 +53,11 @@ public class Configuration {
 	}
 	public final EngineExecutable EngineExecutable = new EngineExecutable();
 
+	public class WorkingDirAtExecutable extends BooleanValue {
+		private WorkingDirAtExecutable() { super("workingDirAtExecutable", false); }
+	}
+	public final WorkingDirAtExecutable WorkingDirAtExecutable = new WorkingDirAtExecutable();
+
 	public class LocalDatabaseFile extends FileValue {
 		private LocalDatabaseFile() { super("localDatabaseFile", new File("database.xml")); }
 	}
@@ -95,9 +100,15 @@ public class Configuration {
 
 	public class RepositoryDatabasePath extends StringValue {
 		private RepositoryDatabasePath() { super("repositoryDatabase",
-				"http://www.quaddicted.com/reviews/quaddicted_database.xml"); }
+				"https://www.quaddicted.com/reviews/quaddicted_database.xml"); }
 	}
 	public final RepositoryDatabasePath RepositoryDatabasePath = new RepositoryDatabasePath();
+	
+	public class ScreenshotRepositoryPath extends StringValue {
+		private ScreenshotRepositoryPath() { super("screenshotRepositoryPath",
+				"https://www.quaddicted.com/reviews/screenshots/"); }
+	}
+	public final ScreenshotRepositoryPath ScreenshotRepositoryPath = new ScreenshotRepositoryPath();
 
 	public class ZipContentsDatabaseUrl extends StringValue {
 		private ZipContentsDatabaseUrl() { super("ZipContentsDatabaseUrl",
@@ -156,7 +167,7 @@ public class Configuration {
 	public class RepositoryBasePath extends StringValue {
 		private final static String onlineRepositoryExtension = ".zip";
 		
-		private RepositoryBasePath() { super("repositoryBase", "http://www.quaddicted.com/filebase/"); }
+		private RepositoryBasePath() { super("repositoryBase", "https://www.quaddicted.com/filebase/"); }
 
 		/**
 		 * Get a complete Url to a map archive file in the repo

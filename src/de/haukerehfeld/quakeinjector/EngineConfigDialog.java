@@ -23,6 +23,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.event.DocumentListener;
@@ -34,12 +36,15 @@ import javax.swing.BorderFactory;
 import javax.swing.border.Border;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -56,6 +61,9 @@ public class EngineConfigDialog extends JDialog {
 	private final static String windowTitle = "Engine Configuration";
 
 	private final ChangeListenerList listeners = new ChangeListenerList();
+
+	private final JPanel configPanel;
+
 	private final JPathPanel enginePath;
 	private final JPathPanel engineExecutable;
 	private final JTextField engineCommandline;
@@ -65,18 +73,21 @@ public class EngineConfigDialog extends JDialog {
 
 	private final JCheckBox rogue;
 	private final JCheckBox hipnotic;
+
+	private final WorkingDirOpts workingDirOpts;
 	
 	
 	public EngineConfigDialog(final JFrame frame,
 							  Configuration.EnginePath enginePathDefault,
 							  Configuration.EngineExecutable engineExeDefault,
+							  Configuration.WorkingDirAtExecutable workingDirAtExecutable,
 	                          Configuration.DownloadPath downloadPathDefault,
 	                          Configuration.EngineCommandLine cmdlineDefault,
 	                          boolean rogueInstalled,
 	                          boolean hipnoticInstalled) {
 		super(frame, windowTitle, true);
 
-		JPanel configPanel = new JPanel();
+		configPanel = new JPanel();
 		configPanel.setBorder(LookAndFeelDefaults.PADDINGBORDER);
 		configPanel.setLayout(new GridBagLayout());
 
@@ -225,6 +236,9 @@ public class EngineConfigDialog extends JDialog {
 				gridwidth = 1;
 			}});
 		}
+		++row;
+
+		workingDirOpts = new WorkingDirOpts(row, workingDirAtExecutable.get());
 
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setBorder(LookAndFeelDefaults.PADDINGBORDER);
@@ -278,12 +292,24 @@ public class EngineConfigDialog extends JDialog {
 					engineExecutable.setBasePath(enginePath.getPath());
 				}
 			});
+		//(un)set working dir opt visibility as appropriate
+		enginePath.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					workingDirOpts.checkDisplay();
+				}
+			});
 		enginePath.addChangeListener(enableOkay);
 
 		engineExecutable.addErrorListener(new ErrorListener() {
 				public void errorOccured(ErrorEvent e) {
 					okay.setEnabled(false);
 					apply.setEnabled(false);
+				}
+			});
+		//(un)set working dir opt visibility as appropriate
+		engineExecutable.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+					workingDirOpts.checkDisplay();
 				}
 			});
 		engineExecutable.addChangeListener(enableOkay);
@@ -324,11 +350,119 @@ public class EngineConfigDialog extends JDialog {
 		
 	}
 
+	class WorkingDirOpts {
+		private final JSeparator workingDirBoxSep;
+		private final GridBagConstraints sepConstraints;
+		private final JLabel workingDirTitle;
+		private final GridBagConstraints titleConstraints;
+		private final Box workingDirChoices;
+		private final GridBagConstraints choicesConstraints;
+		private final JRadioButton workAtExe;
+		private boolean visible;
+		public WorkingDirOpts(int configPanelRow, boolean workAtExeDefault) {
+			// Separator
+			workingDirBoxSep = new JSeparator(JSeparator.HORIZONTAL);
+			sepConstraints = new GridBagConstraints();
+			sepConstraints.gridx = 0;
+			sepConstraints.gridy = configPanelRow;
+			sepConstraints.gridwidth = GridBagConstraints.REMAINDER;
+			sepConstraints.fill = GridBagConstraints.HORIZONTAL;
+			sepConstraints.insets = new Insets(10, 0, 10, 0);
+			sepConstraints.weightx = 1;
+			// Explanatory text
+			String workingDirBlurb =
+				"<html><body><nobr>" +
+				"<b>Notice:</b> your Quake Executable is not located in " +
+				"your Quake Directory.<br/>Choose where the runtime " +
+				"\"working directory\" for Quake should be located:" +
+				"</nobr></body></html>";
+			workingDirTitle = new JLabel(workingDirBlurb);
+			titleConstraints = new GridBagConstraints();
+			titleConstraints.gridx = 0;
+			titleConstraints.gridy = configPanelRow + 1;
+			titleConstraints.gridwidth = GridBagConstraints.REMAINDER;
+			// Container for the choices
+			workingDirChoices = new Box(BoxLayout.Y_AXIS);
+			// Radio buttons for the choices
+			JRadioButton workInBase = new JRadioButton("in Quake Directory");
+			String baseBlurb =
+				"Using the Quake Directory as the working directory may " +
+				"fail if necessary libraries or other resources are " +
+				"located with the engine.";
+			workInBase.setToolTipText(baseBlurb);
+			workInBase.setSelected(!workAtExeDefault);
+			workAtExe = new JRadioButton("at Quake Executable");
+			String exeBlurb =
+				"Using the Quake Engine's location as the working directory " +
+				"may require adding a -basedir argument to the command line.";
+			workAtExe.setToolTipText(exeBlurb);
+			workAtExe.setSelected(workAtExeDefault);
+			ButtonGroup workingDirGroup = new ButtonGroup();
+			workingDirGroup.add(workInBase);
+			workingDirGroup.add(workAtExe);
+			workingDirChoices.add(workInBase);
+			workingDirChoices.add(workAtExe);
+			choicesConstraints = new GridBagConstraints();
+			choicesConstraints.gridx = 0;
+			choicesConstraints.gridy = configPanelRow + 2;
+			choicesConstraints.gridwidth = GridBagConstraints.REMAINDER;
+			choicesConstraints.insets = new Insets(5, 0, 5, 0);
+			// Start visible if appropriate
+			visible = false;
+			checkDisplay();
+		}
+		public void checkDisplay() {
+			File exeDir = null;
+			if (null != engineExecutable) {
+				exeDir = engineExecutable.getPath().getParentFile();
+			}
+			boolean validPaths =
+				null != exeDir &&
+				null != enginePath &&
+				!(exeDir.getPath().equals("")) &&
+				!(enginePath.getPath().getPath().equals("")) &&
+				!(engineExecutable.getPath().equals(enginePath.getPath()));
+			boolean showOpt =
+				validPaths && !(enginePath.getPath().equals(exeDir));
+			if (showOpt) {
+				if (!visible) {
+					configPanel.add(workingDirBoxSep, sepConstraints);
+					configPanel.add(workingDirTitle, titleConstraints);
+					configPanel.add(workingDirChoices, choicesConstraints);
+					verticalRepack();
+					visible = true;
+				}
+			}
+			else {
+				if (visible) {
+					configPanel.remove(workingDirBoxSep);
+					configPanel.remove(workingDirTitle);
+					configPanel.remove(workingDirChoices);
+					verticalRepack();
+					visible = false;
+				}
+			}
+		}
+		private void verticalRepack() {
+			EngineConfigDialog dialog = EngineConfigDialog.this;
+			Rectangle bounds = dialog.getBounds();
+			dialog.setMinimumSize(new Dimension(bounds.width, 0));
+			dialog.pack();
+			dialog.setMinimumSize(null);
+		}
+		public boolean getWorkingDirAtExecutable() {
+			return workAtExe.isSelected();
+		}
+	}
+
 	public File getEnginePath() {
 		return enginePath.getPath();
 	}
 	public File getEngineExecutable() {
 		return engineExecutable.getPath();
+	}
+	public boolean getWorkingDirAtExecutable() {
+		return workingDirOpts.getWorkingDirAtExecutable();
 	}
 	public String getCommandline() {
 		return engineCommandline.getText();
