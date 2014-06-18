@@ -1,25 +1,25 @@
 Quake Injector
 ###
 
-Quake Injector is a tool to *download, install and play* Quake (some call it "Quake 1") singleplayer maps from Spirit's "Quaddicted archive":http://www.quaddicted.com - basically the complete history of all quake singleplayer maps ever made. Ever been annoyed by an excruciating installation process? Could not figure out how to install a certain map? Well, this tool makes it a piece of cake. Simply pick a map and click Install.
+Quake Injector is a tool to *download, install and play* Quake (some call it "Quake 1") singleplayer maps from Spirit's "Quaddicted archive":https://www.quaddicted.com - basically the complete history of all quake singleplayer maps ever made. Ever been annoyed by an excruciating installation process? Could not figure out how to install a certain map? Well, this tool makes it a piece of cake. Simply pick a map and click Install.
  
-"[* http://www.quaddicted.com/wp-content/uploads/quakeinjector_20090528_n.png *]":http://www.quaddicted.com/wp-content/uploads/quakeinjector_20090528.png
+"[* https://www.quaddicted.com/wp-content/uploads/quakeinjector_20090528_n.png *]":https://www.quaddicted.com/wp-content/uploads/quakeinjector_20090528.png
 
 Features
 ***
 - Simply pick a map, click install and play
-- "All Quake singleplayer maps ever made":http://www.quaddicted.com/spmaps.html  (900+) in the database
+- "All Quake singleplayer maps ever made":https://www.quaddicted.com/spmaps.html  (900+) in the database
 - Filter, sort, browse to find your favourite map
 - Automatically installs dependencies (e.g. Quoth)
 - Cross-Platform
-- "Free, Open Source Software":http://github.com/hrehfeld/QuakeInjector/, released under the GPL.
+- "Free, Open Source Software":https://github.com/hrehfeld/QuakeInjector/, released under the GPL.
 - Scan your Quake directory for already installed maps
  
 
 Installation
 ***
 
-Quake Injector requires "Java 6":http://www.java.com/en/download/ and a Quake installation ("Linux howto":http://tldp.org/HOWTO/Quake-HOWTO-2.html, "modern Fitzquake engine":http://www.celephais.net/fitzquake/).
+Quake Injector requires "Java 6":https://www.java.com/en/download/ and a Quake installation ("Linux howto":http://tldp.org/HOWTO/Quake-HOWTO-2.html, "modern Fitzquake engine":http://www.celephais.net/fitzquake/).
 
 1) Make sure you have Java 6 installed,
 2) Download Quake Injector Alpha 1
@@ -40,7 +40,7 @@ Known Problems
 Bug Reports, Help with Development, etc.
 ***
 
-If anything that feels weird occurs to you, or you find a definite bug, please "report it as an issue":http://github.com/hrehfeld/QuakeInjector/issues or mail Spirit (spixrixt@quaxddixcted.com, remove all xs from that address) or Hauke (hreaaaahfeaaaald@uni-aaakobaalenz.de, remove all as from that address). Likewise, give us a shout if you want to help with development or package management (all the packages need testing).
+If anything that feels weird occurs to you, or you find a definite bug, please "report it as an issue":https://github.com/hrehfeld/QuakeInjector/issues or mail Spirit (spixrixt@quaxddixcted.com, remove all xs from that address) or Hauke (hreaaaahfeaaaald@uni-aaakobaalenz.de, remove all as from that address). Likewise, give us a shout if you want to help with development or package management (all the packages need testing).
 
 Manual
 ***

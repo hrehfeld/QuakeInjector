@@ -90,6 +90,8 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 	private BrowserLauncher launcher = null;
 
+	private String screenshotRepositoryPath;
+	
 	/**
 	 * Holds the currently valid screenshot url, for threading reasons
 	 */
@@ -109,8 +111,10 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		}
 	
 
-	public PackageDetailPanel() {
+	public PackageDetailPanel(String screenshotRepositoryPath) {
 		super(new GridBagLayout());
+		
+		this.screenshotRepositoryPath = screenshotRepositoryPath;
 
 		{
 			try {
@@ -168,7 +172,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 						}
 						else {
 							System.err.println("Weird hyperlink with null URL: " + e.getDescription());
-							String link = "http://www.quaddicted.com/reviews/" + e.getDescription();
+							String link = "https://www.quaddicted.com/reviews/" + e.getDescription();
 							launcher.openURLinBrowser(link);
 						}
 					}
@@ -267,9 +271,8 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 
 		image.setIcon(null);
-
-		supposedImageUrl = "http://www.quaddicted.com/reviews/screenshots/" + current.getId()
-		    +"_injector.jpg";
+		
+		supposedImageUrl = screenshotRepositoryPath + current.getId() + "_injector.jpg";
 		
 		//load image in bg thread
 		new SwingWorker<ImageIcon,Void>() {
@@ -304,7 +307,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 				if (icon == null || icon.getImageLoadStatus() != java.awt.MediaTracker.COMPLETE) {
 					removeImage();
-					System.err.println("Couldn't load image " + current.getId());
+					System.err.println("Couldn't load image " + supposedImageUrl);
 				}
 				else {
 					image.setIcon(icon);

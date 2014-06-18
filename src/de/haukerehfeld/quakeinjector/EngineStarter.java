@@ -31,7 +31,7 @@ import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 
 public class EngineStarter {
-	private File quakeDir;
+	private File workingDir;
 	private File quakeExe;
 	private String quakeCmdline;
 
@@ -127,8 +127,8 @@ public class EngineStarter {
 		return app;
 	}
 	
-	public EngineStarter(File quakeDir, File quakeApp, Configuration.EngineCommandLine quakeCmdline) {
-		this.quakeDir = quakeDir;
+	public EngineStarter(File workingDir, File quakeApp, Configuration.EngineCommandLine quakeCmdline) {
+		this.workingDir = workingDir;
 		setQuakeApp(quakeApp);
 		this.quakeCmdline = quakeCmdline.get();
 	}
@@ -148,7 +148,7 @@ public class EngineStarter {
 		cmd.add(startmap);
 		
 		ProcessBuilder pb = new ProcessBuilder(cmd);
-		pb.directory(quakeDir);
+		pb.directory(workingDir);
 		pb.redirectErrorStream(true);
 
 		System.out.println(cmd);
@@ -157,8 +157,8 @@ public class EngineStarter {
 		return p;
 	}
 
-	public void setQuakeDirectory(File dir) {
-		this.quakeDir = dir;
+	public void setWorkingDirectory(File dir) {
+		this.workingDir = dir;
 	}
 
 	public void setQuakeApp(File quakeApp) {
