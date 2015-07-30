@@ -341,8 +341,8 @@ public class QuakeInjector extends JFrame {
 		
 		final SwingWorker<List<Requirement>, Void> dbParse
 		    = new SwingWorker<List<Requirement>,Void>() {
-		    /** the stream for the database download **/
-		    private BufferedInputStream downloadStream;
+			/** the stream for the database download **/
+			private BufferedInputStream downloadStream;
 			/** we need to try to download the db to a tmp file first so the old one doesn't get overwritten */
 			private File tmpFile;
 			/** the stream to the temporary file */
@@ -350,7 +350,7 @@ public class QuakeInjector extends JFrame {
 			/** the cached database file **/
 			private File cache;
 			/** stream from the cached database file, if needed **/
-		    private BufferedInputStream cacheReadStream;
+			private BufferedInputStream cacheReadStream;
 			/** whether the temporary file was populated with a good DB **/
 			private boolean updateCache = false;
 			
