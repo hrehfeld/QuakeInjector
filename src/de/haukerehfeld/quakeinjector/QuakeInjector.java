@@ -423,6 +423,11 @@ public class QuakeInjector extends JFrame {
 					if (tmpFile != null && tmpFile.exists()) {
 						tmpFile.delete();
 					}
+					String msg = "Failed to fetch current database; using previously downloaded info.";
+					JOptionPane.showMessageDialog(QuakeInjector.this,
+					                              msg,
+					                              "Downloading failed!",
+					                              JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		};
