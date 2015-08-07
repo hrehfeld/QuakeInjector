@@ -19,34 +19,31 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector.packagelist.model;
 
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 import de.haukerehfeld.quakeinjector.ChangeListenerList;
-import de.haukerehfeld.quakeinjector.PackageList;
 import de.haukerehfeld.quakeinjector.Package;
+import de.haukerehfeld.quakeinjector.PackageList;
 import de.haukerehfeld.quakeinjector.Utils;
-
-import javax.swing.table.TableCellRenderer;
-import java.util.List;
-import java.util.ArrayList;
-
-import java.awt.Component;
-import java.awt.FlowLayout;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
-import javax.swing.border.EmptyBorder;
 
 public class PackageListModel extends AbstractTableModel implements ChangeListener {
 	private ChangeListenerList listeners = new ChangeListenerList();

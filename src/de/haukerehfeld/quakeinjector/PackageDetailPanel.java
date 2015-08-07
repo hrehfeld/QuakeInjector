@@ -24,42 +24,32 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.TimeZone;
 
+import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.StyleSheet;
-import javax.swing.text.Style;
-import java.util.Enumeration;
-
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import javax.swing.ImageIcon;
-import javax.swing.Icon;
-import javax.swing.border.EmptyBorder;
-import java.net.URL;
-
-import javax.swing.Scrollable;
-import java.awt.Rectangle;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
-import javax.swing.SwingWorker;
-import java.util.concurrent.Future;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.text.Style;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
 import de.haukerehfeld.quakeinjector.gui.BrowserLauncher;
 import de.haukerehfeld.quakeinjector.gui.ScrollablePanel;

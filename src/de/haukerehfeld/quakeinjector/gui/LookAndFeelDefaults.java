@@ -19,31 +19,9 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.io.File;
-
-import java.util.Map;
-import java.util.HashMap;
-
-import java.util.List;
-import java.util.ArrayList;
-
-import javax.swing.JComponent;
 import javax.swing.BorderFactory;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.Box;
-
-import java.awt.Insets;
+import javax.swing.border.Border;
 
 public class LookAndFeelDefaults extends JPanel {
 	public static final int FRAMEPADDING = 7;

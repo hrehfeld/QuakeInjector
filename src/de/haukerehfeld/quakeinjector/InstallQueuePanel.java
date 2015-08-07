@@ -19,11 +19,10 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import javax.swing.Box;
+import java.awt.Rectangle;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -31,13 +30,10 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 import javax.swing.JButton;
-import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-
 import javax.swing.Scrollable;
-import java.awt.Rectangle;
-
 
 import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 

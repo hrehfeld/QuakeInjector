@@ -25,19 +25,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.io.File;
-
-import java.util.Map;
-import java.util.HashMap;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
-import javax.swing.border.Border;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
@@ -45,16 +39,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.border.Border;
 
-import de.haukerehfeld.quakeinjector.gui.ErrorEvent;
-import de.haukerehfeld.quakeinjector.gui.ErrorListener;
-import de.haukerehfeld.quakeinjector.gui.JPathPanel;
-import de.haukerehfeld.quakeinjector.gui.ScrollablePanel;
 import de.haukerehfeld.quakeinjector.gui.OkayCancelApplyPanel;
+import de.haukerehfeld.quakeinjector.gui.ScrollablePanel;
 
 public class PackageOverwriteDialog extends JDialog {
 	private final static String windowTitle = "Overwrite Package Files?";
