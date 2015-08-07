@@ -161,7 +161,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
  			@Override
  			public void mouseClicked(MouseEvent e) {
  				// TODO: Refactor
- 				BrowserLauncher.openURL(screenshotRepositoryPath + current.getId() + ".jpg");
+ 				BrowserLauncher.openURL(PackageDetailPanel.this.screenshotRepositoryPath + current.getId() + ".jpg");
  			}		
 		});
  		imagePanel.add(image);
