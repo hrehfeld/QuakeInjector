@@ -656,7 +656,7 @@ public class QuakeInjector extends JFrame {
 	                             boolean rogueInstalled,
 	                             boolean hipnoticInstalled) {
 		starter.setWorkingDirectory(workingDir);
-		starter.setQuakeExecutable(engineExecutable);
+		starter.setQuakeApplication(engineExecutable);
 		starter.setQuakeCommandline(commandline);
 
 		maps.get("rogue").setInstalled(rogueInstalled);
