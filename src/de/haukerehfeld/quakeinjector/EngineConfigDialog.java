@@ -27,8 +27,6 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 
@@ -47,9 +45,10 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
 
 import de.haukerehfeld.quakeinjector.gui.ErrorEvent;
 import de.haukerehfeld.quakeinjector.gui.ErrorListener;

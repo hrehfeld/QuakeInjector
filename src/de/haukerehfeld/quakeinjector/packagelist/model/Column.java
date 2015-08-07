@@ -19,7 +19,6 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector.packagelist.model;
 
-import java.util.EnumSet;
 import java.util.Date;
 
 import de.haukerehfeld.quakeinjector.Package;

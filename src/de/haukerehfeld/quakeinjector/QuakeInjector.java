@@ -24,28 +24,25 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Rectangle;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -65,11 +62,6 @@ import javax.swing.event.DocumentListener;
 
 import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
-
-import de.haukerehfeld.quakeinjector.database.InstalledMapsParser;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class QuakeInjector extends JFrame {
 	/**

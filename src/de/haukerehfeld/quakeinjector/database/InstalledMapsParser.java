@@ -21,14 +21,11 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 package de.haukerehfeld.quakeinjector.database;
 
 import java.io.InputStream;
-
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
-import javax.swing.SwingWorker;
-
-import de.haukerehfeld.quakeinjector.PackageFileList;
 import de.haukerehfeld.quakeinjector.InstalledPackageList;
+import de.haukerehfeld.quakeinjector.PackageFileList;
 
 
 /**

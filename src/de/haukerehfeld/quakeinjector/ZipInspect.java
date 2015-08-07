@@ -19,64 +19,23 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector;
 
-//import java.awt.*;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.BufferedWriter;
 import java.io.FileWriter;
-
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
-import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
-import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-
-import java.beans.XMLEncoder;
-
-import java.io.Console;
 
 /**
  * Create an xml of all the files in the zips

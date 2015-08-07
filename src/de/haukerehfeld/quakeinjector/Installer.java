@@ -20,27 +20,23 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 package de.haukerehfeld.quakeinjector;
 
 import java.beans.PropertyChangeListener;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutionException;
-import java.lang.reflect.InvocationTargetException;
-
-import java.util.List;
-import java.util.ArrayList;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
-import javax.swing.SwingWorker;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 public class Installer {
 	private static final int simultanousDownloads = 1;

@@ -20,49 +20,21 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 package de.haukerehfeld.quakeinjector;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
-import java.util.Map;
-import java.util.HashMap;
-
-import java.util.List;
-import java.util.ArrayList;
-
-import javax.swing.BorderFactory;
-import javax.swing.border.Border;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import de.haukerehfeld.quakeinjector.gui.ErrorEvent;
-import de.haukerehfeld.quakeinjector.gui.ErrorListener;
-import de.haukerehfeld.quakeinjector.gui.JPathPanel;
-import de.haukerehfeld.quakeinjector.gui.ScrollablePanel;
-import de.haukerehfeld.quakeinjector.gui.OkayCancelApplyPanel;
-
 import javax.swing.JTextArea;
-import java.io.InputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import javax.swing.SwingWorker;
 
-import java.awt.Rectangle;
+import de.haukerehfeld.quakeinjector.gui.OkayCancelApplyPanel;
 
 public class EngineOutputDialog extends JDialog {
 	private final static String windowTitle = "Engine Output";
