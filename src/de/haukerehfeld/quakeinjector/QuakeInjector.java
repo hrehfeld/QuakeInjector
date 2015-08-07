@@ -300,8 +300,8 @@ public class QuakeInjector extends JFrame {
 		//get download stream
 		Download d = Download.create(databaseUrl);
 		d.connect();
-		int size = d.getSize();
 		InputStream dl;
+		//int size = d.getSize();
 		// if (size > 0) {
 		// 	ProgressListener progress =
 		// 	    new SumProgressListener(new PercentageProgressListener(size, this));
@@ -494,7 +494,7 @@ public class QuakeInjector extends JFrame {
 			});
 		checker.execute();
 		dbpopup.pack();
-		dbpopup.show();
+		dbpopup.setVisible(true);
 
 		return checker;
 	}
@@ -619,7 +619,7 @@ public class QuakeInjector extends JFrame {
 
 		d.pack();
 		d.setLocationRelativeTo(this);
-		d.show();
+		d.setVisible(true);
 		
 	}
 

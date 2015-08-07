@@ -127,7 +127,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 				File original = f;
 				if (f.exists()) {
 					//create Temp file and rename later
-					f = f.createTempFile("quakeinjector", ".tmp", f.getParentFile());
+					f = File.createTempFile("quakeinjector", ".tmp", f.getParentFile());
 					System.out.println("create Temp file " + f);
 				}
 

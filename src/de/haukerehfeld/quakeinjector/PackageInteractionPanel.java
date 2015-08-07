@@ -480,10 +480,10 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 
 		try {
 			Process p = starter.start(selectedMap.getCommandline(), startmap);
-			EngineOutputDialog e = new EngineOutputDialog(main, p.getInputStream());
-			e.pack();
-			e.setLocationRelativeTo(main);
-			e.show();
+			EngineOutputDialog eod = new EngineOutputDialog(main, p.getInputStream());
+			eod.pack();
+			eod.setLocationRelativeTo(main);
+			eod.setVisible(true);
 
 		}
 		catch (java.io.IOException e) {
