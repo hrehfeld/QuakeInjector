@@ -94,6 +94,7 @@ public class EngineOutputDialog extends JDialog {
 
 		add(new OkayCancelApplyPanel(close, null, null, false), BorderLayout.PAGE_END);
 
+		addEscapeListener(this); // this is probably not how you do it... -Spirit
 
 		new SwingWorker<Void,Void>() {
 			@Override
@@ -137,5 +138,20 @@ public class EngineOutputDialog extends JDialog {
 			public void done() {
 			}
 		}.execute();
+	}
+	
+	// from http://stackoverflow.com/questions/642925/swing-how-do-i-close-a-dialog-when-the-esc-key-is-pressed -Spirit
+	public static void addEscapeListener(final JDialog dialog) {
+		ActionListener escListener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dialog.dispose();
+			}
+		};
+
+		dialog.getRootPane().registerKeyboardAction(escListener,
+				KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+				JComponent.WHEN_IN_FOCUSED_WINDOW);
+
 	}
 }
