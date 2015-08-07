@@ -19,6 +19,7 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector;
 
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -52,15 +53,15 @@ import java.net.URL;
 import javax.swing.Scrollable;
 import java.awt.Rectangle;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
-
-import edu.stanford.ejalbert.BrowserLauncher;
-
 import javax.swing.SwingWorker;
 import java.util.concurrent.Future;
 
+import de.haukerehfeld.quakeinjector.gui.BrowserLauncher;
 import de.haukerehfeld.quakeinjector.gui.ScrollablePanel;
 
 /**
@@ -88,8 +89,6 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 
 	private JEditorPane description;
 
-	private BrowserLauncher launcher = null;
-
 	private String screenshotRepositoryPath;
 	
 	/**
@@ -116,16 +115,6 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		
 		this.screenshotRepositoryPath = screenshotRepositoryPath;
 
-		{
-			try {
-				launcher = new BrowserLauncher();
-			}
-			catch (Exception e) {
-				System.err.println("Couldn't init browserlauncher: " + e.getMessage());
-				e.printStackTrace();
-			}
-		}
-
 		content = new ScrollablePanel(50, 50) {{
 			setLayout(new GridBagLayout());
 		}};
@@ -135,6 +124,16 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		title = new JLabel();
 		title.setHorizontalAlignment(SwingConstants.CENTER);
 		title.setOpaque(true);
+		title.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		title.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent arg0) {
+				if (current != null) {
+					// TODO: Refactor; get the URL from Configuration
+					BrowserLauncher.openURL("https://www.quaddicted.com/reviews/" + current.getId() + ".html");
+				}
+			}
+		});
+		
 		content.add(title, new GridBagConstraints() {{
 			weightx = 1;
 			weighty = 0;
@@ -157,6 +156,14 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
  		EmptyBorder border = new EmptyBorder(0,0,0,0);
  		image.setBorder(border);
  		image.setHorizontalAlignment(SwingConstants.CENTER);
+ 		image.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+ 		image.addMouseListener(new MouseAdapter() {
+ 			@Override
+ 			public void mouseClicked(MouseEvent e) {
+ 				// TODO: Refactor
+ 				BrowserLauncher.openURL(screenshotRepositoryPath + current.getId() + ".jpg");
+ 			}		
+		});
  		imagePanel.add(image);
 
  		
@@ -165,15 +172,15 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 		description.setEditable(false);
 		description.addHyperlinkListener(new HyperlinkListener() {
 				@Override public void hyperlinkUpdate(HyperlinkEvent e) {
-					if (launcher != null && e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+					if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
 						java.net.URL url = e.getURL();
 						if (url != null) {
-							launcher.openURLinBrowser(url.toString());
+							BrowserLauncher.openURL(url.toString());							
 						}
 						else {
 							System.err.println("Weird hyperlink with null URL: " + e.getDescription());
 							String link = "https://www.quaddicted.com/reviews/" + e.getDescription();
-							launcher.openURLinBrowser(link);
+							BrowserLauncher.openURL(link);
 						}
 					}
 				}
