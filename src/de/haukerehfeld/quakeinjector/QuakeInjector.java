@@ -341,13 +341,29 @@ public class QuakeInjector extends JFrame {
 		
 		final SwingWorker<List<Requirement>, Void> dbParse
 		    = new SwingWorker<List<Requirement>,Void>() {
+			/** the stream for the database download **/
+			private BufferedInputStream downloadStream;
 			/** we need to try to download the db to a tmp file first so the old one doesn't get overwritten */
 			private File tmpFile;
-			/** the cached database file */
-			private File cache;
 			/** the stream to the temporary file */
-			private FileOutputStream cacheStream;
+			private BufferedOutputStream tmpWriteStream;
+			/** the cached database file **/
+			private File cache;
+			/** stream from the cached database file, if needed **/
+			private BufferedInputStream cacheReadStream;
+			/** whether the temporary file was populated with a good DB **/
+			private boolean updateCache = false;
 			
+			private BufferedInputStream cachedDatabaseStream() throws IOException {
+				if (cache != null && cache.exists() && cache.canRead()) {
+					try {
+						return new BufferedInputStream(new FileInputStream(cache));
+					}
+					catch (IOException e) {}
+				}
+				throw new IOException("cannot download package database or read local cache");
+			}
+
 			@Override
 			public List<Requirement> doInBackground() throws IOException, org.xml.sax.SAXException {
 				cache = getConfig().LocalDatabaseFile.get();
@@ -355,40 +371,63 @@ public class QuakeInjector extends JFrame {
 				InputStream db;
 				try {
 					//download database and dump to file
-					tmpFile = File.createTempFile(cache.getName(), ".xml", cache.getParentFile());
-					cacheStream = new FileOutputStream(tmpFile);
-					OutputStream out = new BufferedOutputStream(cacheStream);
-					db = new DumpInputStream(new BufferedInputStream(downloadDatabase(databaseUrl)), out);
+					downloadStream = new BufferedInputStream(downloadDatabase(databaseUrl));
+					tmpFile = File.createTempFile(cache.getName(), null, cache.getParentFile());
+					tmpWriteStream = new BufferedOutputStream(new FileOutputStream(tmpFile));
+					db = new DumpInputStream(downloadStream, tmpWriteStream);
+					List<Requirement> parseResult = parseDatabase(db);
+					updateCache = true;
+					return parseResult;
 				}
+				// if using java 7 we could more nicely do:
+				// catch (IOException | org.xml.sax.SAXException | javax.xml.ws.http.HTTPException e) {
 				catch (IOException e) {
-					//try reading the cached version if downloading fails
-					System.err.println("Downloading the database failed. "+databaseUrl);
-					if (cache.exists() && cache.canRead()) {
-						System.err.println("Using cached database file (" + cache + ") instead.");
-						db = new BufferedInputStream(new FileInputStream(cache));
-					}
-					else {
-						System.err.println("using cached database file instead.");
-						throw e;
-					}
+					cacheReadStream = cachedDatabaseStream();
+					return parseDatabase(cacheReadStream);
 				}
-				return parseDatabase(db);
+				catch (org.xml.sax.SAXException e) {
+					cacheReadStream = cachedDatabaseStream();
+					return parseDatabase(cacheReadStream);
+				}
+				catch (javax.xml.ws.http.HTTPException e) {
+					cacheReadStream = cachedDatabaseStream();
+					return parseDatabase(cacheReadStream);
+				}
 			}
 
 			@Override
 			public void done() {
 				try {
-					cacheStream.close();
+					if (cacheReadStream != null) {
+						cacheReadStream.close();
+					}
+					if (tmpWriteStream != null) {
+						tmpWriteStream.close();
+					}
+					if (downloadStream != null) {
+						downloadStream.close();
+					}
 				}
-				catch (IOException e) {
-					System.out.println("Couldn't close tmp cache outputstream!" + e);
+				catch (IOException e) {}
+				if (updateCache == true) {
+					if (cache.exists()) {
+						if (cache.delete() == false) {
+							System.err.println("Couldn't delete the real cache file!");
+						}
+					}
+					if (tmpFile.renameTo(cache) == false) {
+						System.err.println("Couldn't move the temporary cache file to the real cache file!");
+					}
 				}
-
-				if (cache.exists() && !cache.delete()) {
-					System.err.println("Couldn't delete the real cache file!");
-				}
-				if (tmpFile.renameTo(cache) != true) {
-					System.err.println("Couldn't move the temporary cache file to the real cache file!");
+				else {
+					if (tmpFile != null && tmpFile.exists()) {
+						tmpFile.delete();
+					}
+					String msg = "Failed to fetch current database; using previously downloaded info.";
+					JOptionPane.showMessageDialog(QuakeInjector.this,
+					                              msg,
+					                              "Downloading failed!",
+					                              JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		};

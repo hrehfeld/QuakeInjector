@@ -53,9 +53,8 @@ public class DumpInputStream extends InputStream {
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		int readcount = in.read(b, off, len);
-
 		if (readcount > 0) {
-			out.write(b, off, len);
+			out.write(b, off, readcount);
 		}
 		return readcount;
 	}
