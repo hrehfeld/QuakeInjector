@@ -41,6 +41,7 @@ import de.haukerehfeld.quakeinjector.gui.OkayCancelApplyPanel;
 
 public class EngineOutputDialog extends JDialog {
 	private final static String windowTitle = "Engine Output";
+	private final static String outputQIPrefix = "[Quake Injector]: ";
 
 	private final InputStream engineOut;
 
@@ -79,7 +80,7 @@ public class EngineOutputDialog extends JDialog {
 					BufferedReader b = new BufferedReader(in);
 
 					
-					output.append("Starting engine...\n");
+					output.append(outputQIPrefix+"Starting engine...\n");
 					String line;
 					int lineCount = 0;
 					while ((line = b.readLine()) != null) {
@@ -96,15 +97,15 @@ public class EngineOutputDialog extends JDialog {
 						    });
 					}
 					if (lineCount == 0) {
-						output.append("Done with no output.\n");
+						output.append(outputQIPrefix+"Done with no output.\n");
 					}
 					else {
-						output.append("Done.\n");
+						output.append(outputQIPrefix+"Done.\n");
 					}
 						
 				}
 				catch (java.io.IOException e) {
-					output.append("Error: Couldn't read engine output from stream");
+					output.append(outputQIPrefix+"Error: Couldn't read engine output from stream");
 				}
 
 				return null;
