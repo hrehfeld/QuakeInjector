@@ -46,6 +46,7 @@ import java.util.concurrent.Future;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -718,6 +719,9 @@ public class QuakeInjector extends JFrame {
 			filterPanel.add(filterText);
 			filterPanel.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4));
 
+			final JButton clearFilter = new JButton("Clear");
+			clearFilter.setEnabled(false);  // disabled until there's text in filter textfield
+
 			final JTextField filter = new JTextField();
 			filter.getDocument().addDocumentListener(
                 new DocumentListener() {
@@ -727,6 +731,13 @@ public class QuakeInjector extends JFrame {
 
 					private void filter() {
 						table.getRowSorter().setRowFilter(maplist.filter(filter.getText()));
+
+						// https://stackoverflow.com/questions/21522902/how-disable-button-when-nothing-in-textfield
+						if (filter.getText().equals("")) {
+							clearFilter.setEnabled(false);
+						} else {
+							clearFilter.setEnabled(true);
+						}
 					}
                 });
 			filterText.setLabelFor(filter);
@@ -739,6 +750,16 @@ public class QuakeInjector extends JFrame {
 				weighty = 0;
 			}});
 
+			// https://stackoverflow.com/questions/5328945/how-to-clear-the-jtextfield-by-clicking-jbutton
+			clearFilter.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					filter.setText("");
+				}
+			});
+
+			filterPanel.add(clearFilter, new GridBagConstraints() {{
+				anchor = LINE_END;
+			}});
 		}
 		
 
