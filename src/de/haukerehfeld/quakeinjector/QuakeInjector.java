@@ -901,6 +901,10 @@ public class QuakeInjector extends JFrame {
 				System.setProperty("awt.useSystemAAFontSettings", "on");
 		}
 
+		// override the HTTP user-agent for any connections this program does
+		// re https://stackoverflow.com/questions/2529682/setting-user-agent-of-a-java-urlconnection
+		System.setProperty("http.agent", "Quakeinjector-" + BuildCommit.buildCommit);
+
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					QuakeInjector qs = new QuakeInjector();
