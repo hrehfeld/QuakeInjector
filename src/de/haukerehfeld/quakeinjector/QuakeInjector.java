@@ -891,6 +891,16 @@ public class QuakeInjector extends JFrame {
 		catch (IllegalAccessException e) {
 		}
 
+		// borrowed from jmtd's wadc:
+		// The default setting for useSystemAAFontSettings is off; and the result
+		// looks awful on (at least my) Linux systems. We want to switch the default
+		// to on, but leave it possible for the user to override our choice.
+		if(null == System.getenv("_JAVA_OPTIONS") ||
+				!System.getenv("_JAVA_OPTIONS").contains("useSystemAAFontSettings"))
+		{
+				System.setProperty("awt.useSystemAAFontSettings", "on");
+		}
+
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					QuakeInjector qs = new QuakeInjector();
