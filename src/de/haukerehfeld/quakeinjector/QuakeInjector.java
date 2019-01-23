@@ -597,8 +597,8 @@ public class QuakeInjector extends JFrame {
 		                             getConfig().WorkingDirAtExecutable,
 		                             getConfig().DownloadPath,
 		                             getConfig().EngineCommandLine,
-		                             rogueInstalled,
-		                             hipnoticInstalled
+		                             getConfig().RogueInstalled,
+		                             getConfig().HipnoticInstalled
 		        );
 		d.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
@@ -647,6 +647,8 @@ public class QuakeInjector extends JFrame {
 		c.EngineExecutable.set(RelativePath.getRelativePath(enginePath, engineExecutable));
 		c.WorkingDirAtExecutable.set(workingDirAtExecutable);
 		c.EngineCommandLine.set(commandline);
+		c.RogueInstalled.set(rogueInstalled);
+		c.HipnoticInstalled.set(hipnoticInstalled);
 
 		c.DownloadPath.set(downloadPath);
 

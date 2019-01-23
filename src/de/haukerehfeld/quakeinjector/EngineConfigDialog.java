@@ -82,8 +82,8 @@ public class EngineConfigDialog extends JDialog {
 							  Configuration.WorkingDirAtExecutable workingDirAtExecutable,
 	                          Configuration.DownloadPath downloadPathDefault,
 	                          Configuration.EngineCommandLine cmdlineDefault,
-	                          boolean rogueInstalled,
-	                          boolean hipnoticInstalled) {
+	                          Configuration.RogueInstalled rogueInstalled,
+	                          Configuration.HipnoticInstalled hipnoticInstalled) {
 		super(frame, windowTitle, true);
 
 		configPanel = new JPanel();
@@ -208,11 +208,11 @@ public class EngineConfigDialog extends JDialog {
 
 			rogue = new JCheckBox("rogue");
 			rogue.setMnemonic(KeyEvent.VK_R);
-			rogue.setSelected(rogueInstalled);
+			rogue.setSelected(rogueInstalled.get());
 
 			hipnotic = new JCheckBox("hipnotic");
 			hipnotic.setMnemonic(KeyEvent.VK_H);
-			hipnotic.setSelected(hipnoticInstalled);
+			hipnotic.setSelected(hipnoticInstalled.get());
 
 			final int row_ = row;
 			configPanel.add(expansionsInstalled, new LabelConstraints() {{ gridy = row_; }});
