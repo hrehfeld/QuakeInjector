@@ -373,7 +373,7 @@ public class QuakeInjector extends JFrame {
 					return parseResult;
 				}
 				// if using java 7 we could more nicely do:
-				// catch (IOException | org.xml.sax.SAXException | javax.xml.ws.http.HTTPException e) {
+				// catch (IOException | org.xml.sax.SAXException e) {
 				catch (IOException e) {
 					cacheReadStream = cachedDatabaseStream();
 					return parseDatabase(cacheReadStream);
@@ -382,7 +382,7 @@ public class QuakeInjector extends JFrame {
 					cacheReadStream = cachedDatabaseStream();
 					return parseDatabase(cacheReadStream);
 				}
-				catch (javax.xml.ws.http.HTTPException e) {
+				catch (HTTPException e) {
 					cacheReadStream = cachedDatabaseStream();
 					return parseDatabase(cacheReadStream);
 				}
