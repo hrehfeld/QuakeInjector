@@ -22,6 +22,7 @@ package de.haukerehfeld.quakeinjector;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Properties;
 
 import java.util.Map;
@@ -299,12 +300,7 @@ public class Configuration {
 			FileOutputStream out = new FileOutputStream(configFile);
 			properties.store(out, CONFIGHEADER);
 			out.close();
-		}
-		catch (java.io.FileNotFoundException e) {
-			System.err.println("Can't write config file: " + e.getMessage());
-			e.printStackTrace();
-		}
-		catch (java.io.IOException e) {
+		} catch (IOException e) {
 			System.err.println("Can't write config file: " + e.getMessage());
 			e.printStackTrace();
 		}

@@ -33,7 +33,7 @@ public class ChangeListenerList {
 
 	public void addChangeListener(ChangeListener l) {
 		
-		if (listeners.indexOf(l) >= 0) {
+		if (listeners.contains(l)) {
 			return;
 		}
 		listeners.add(l);

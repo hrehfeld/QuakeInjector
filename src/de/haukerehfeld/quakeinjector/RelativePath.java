@@ -71,10 +71,6 @@ reverse order
 		// iterate while both lists are equal
 		final int homeLast = home.size() - 1;
 		final int fileLast = file.size() - 1;
-
-		
-
-		
 		int i = getFirstRootPosition(home);
 		int j = getFirstRootPosition(file);
 
@@ -129,10 +125,9 @@ make sense
 		homelist = getPathList(home);
 		filelist = getPathList(file);
 
-		File result = matchPathLists(homelist,filelist);
 		//System.out.println("getName(): " + result.getName());
 		//System.out.println("getToString(): " + result.toString());
 
-		return result;
+		return matchPathLists(homelist,filelist);
 	}
 }

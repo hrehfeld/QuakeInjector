@@ -46,10 +46,7 @@ public class InstalledPackages {
 		try {
 			return installedPackages.get();
 		}
-		catch (InterruptedException e) {
-			throw e;
-		}
-		catch (ExecutionException e) {
+		catch (InterruptedException | ExecutionException e) {
 			throw e;
 		}
 	}
@@ -119,11 +116,7 @@ public class InstalledPackages {
 		Exception error = null;
 		try {
 			in.close();
-		}
-		catch (java.io.FileNotFoundException e) {
-			error = e;
-		}
-		catch (java.io.IOException e) {
+		} catch (IOException e) {
 			error = e;
 		}
 		if (error != null ) {

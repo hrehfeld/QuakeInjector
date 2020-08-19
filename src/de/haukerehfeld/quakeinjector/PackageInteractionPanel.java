@@ -495,9 +495,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 
 	public void setSelection(Package map) {
 		this.selectedMap = map;
-
 		refreshUi();
-
 	}
 
 	private void refreshUi() {
@@ -530,12 +528,7 @@ class PackageInteractionPanel extends JPanel implements ChangeListener,
 			startmaps.setEnabled(enableList);
 		}
 		else {
-			if (installer.alreadyQueued(selectedMap)) {
-				installButton.setEnabled(false);
-			}
-			else {
-				installButton.setEnabled(true);
-			}
+			installButton.setEnabled(!installer.alreadyQueued(selectedMap));
 			playButton.setEnabled(false);
 			uninstallButton.setEnabled(false);
 			startmaps.setEnabled(false);

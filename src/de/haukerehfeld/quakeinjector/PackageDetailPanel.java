@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
@@ -295,10 +296,7 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 				try {
 					icon = get();
 				}
-				catch (java.lang.InterruptedException e) {
-					icon = null;
-				}
-				catch (java.util.concurrent.ExecutionException e) {
+				catch (InterruptedException | ExecutionException e) {
 					icon = null;
 				}
 

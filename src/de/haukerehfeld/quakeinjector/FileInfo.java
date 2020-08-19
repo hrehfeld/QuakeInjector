@@ -68,7 +68,7 @@ public class FileInfo implements Comparable<FileInfo> {
 	public int compareTo(FileInfo o) {
 		int i = o.getName().compareTo(getName());
 		if (i == 0) {
-			i = Long.valueOf(o.getChecksum()).compareTo(Long.valueOf(getChecksum()));
+			i = Long.compare(o.getChecksum(), getChecksum());
 		}
 		return i;
 	}

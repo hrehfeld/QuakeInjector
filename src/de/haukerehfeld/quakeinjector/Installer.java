@@ -20,16 +20,13 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 package de.haukerehfeld.quakeinjector;
 
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -270,20 +267,9 @@ public class Installer {
 					System.out.println("Canceling install");
 					cancel();
 				}
-			}
-			catch (java.io.FileNotFoundException e) {
+			} catch (InterruptedException | CancellationException | IOException e) {
 				error = e;
-			}
-			catch (IOException e) {
-				error = e;
-			}
-			catch (java.util.concurrent.CancellationException e) {
-				error = e;
-			}
-			catch (java.lang.InterruptedException e) {
-				error = e;
-			}
-			catch (java.util.concurrent.ExecutionException e) {
+			} catch (java.util.concurrent.ExecutionException e) {
 				error = e.getCause();
 			}
 			catch (Exception e) {
@@ -310,9 +296,8 @@ public class Installer {
 		}
 
 		private Map<String,File> inspect(final InputStream in) throws
-		    IOException,
-		    InterruptedException,
-			ExecutionException  {
+				InterruptedException,
+				ExecutionException  {
 			//see what files the zip wants to extract
 
 			InspectZipWorker inspector = new InspectZipWorker(in);
@@ -354,8 +339,7 @@ public class Installer {
 			};
 			SwingUtilities.invokeAndWait(dialogue);
 
-			List<File> overwrites = dialogue.get();
-			return overwrites;
+			return dialogue.get();
 		}
 		
 		public void cancel() {

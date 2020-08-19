@@ -37,7 +37,6 @@ import javax.swing.SwingWorker;
 public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 																	  ProgressListener,
 																	  Cancelable {
-	private final static int BUFFERSIZE = 1024;
 	
 	private File baseDirectory;
 	private String unzipDirectory;
@@ -114,7 +113,7 @@ public class InstallWorker extends SwingWorker<PackageFileList, Void> implements
 			File f = new File(unzipdir + File.separator + entry.getName());
 			String filename = RelativePath.getRelativePath(basedir, f).toString();
 			
-			if (overwrites != null && overwrites.indexOf(f) < 0) {
+			if (overwrites != null && !overwrites.contains(f)) {
 				System.out.println("Skipping " + filename + ", because it isn't supposed to be overwritten.");
 				continue;
 			}

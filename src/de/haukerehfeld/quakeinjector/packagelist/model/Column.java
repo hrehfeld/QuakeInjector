@@ -66,7 +66,6 @@ public enum Column {
 	}
 		;
 
-
 	public String header;
 
 	private Column(String header) {

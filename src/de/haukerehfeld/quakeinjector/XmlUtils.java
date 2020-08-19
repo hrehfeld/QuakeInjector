@@ -41,11 +41,10 @@ public class XmlUtils {
 			db = dbf.newDocumentBuilder();
 		}
 		catch (javax.xml.parsers.ParserConfigurationException e) {
-			throw new RuntimeException("Parser misconfiguration");
+			throw new RuntimeException("Parser misconfiguration - " + e.getMessage());
 		}
-		
-		Document doc = db.parse(xml);
-		return doc;
+
+		return db.parse(xml);
 	}
 	
 
@@ -64,7 +63,6 @@ public class XmlUtils {
 
 		public Node next() {
 			i++;
-
 			return list.item(i);
 		}
 
@@ -87,17 +85,16 @@ public class XmlUtils {
 
 /**
  * Gets the String value of the node. 
- If the node does not contain text then an empty String is returned
+ * If the node does not contain text then an empty String is returned
  * @param node the node of interest
  * @return the value of that node
  */
 	public static String getTextForNode(Node node)
 		{
 			NodeList children = node.getChildNodes();
-			if (children == null) {
+			if (children == null)
 				return "";
-			}
-			
+
 			for (int i = 0; i < children.getLength(); i++) {
 				Node childNode = children.item(i);
 				if ((childNode.getNodeType() == Node.TEXT_NODE)

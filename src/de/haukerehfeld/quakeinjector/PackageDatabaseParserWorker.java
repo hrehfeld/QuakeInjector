@@ -39,11 +39,8 @@ public class PackageDatabaseParserWorker extends SwingWorker<List<Requirement>, 
 	@Override
 	public List<Requirement> doInBackground() throws java.io.IOException, org.xml.sax.SAXException {
 		InputStream dl = getDownloadStream(this.databaseUrl);
-		
 		final PackageDatabaseParser parser = new PackageDatabaseParser();
-		List<Requirement> all = parser.parse(XmlUtils.getDocument(dl));
-
-		return all;
+		return parser.parse(XmlUtils.getDocument(dl));
 	}
 
 

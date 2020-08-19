@@ -44,18 +44,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -63,6 +52,7 @@ import javax.swing.event.DocumentListener;
 
 import de.haukerehfeld.quakeinjector.gui.ProgressPopup;
 import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
+import org.xml.sax.SAXException;
 
 public class QuakeInjector extends JFrame {
 	/**
@@ -280,8 +270,7 @@ public class QuakeInjector extends JFrame {
 					try {
 						requirementsListUpdater.get();
 					}
-					catch (java.lang.InterruptedException e) {}
-					catch (java.util.concurrent.ExecutionException e) {}
+					catch (InterruptedException | ExecutionException e) {}
 					return null;
 				}
 				@Override
@@ -319,10 +308,8 @@ public class QuakeInjector extends JFrame {
 	private List<Requirement> parseDatabase(InputStream database)
 		throws IOException, org.xml.sax.SAXException {
 		final PackageDatabaseParser parser = new PackageDatabaseParser();
-		
-		List<Requirement> all = parser.parse(XmlUtils.getDocument(database));
 
-		return all;
+		return parser.parse(XmlUtils.getDocument(database));
 	}
 
 	/**
@@ -372,17 +359,7 @@ public class QuakeInjector extends JFrame {
 					updateCache = true;
 					return parseResult;
 				}
-				// if using java 7 we could more nicely do:
-				// catch (IOException | org.xml.sax.SAXException e) {
-				catch (IOException e) {
-					cacheReadStream = cachedDatabaseStream();
-					return parseDatabase(cacheReadStream);
-				}
-				catch (org.xml.sax.SAXException e) {
-					cacheReadStream = cachedDatabaseStream();
-					return parseDatabase(cacheReadStream);
-				}
-				catch (HTTPException e) {
+				catch (IOException | HTTPException | SAXException e) {
 					cacheReadStream = cachedDatabaseStream();
 					return parseDatabase(cacheReadStream);
 				}
@@ -402,13 +379,11 @@ public class QuakeInjector extends JFrame {
 					}
 				}
 				catch (IOException e) {}
-				if (updateCache == true) {
-					if (cache.exists()) {
-						if (cache.delete() == false) {
-							System.err.println("Couldn't delete the real cache file!");
-						}
+				if (updateCache) {
+					if (cache.exists() && !cache.delete()) {
+						System.err.println("Couldn't delete the real cache file!");
 					}
-					if (tmpFile.renameTo(cache) == false) {
+					if (!tmpFile.renameTo(cache)) {
 						System.err.println("Couldn't move the temporary cache file to the real cache file!");
 					}
 				}
@@ -425,7 +400,7 @@ public class QuakeInjector extends JFrame {
 			}
 		};
 
-		final ProgressPopup dbpopup = new ProgressPopup("Downloading package database",
+		final ProgressPopup dbPopup = new ProgressPopup("Downloading package database",
 		                      new ActionListener() {
 								  public void actionPerformed(ActionEvent e) {
 									  dbParse.cancel(true);
@@ -438,17 +413,17 @@ public class QuakeInjector extends JFrame {
 				public void propertyChange(PropertyChangeEvent evt) {
 					if (evt.getPropertyName() == "progress") {
 						int p = (Integer) evt.getNewValue();
-						dbpopup.setProgress(p);
+						dbPopup.setProgress(p);
 					}
 					else if (evt.getPropertyName() == "state"
 					    && evt.getNewValue().equals(SwingWorker.StateValue.DONE)) {
-						dbpopup.close();
+						dbPopup.close();
 					}
 				}
 			});
 		dbParse.execute();
-		dbpopup.pack();
-		dbpopup.setVisible(true);
+		dbPopup.pack();
+		dbPopup.setVisible(true);
 
 		return dbParse;
 	}
@@ -643,15 +618,15 @@ public class QuakeInjector extends JFrame {
 	                              boolean hipnoticInstalled) throws IOException {
 		
 
-		Configuration c = getConfig();
-		c.EnginePath.set(enginePath);
-		c.EngineExecutable.set(RelativePath.getRelativePath(enginePath, engineExecutable));
-		c.WorkingDirAtExecutable.set(workingDirAtExecutable);
-		c.EngineCommandLine.set(commandline);
-		c.RogueInstalled.set(rogueInstalled);
-		c.HipnoticInstalled.set(hipnoticInstalled);
+		Configuration config = getConfig();
+		config.EnginePath.set(enginePath);
+		config.EngineExecutable.set(RelativePath.getRelativePath(enginePath, engineExecutable));
+		config.WorkingDirAtExecutable.set(workingDirAtExecutable);
+		config.EngineCommandLine.set(commandline);
+		config.RogueInstalled.set(rogueInstalled);
+		config.HipnoticInstalled.set(hipnoticInstalled);
 
-		c.DownloadPath.set(downloadPath);
+		config.DownloadPath.set(downloadPath);
 
 		File workingDir;
 		if (workingDirAtExecutable) {
@@ -665,7 +640,7 @@ public class QuakeInjector extends JFrame {
 
 
 		try {
-			c.write();
+			config.write();
 		}
 		catch (IOException e) {
 			File dir = configFile.getAbsoluteFile().getParentFile();
@@ -677,7 +652,7 @@ public class QuakeInjector extends JFrame {
 				System.out.println("Couldn't set writable: " + securityError);
 			}
 
-			c.write();
+			config.write();
 		}
 	}
 
@@ -733,11 +708,7 @@ public class QuakeInjector extends JFrame {
 						table.getRowSorter().setRowFilter(maplist.filter(filter.getText()));
 
 						// https://stackoverflow.com/questions/21522902/how-disable-button-when-nothing-in-textfield
-						if (filter.getText().equals("")) {
-							clearFilter.setEnabled(false);
-						} else {
-							clearFilter.setEnabled(true);
-						}
+						clearFilter.setEnabled(!filter.getText().equals(""));
 					}
                 });
 			filterText.setLabelFor(filter);
@@ -761,7 +732,7 @@ public class QuakeInjector extends JFrame {
 				anchor = LINE_END;
 			}});
 		}
-		
+
 
 		//Create the scroll pane and add the table to it.
 		JScrollPane scrollPane = new JScrollPane(table);
@@ -843,8 +814,6 @@ public class QuakeInjector extends JFrame {
 		splitPane.setMinimumSize(new Dimension(450, 300));
 
 		panel.add(splitPane);
-
-		
 	}
 
 	
@@ -903,13 +872,7 @@ public class QuakeInjector extends JFrame {
 			javax.swing.UIManager.setLookAndFeel(
 				javax.swing.UIManager.getSystemLookAndFeelClassName());
 		} 
-		catch (javax.swing.UnsupportedLookAndFeelException e) {
-		}
-		catch (ClassNotFoundException e) {
-		}
-		catch (InstantiationException e) {
-		}
-		catch (IllegalAccessException e) {
+		catch (UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException | ClassNotFoundException e) {
 		}
 
 		// borrowed from jmtd's wadc:
@@ -982,7 +945,6 @@ public class QuakeInjector extends JFrame {
 				savingFailedDialogue(err);
 			}
 			//System.out.println("Closing Window: " + (int) bounds.getWidth() + (int) bounds.getHeight());
-
 
 			System.exit(0);
 		}

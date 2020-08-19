@@ -133,7 +133,6 @@ public class PackageOverwriteDialog extends JDialog {
 		description.setBorder(DESCRIPTIONMARGIN);
 		panel.add(description, new GridBagConstraints() {{
 			gridy = line;
-
 			gridwidth = 2;
 			fill = BOTH;
 			anchor = LINE_START;

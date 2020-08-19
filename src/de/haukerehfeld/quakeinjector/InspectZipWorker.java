@@ -41,15 +41,13 @@ public class InspectZipWorker extends SwingWorker<List<ZipEntry>, Void> {
 	}
 
 	@Override
-	public List<ZipEntry> doInBackground() throws IOException,
-	    FileNotFoundException {
+	public List<ZipEntry> doInBackground() throws IOException {
 		ZipInputStream zis = new ZipInputStream(new BufferedInputStream(input));
 		List<ZipEntry> entries = new ArrayList<ZipEntry>();
 
 		ZipEntry entry;
 		while((entry = zis.getNextEntry()) != null) {
 			entries.add(entry);
-			
 		}
 		zis.close();
 

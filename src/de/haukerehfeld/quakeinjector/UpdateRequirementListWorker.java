@@ -44,7 +44,6 @@ public class UpdateRequirementListWorker extends SwingWorker<Void, Void> {
 	@Override
 	public Void doInBackground() {
 		try {
-			
 			requirement = requirementGetter.get();
 			installed = installedGetter.get();
 		}			
@@ -55,7 +54,6 @@ public class UpdateRequirementListWorker extends SwingWorker<Void, Void> {
 		catch (java.lang.InterruptedException e) {
 			System.err.println("Couldn't wait for results!" + e.getMessage());
 			e.printStackTrace();
-			
 		}
 		return null;
 	}
@@ -71,7 +69,6 @@ public class UpdateRequirementListWorker extends SwingWorker<Void, Void> {
 			}
 
 			requirementList.notifyChangeListeners();
-			
 		}
 	}
 }

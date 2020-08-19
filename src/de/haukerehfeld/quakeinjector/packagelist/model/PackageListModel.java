@@ -50,7 +50,6 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 	
 	private PackageList data;
 
-
 	public PackageListModel(PackageList data) {
 		setMapList(data);
 	}
@@ -168,7 +167,6 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		throw new RuntimeException("didn't recognise what changed!");
 	}
 
-
 	/** 
 	 * Update the row filter regular expression from the expression in
 	 * the text box.
@@ -279,5 +277,4 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 //         data[row][col] = value;
 //         fireTableCellUpdated(row, col);
 //     }{
-
 }

@@ -21,7 +21,7 @@
 package de.haukerehfeld.quakeinjector;
 
 /**
- * Check if canceledd on each write
+ * Check if canceled on each write
  */
 public class CheckCanceledProgressListener implements ProgressListener {
 	private final ProgressListener progress;

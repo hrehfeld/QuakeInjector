@@ -104,7 +104,7 @@ public class Utils {
 	                        final OutputStream out,
 	                        final int BUFFERSIZE,
 	                        final ProgressListener progress) throws IOException {
-		byte data[] = new byte[BUFFERSIZE];
+		byte[] data = new byte[BUFFERSIZE];
 		CRC32 crc = new CRC32();
 
 		int readcount;
@@ -129,7 +129,6 @@ public class Utils {
 		public void write(byte[] b) {}
 		public void write(byte[] b, int off, int len) {}
 	}
-
 
 	/**
 	   Check if files can indeed be written inside a certain directory

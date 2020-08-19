@@ -74,7 +74,6 @@ public class ProgressPopup extends JDialog {
 		progress.setIndeterminate(false);
 		progress.setValue(percent);
 		progress.setString(progressString(description, percent));
-
 	}
 
 	public void close() {

@@ -21,6 +21,7 @@ package de.haukerehfeld.quakeinjector;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -84,8 +85,6 @@ public class EngineStarter {
 			if (!isMacApplication(app) && !isExecutable(app)) {
 				return "Must be an application or executable!";
 			}
-			return null;
-			
 		} else {
 			if (app.isDirectory()) {
 				return "Must be an executable file!";
@@ -93,8 +92,8 @@ public class EngineStarter {
 			else if (!app.canExecute()) {
 				return "Cannot be executed!";
 			}
-			return null;
 		}
+		return null;
 	}
 	
 	/**
@@ -116,8 +115,7 @@ public class EngineStarter {
 				XPathExpression expr = xpath.compile("/plist/dict/key/text()[.='CFBundleExecutable']/../following-sibling::string[1]/text()");
 				String cfBundleExecutable = (String) expr.evaluate(document);
 
-				File executable = new File(macOS, cfBundleExecutable);
-				return executable;
+				return new File(macOS, cfBundleExecutable);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -139,10 +137,10 @@ public class EngineStarter {
 		cmd.add(quakeExe.getAbsolutePath());
 		//processbuilder doesn't like arguments with spaces
 		if (quakeCmdline != null) {
-			for (String s: quakeCmdline.split(" ")) { cmd.add(s); }
+			cmd.addAll(Arrays.asList(quakeCmdline.split(" ")));
 		}
 		if (mapCmdline != null) {
-			for (String s: mapCmdline.split(" ")) { cmd.add(s); }
+			cmd.addAll(Arrays.asList(mapCmdline.split(" ")));
 		}
 		cmd.add("+map");
 		cmd.add(startmap);
@@ -152,9 +150,8 @@ public class EngineStarter {
 		pb.redirectErrorStream(true);
 
 		System.out.println(cmd);
-		
-		Process p = pb.start();
-		return p;
+
+		return pb.start();
 	}
 
 	public void setWorkingDirectory(File dir) {

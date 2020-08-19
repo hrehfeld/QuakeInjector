@@ -67,7 +67,7 @@ public class PackageTable extends JTable {
      */
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 		Component c = super.prepareRenderer(renderer, row, column);
-        if (isCellSelected(row, column) == false) {
+        if (!isCellSelected(row, column)) {
             c.setBackground(colorForRow(row));
             c.setForeground(UIManager.getColor("Table.foreground"));
         } else {

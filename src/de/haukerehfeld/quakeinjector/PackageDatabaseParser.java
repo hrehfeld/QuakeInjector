@@ -152,22 +152,24 @@ public class PackageDatabaseParser implements java.io.Serializable {
 				}
 				Element info = (Element) node;
 
-				if (info.getTagName().equals("zipbasedir")) {
-					relativeBaseDir = info.getTextContent();
-				}
-				else if (info.getTagName().equals("commandline")) {
-					cmdline = info.getTextContent();
-				}
-				else if (info.getTagName().equals("startmap")) {
-					startmaps.add(info.getTextContent());
-				}
-				else if (info.getTagName().equals("requirements")) {
-					for (Node reqFile: XmlUtils.iterate(info.getChildNodes())) {
-						if (XmlUtils.isElement(reqFile)) {
-							String r = ((Element) reqFile).getAttribute("id");
-							requirements.add(r);
+				switch (info.getTagName()) {
+					case "zipbasedir":
+						relativeBaseDir = info.getTextContent();
+						break;
+					case "commandline":
+						cmdline = info.getTextContent();
+						break;
+					case "startmap":
+						startmaps.add(info.getTextContent());
+						break;
+					case "requirements":
+						for (Node reqFile : XmlUtils.iterate(info.getChildNodes())) {
+							if (XmlUtils.isElement(reqFile)) {
+								String r = ((Element) reqFile).getAttribute("id");
+								requirements.add(r);
+							}
 						}
-					}
+						break;
 				}
 			}
 		}
