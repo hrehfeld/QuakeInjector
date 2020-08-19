@@ -102,7 +102,7 @@ public final class BuildCommit {
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${quakeinjector.src}" destdir="${quakeinjector.build}" 
 		   debug="on" debuglevel="lines,vars,source"
-		   source="1.6" fork="true">
+		   fork="true">
 	  <classpath refid="quakeinjector.class.path"/>
 <!--	  <compilerarg value="-Xlint"/> -->
 	  <compilerarg value="-Xlint:unchecked"/>
