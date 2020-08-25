@@ -61,8 +61,8 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		m.getColumn(Column.getColumnNumber(Column.TITLE)).setPreferredWidth(150);
 		m.getColumn(Column.getColumnNumber(Column.AUTHOR)).setPreferredWidth(100);
 		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setResizable(false);
-		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setMaxWidth(16);
-		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setMinWidth(16);
+		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setMaxWidth(20);
+		m.getColumn(Column.getColumnNumber(Column.INSTALLED)).setMinWidth(20);
 
 		int ratingSize = 5 * (RatingRenderer.ICONSIZE + RatingRenderer.HORIZONTALGAP)
 		    + RatingRenderer.HORIZONTALGAP;
@@ -73,13 +73,11 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setMinWidth(75);
 		m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setPreferredWidth(80);
 		//m.getColumn(Column.getColumnNumber(Column.RELEASEDATE)).setMaxWidth(80);
-
 	}
 	
 //  	public List<Package> getPackageList() {
 //  		return this.data;
 //  	}
-
 
 	public void setMapList(PackageList data) {
 		if (this.data != null) {
@@ -112,14 +110,10 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
         return Column.getColumn(col).header;
     }
 
-	/*
-	 * data
-	 */
 	@Override
     public int getRowCount() {
         return data.size();
     }
-
 
 	public Object getColumnData(int col, Package info) {
 		return Column.getColumn(col).getData(info);
@@ -134,7 +128,6 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
     public Object getValueAt(int row, int col) {
         return getColumnData(col, data.get(row));
     }
-
 
     @Override
 	public boolean isCellEditable(int row, int col) {

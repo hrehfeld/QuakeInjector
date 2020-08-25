@@ -488,8 +488,6 @@ public class QuakeInjector extends JFrame {
 		}
 		
 		maps.notifyChangeListeners();
-
-		
 	}
 
 	private Future<Void> parseDatabaseAndSetList() {
@@ -682,7 +680,6 @@ public class QuakeInjector extends JFrame {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
 
-		
 		//create a table
 		final PackageTable table =  new PackageTable(maplist);
 		maplist.size(table);
@@ -896,7 +893,6 @@ public class QuakeInjector extends JFrame {
 					qs.init();
 				}
 			});
-
 	}
 
 	private class QuakeInjectorWindowListener extends WindowAdapter
