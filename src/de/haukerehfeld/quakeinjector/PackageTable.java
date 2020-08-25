@@ -19,19 +19,13 @@ along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector;
 
-import java.awt.Dimension;
-import java.awt.Color;
-import java.awt.Component;
+import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
 
-import javax.swing.UIManager;
-
-import javax.swing.JTable;
-import javax.swing.JComponent;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
-
-import de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel;
+import java.awt.*;
 
 /**
  * @todo check if dependency on de.haukerehfeld.quakeinjector.packagelist.model.PackageListModel is necessary
@@ -43,7 +37,6 @@ public class PackageTable extends JTable {
 	private static final int CELLPADDING = 2;
 
 	private final EmptyBorder border = new EmptyBorder(0, CELLPADDING, 0, CELLPADDING);
-	                                                           
 
 	public PackageTable(PackageListModel maplist) {
 		super(maplist);
@@ -58,6 +51,7 @@ public class PackageTable extends JTable {
 		setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 		setShowGrid(false);
 		setIntercellSpacing(new Dimension(0, 0));
+		setRowHeight(getFontMetrics(getFont()).getHeight());
 
 		setDefaultRenderer(Package.Rating.class, new PackageListModel.RatingRenderer());		
 	}
@@ -67,7 +61,7 @@ public class PackageTable extends JTable {
      */
 	public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 		Component c = super.prepareRenderer(renderer, row, column);
-        if (isCellSelected(row, column) == false) {
+        if (!isCellSelected(row, column)) {
             c.setBackground(colorForRow(row));
             c.setForeground(UIManager.getColor("Table.foreground"));
         } else {
