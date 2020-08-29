@@ -58,6 +58,7 @@ public class PackageTable extends JTable {
 		setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 		setShowGrid(false);
 		setIntercellSpacing(new Dimension(0, 0));
+		setRowHeight(getFontMetrics(getFont()).getHeight());
 
 		setDefaultRenderer(Package.Rating.class, new PackageListModel.RatingRenderer());		
 	}
