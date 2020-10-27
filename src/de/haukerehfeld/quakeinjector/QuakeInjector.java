@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -707,7 +708,7 @@ public class QuakeInjector extends JFrame {
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new GridBagLayout());
 
-		
+
 		//create a table
 		final PackageTable table =  new PackageTable(maplist);
 		maplist.size(table);
@@ -760,8 +761,25 @@ public class QuakeInjector extends JFrame {
 			filterPanel.add(clearFilter, new GridBagConstraints() {{
 				anchor = LINE_END;
 			}});
+
+			final JButton randomMapButton = new JButton("Install Random Map");
+			randomMapButton.addActionListener(new ActionListener(){
+				public void actionPerformed(ActionEvent e){
+					// Package list index != current table index, which can change based on the column used to sort the
+					// table. Therefore, it has to be converted.
+					int mapTableRowIdx = new Random().nextInt(maplist.getRowCount());
+					int mapListIdx = table.getRowSorter().convertRowIndexToModel(mapTableRowIdx);
+					interactionPanel.install(maplist.getPackage(mapListIdx), false);
+					table.setRowSelectionInterval(mapTableRowIdx, mapTableRowIdx);
+					table.scrollRectToVisible(new Rectangle(table.getCellRect(mapTableRowIdx, 0, true)));
+				}
+			});
+
+			filterPanel.add(randomMapButton, new GridBagConstraints() {{
+				anchor = LINE_END;
+			}});
 		}
-		
+
 
 		//Create the scroll pane and add the table to it.
 		JScrollPane scrollPane = new JScrollPane(table);
