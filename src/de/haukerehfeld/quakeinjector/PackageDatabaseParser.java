@@ -208,12 +208,6 @@ public class PackageDatabaseParser implements java.io.Serializable {
 		int day = Integer.parseInt(components[0]);
 		int month = Integer.parseInt(components[1]) - 1;
 		int year = Integer.parseInt(components[2]);
-		if (year < 60) {
-			year += 2000;
-		}
-		else {
-			year += 1900;
-		}
 		return new GregorianCalendar(year, month, day).getTime();
 	}
 }
