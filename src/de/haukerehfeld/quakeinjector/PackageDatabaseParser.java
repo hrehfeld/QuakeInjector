@@ -198,7 +198,7 @@ public class PackageDatabaseParser implements java.io.Serializable {
 	}
 
 	/**
-	 * Parses the date that's in dd.mm.yy format
+	 * Parses the date that's in dd.mm.yyyy format
 	 */
 	public static Date parseDate(String date) {
 		String[] components = date.split("\\.");
