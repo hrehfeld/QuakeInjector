@@ -200,7 +200,7 @@ public final class BuildCommit {
 
   <target name="release" description="Build jar and zip for release"
      depends="quakeinjector.jar,getversion">
-     <zip destfile="${quakeinjector.release}/quakeinjector-${quakeinjector.buildcommit}.zip">
+     <zip destfile="${quakeinjector.release}/quakeinjector-${quakeinjector.buildcommit}.zip" zip64Mode="always">
        <fileset dir="${quakeinjector.dist}" />
      </zip>
 
