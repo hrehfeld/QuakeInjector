@@ -126,6 +126,10 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
 		return Column.getColumn(col).getData(info);
 	}
 
+	public boolean isPackageInstalled(Package info){
+		return (boolean) getColumnData(0, info);
+	}
+
     @Override
 	public Class<? extends Object> getColumnClass(int c) {
 		return Column.getColumn(c).getColumnClass();
@@ -135,7 +139,6 @@ public class PackageListModel extends AbstractTableModel implements ChangeListen
     public Object getValueAt(int row, int col) {
         return getColumnData(col, data.get(row));
     }
-
 
     @Override
 	public boolean isCellEditable(int row, int col) {

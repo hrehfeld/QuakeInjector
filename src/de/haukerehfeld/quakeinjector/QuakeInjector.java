@@ -509,9 +509,9 @@ public class QuakeInjector extends JFrame {
 		for (PackageFileList l: packages) {
 			maps.setInstalled(l);
 		}
-		for (Requirement r: maps) {
+		//for (Requirement r: maps) {
 			//System.out.println(r);
-		}
+		//}
 		
 		maps.notifyChangeListeners();
 
@@ -769,7 +769,10 @@ public class QuakeInjector extends JFrame {
 					// table. Therefore, it has to be converted.
 					int mapTableRowIdx = new Random().nextInt(maplist.getRowCount());
 					int mapListIdx = table.getRowSorter().convertRowIndexToModel(mapTableRowIdx);
-					interactionPanel.install(maplist.getPackage(mapListIdx), false);
+					Package map = maplist.getPackage(mapListIdx);
+					if(!maplist.isPackageInstalled(map))
+						interactionPanel.install(map, false);
+
 					table.setRowSelectionInterval(mapTableRowIdx, mapTableRowIdx);
 					table.scrollRectToVisible(new Rectangle(table.getCellRect(mapTableRowIdx, 0, true)));
 				}
@@ -780,10 +783,8 @@ public class QuakeInjector extends JFrame {
 			}});
 		}
 
-
 		//Create the scroll pane and add the table to it.
 		JScrollPane scrollPane = new JScrollPane(table);
-
 
 		mainPanel.add(scrollPane, new GridBagConstraints() {{
 				anchor = CENTER;
@@ -861,8 +862,6 @@ public class QuakeInjector extends JFrame {
 		splitPane.setMinimumSize(new Dimension(450, 300));
 
 		panel.add(splitPane);
-
-		
 	}
 
 	
