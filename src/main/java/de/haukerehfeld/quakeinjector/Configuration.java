@@ -33,7 +33,7 @@ import java.lang.reflect.Field;
  * Handle the config/properties file and allow access to properties
  */
 public class Configuration {
-	private static final String CONFIGHEADER = "Quake Injector " + BuildCommit.buildCommit + " config file";
+	private static final String CONFIGHEADER = "Quake Injector " + BuildCommit.getBuildCommit() + " config file";
 	public class EnginePath extends FileValue {
 		private EnginePath() { super("enginePath", null); }
 		
@@ -185,20 +185,20 @@ public class Configuration {
 	public Configuration(File configFile) {
 		this.configFile = configFile;
 		
-		//assign all fields to all list;
-		Field[] fields = getClass().getDeclaredFields();
-		for (Field f: fields) {
-			//System.out.println(f.getType());
-			//only value fields
-			if (Value.class.isAssignableFrom(f.getType())) {
-				try {
-					All.put(f.getName(), (Value) f.get(this));
-				}
-				catch (java.lang.IllegalAccessException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+//		//assign all fields to all list;
+//		Field[] fields = getClass().getDeclaredFields();
+//		for (Field f: fields) {
+//			//System.out.println(f.getType());
+//			//only value fields
+//			if (Value.class.isAssignableFrom(f.getType())) {
+//				try {
+//					All.put(f.getName(), (Value) f.get(this));
+//				}
+//				catch (java.lang.IllegalAccessException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 
 		init();
 	}
