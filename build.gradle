@@ -9,7 +9,7 @@ plugins {
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
-
+version = "git describe --tags".execute().text.trim()
 repositories {
     mavenCentral()
 }
@@ -40,7 +40,7 @@ jar {
 task readCommit(type: WriteProperties) {
     outputFile = file("${buildDir}/build-info.properties")
     comment = "Revision name"
-    property("quake-injector.build-commit", "git describe --tags".execute().text.trim())
+    property("quake-injector.build-commit", version)
 }
 
 launch4j {
@@ -98,8 +98,7 @@ task winDist(type: Zip) {
     group "distribution"
     def distDir = "$buildDir/winDist"
     from "$distDir"
-    destinationDir = file("$buildDir/distributions")
-    archiveFileName = "QuakeInjector-exe.zip"
+    archiveFileName = "QuakeInjector.exe-${project.version}.zip"
     exclude("*-jre")
 
 }
