@@ -42,8 +42,29 @@ This works well in combination with a filter. For example you could look at all 
 ### Bugs and feedback
 If anything that feels weird occurs to you, or you find a definite bug, please [report it as an issue](https://github.com/hrehfeld/QuakeInjector/issues). Likewise, give us a shout if you want to help with development. Pull requests are welcome!
 
+### Running from source
+To run the application for development, run the following command in the root directory.
+
+On Windows:
+```
+gradlew.bat run
+```
+On Unix:
+```
+./gradlew run
+``` 
+
 ### Building
-To build a jar, grab the source and run `ant release` in the root directory.
+To build a jar, grab the source and run the following command in the root directory.
+
+On Windows:
+```
+gradlew.bat assemble
+```
+On Unix:
+```bash
+./gradlew assemble
+```
 
 ## Credits
 - Hauke 'megaman' Rehfeld (initial programming)
