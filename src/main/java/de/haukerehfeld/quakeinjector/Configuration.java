@@ -186,19 +186,19 @@ public class Configuration {
 		this.configFile = configFile;
 		
 //		//assign all fields to all list;
-//		Field[] fields = getClass().getDeclaredFields();
-//		for (Field f: fields) {
-//			//System.out.println(f.getType());
-//			//only value fields
-//			if (Value.class.isAssignableFrom(f.getType())) {
-//				try {
-//					All.put(f.getName(), (Value) f.get(this));
-//				}
-//				catch (java.lang.IllegalAccessException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
+		Field[] fields = getClass().getDeclaredFields();
+		for (Field f: fields) {
+			//System.out.println(f.getType());
+			//only value fields
+			if (Value.class.isAssignableFrom(f.getType())) {
+				try {
+					All.put(f.getName(), (Value) f.get(this));
+				}
+				catch (java.lang.IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
 		init();
 	}
