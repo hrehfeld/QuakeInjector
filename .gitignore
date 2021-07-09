@@ -5,16 +5,20 @@ build-info.properties
 
 # Ignore Gradle project-specific cache directory
 .gradle
-.idea/
 # Ignore Gradle build output directory
 build
+
 
 database.xml
 installedMaps.xml
 config.properties
 jre/
 
+# ide files
 # These can be regenerated with `gradlew eclipse` so they no longer need to be committed
 .classpath
 .project
 .settings/
+
+*.iml
+.idea/
