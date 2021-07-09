@@ -55,7 +55,7 @@ On Unix:
 ``` 
 
 ### Building
-To build a jar, grab the source and run the following command in the root directory.
+To build a jar, grab the source and run the following command in the root directory. The jar will be in the `build/libs` directory.
 
 On Windows:
 ```
@@ -64,6 +64,18 @@ gradlew.bat assemble
 On Unix:
 ```bash
 ./gradlew assemble
+```
+
+### Building a Windows EXE
+To build an EXE for Windows, grab the source and run the following command in the root directory. It will create a zip in the `build/distributions` directory.
+
+On Windows:
+```
+gradlew.bat winDist
+```
+On Unix:
+```bash
+./gradlew winDist
 ```
 
 ## Credits
