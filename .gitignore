@@ -11,7 +11,7 @@ build
 
 database.xml
 installedMaps.xml
-
+config.properties
 jre/
 
 # These can be regenerated with `gradlew eclipse` so they no longer need to be committed
