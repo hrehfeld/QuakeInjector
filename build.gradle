@@ -19,12 +19,12 @@ dependencies {
 }
 
 application {
-    mainClassName = 'de.haukerehfeld.quakeinjector.QuakeInjector'
+    mainClass.set('de.haukerehfeld.quakeinjector.QuakeInjector')
 }
 
 jar {
     manifest {
-        attributes["Main-Class"] = application.mainClassName
+        attributes["Main-Class"] = application.mainClass.get()
     }
 }
 
@@ -44,7 +44,7 @@ task readCommit(type: WriteProperties) {
 }
 
 launch4j {
-    mainClassName = application.mainClassName
+    mainClassName = application.mainClass.get()
     icon = "${projectDir}/src/main/resources/Inject2.ico"
     bundledJrePath "./runtime"
     bundledJre64Bit false
