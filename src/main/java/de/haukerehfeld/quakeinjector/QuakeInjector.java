@@ -941,7 +941,7 @@ public class QuakeInjector extends JFrame {
 
 		// override the HTTP user-agent for any connections this program does
 		// re https://stackoverflow.com/questions/2529682/setting-user-agent-of-a-java-urlconnection
-		System.setProperty("http.agent", "Quakeinjector-" + BuildCommit.buildCommit);
+		System.setProperty("http.agent", "Quakeinjector-" + BuildCommit.getBuildCommit());
 
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 				public void run() {

@@ -18,10 +18,8 @@ You should have received a copy of the GNU General Public License
 along with QuakeInjector.  If not, see <http://www.gnu.org/licenses/>.
 */
 package de.haukerehfeld.quakeinjector.packagelist.model;
-
-import java.util.Date;
-
 import de.haukerehfeld.quakeinjector.Package;
+import java.util.Date;
 
 /**
  * Enum for the table columns. Saves all info about them.
