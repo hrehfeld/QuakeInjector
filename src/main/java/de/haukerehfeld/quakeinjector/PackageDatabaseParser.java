@@ -120,6 +120,17 @@ public class PackageDatabaseParser implements java.io.Serializable {
 			rating = ratingTable[ratingNumber];
 		}
 
+		float normalizedUsersRating;
+		{
+			String normalizedUsersRatingString = file.getAttribute("normalized_users_rating");
+			try {
+				normalizedUsersRating = Float.parseFloat(normalizedUsersRatingString);
+			} catch (java.lang.NumberFormatException e) {
+				System.out.println("Users' rating of " + id + " is broken");
+				normalizedUsersRating = Float.NEGATIVE_INFINITY;
+			}
+		}
+
 		String title = XmlUtils.getFirstElement(file, "title").getTextContent().trim();
 		String author = XmlUtils.getFirstElement(file, "author").getTextContent().trim();
 		int size;
@@ -188,6 +199,7 @@ public class PackageDatabaseParser implements java.io.Serializable {
 									 PackageDatabaseParser.parseDate(date),
 									 false,
 		                             rating,
+		                             normalizedUsersRating,
 		                             description,
 									 relativeBaseDir,
 									 cmdline,

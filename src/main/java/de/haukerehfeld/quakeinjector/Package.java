@@ -41,6 +41,8 @@ public class Package extends SortableRequirement implements Requirement {
 
 	private Rating rating;
 
+	private float normalizedUsersRating;
+
 	private String description;
 
 	/**
@@ -68,8 +70,9 @@ public class Package extends SortableRequirement implements Requirement {
 				   Date date,
 	               boolean isInstalled,
 	               Rating rating,
+	               float normalizedUsersRating,
 	               String description) {
-		this(id, author, title, size, date, isInstalled, rating, description, null, null, null, null);
+		this(id, author, title, size, date, isInstalled, rating, normalizedUsersRating, description, null, null, null, null);
 	}
 
 	public Package(String id,
@@ -79,6 +82,7 @@ public class Package extends SortableRequirement implements Requirement {
 				   Date date,
 				   boolean isInstalled,
 	               Rating rating,
+	               float normalizedUsersRating,
 	               String description,
 				   String relativeBaseDir,
 				   String commandline,
@@ -91,6 +95,7 @@ public class Package extends SortableRequirement implements Requirement {
 		this.date = date;
 		super.setInstalled(isInstalled);
 		this.rating = rating;
+		this.normalizedUsersRating = normalizedUsersRating;
 		this.description = description;
 		this.relativeBaseDir = relativeBaseDir;
 		this.commandline = commandline;
@@ -126,6 +131,8 @@ public class Package extends SortableRequirement implements Requirement {
 	 * get rating
 	 */
 	public Rating getRating() { return rating; }
+
+	public float getNormalizedUsersRating() { return normalizedUsersRating; }
 
 
 	/**
