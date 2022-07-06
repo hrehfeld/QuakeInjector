@@ -24,6 +24,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.GZIPInputStream;
@@ -36,15 +39,19 @@ public class Download {
 	private URLConnection connection;
 
 	public static Download create(String urlString) throws IOException {
-		URL url;
+		URL cleanUrl;
 		try {
-			url = new URL(urlString);
+			// URLs with spaces in the path need escaping to %20, not +. We can't use built in URLEncoder
+			URL url= new URL(urlString);
+			URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+
+			cleanUrl = new URL(uri.toASCIIString());
 		}
-		catch (java.net.MalformedURLException e) {
+		catch (MalformedURLException | URISyntaxException e) {
 			throw new RuntimeException("Something is wrong with the way we construct URLs: "
 			                           + e.getMessage());
 		}
-		return new Download(url);
+		return new Download(cleanUrl);
 	}
 
 	public Download(URL url) throws IOException {
