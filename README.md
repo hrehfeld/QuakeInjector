@@ -82,7 +82,7 @@ On Unix:
 ```
 
 ### Notes
-- Use `git tag` to define the name of the resulting JAR: `git tag alpha05` will make gradlew compile `QuakeInjector-alpha05.jar`.
+- Use an annotated Git tag to define the name of the resulting JAR: `git tag -a "alphaXX" -m "alphaXX"` will make gradlew compile `QuakeInjector-alphaXX.jar`.
 
 ## Credits
 - Hauke 'megaman' Rehfeld (initial programming)
