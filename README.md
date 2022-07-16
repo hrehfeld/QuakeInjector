@@ -1,5 +1,5 @@
 # Quake Injector
-Quake Injector is a tool to *download, install and play* Quake (some call it "Quake 1") singleplayer maps from Spirit's "Quaddicted archive":https://www.quaddicted.com - basically the complete history of all quake singleplayer maps ever made. Ever been annoyed by an excruciating installation process? Could not figure out how to install a certain map? Well, this tool makes it a piece of cake. Simply pick a map and click Install.
+Quake Injector is a tool to *download, install and play* Quake (some call it "Quake 1") singleplayer maps from the "Quaddicted archive":https://www.quaddicted.com - basically the complete history of all quake singleplayer maps ever made. Ever been annoyed by an excruciating installation process? Could not figure out how to install a certain map? Well, this tool makes it a piece of cake. Simply pick a map and click Install.
 
 ![Screenshot of the Quake Injector](https://www.quaddicted.com/_media/quakeinjector_20091117.png "Screenshot of the Quake Injector")
 
@@ -11,17 +11,20 @@ Quake Injector is a tool to *download, install and play* Quake (some call it "Qu
 - Cross-Platform
 - [Free, Open Source Software](https://github.com/hrehfeld/QuakeInjector/), released under the GPL.
 - Scan your Quake directory for already installed maps
- 
 
 ## Installation
-Quake Injector requires Quake and Java.
+On Windows you can use a self-contained executable. On Linux and MacOS you need Java.
 
-1. Make sure you have the [latest Java version](https://adoptopenjdk.net/) installed
+### Windows
+1. Download the latest ["QuakeInjector.exe" release](https://github.com/hrehfeld/QuakeInjector/releases)
+1. Extract the .zip file
+1. Double click the QuakeInjector.exe
+
+### Linux and MacOS
+1. Make sure you have a recent Java installed
 1. Download the latest [Quake Injector release](https://github.com/hrehfeld/QuakeInjector/releases)
 1. Extract the .zip file
-1. Double click `quakeinjector.jar`, or simply start it with `java -jar quakeinjector.jar` from the extraction directory. On Windows, you can also use the supplied `quakeinjector.bat`.
-
-Do **not** launch it directly from your browser, your settings would be eaten by a [friendly horde of Shoggies](http://www.macguff.fr/goomi/unspeakable/vault299.html), and the settings are vital to the program.
+1. Double click `lib/quakeinjector.jar`, or start it with `java -jar lib/quakeinjector.jar`. On Windows, you can also use the supplied `quakeinjector.bat`.
 
 *Keep in mind this software is still in heavy development. The alpha tag hints at it not being feature complete, and possibly buggy.* See the included licence (`COPYING`) for more details on warranties, etc. (there are none).
 
@@ -36,11 +39,11 @@ This works well in combination with a filter. For example you could look at all 
 ## Known Problems
 1. On **Linux/MacOS** and other case-sensitive operating systems you won’t have much joy as there is no engine that can ignore the case of filenames *yet*. There will be one and it will be a good one, but for now you're pretty much on your own, as **a lot of maps were packed with mixed case filenames** by the original authors.
 
-1. Also be aware that most engines cannot run some of the latest and greatest maps, because those **maps break the original quake engine limits**. A [modern Quake engine](http://neogeographica.com/site/pages/guides/engines.html#04) is recommended.
+1. Also be aware that most engines cannot run some of the latest and greatest maps, because those **maps break the original quake engine limits**. A [modern Quake engine](https://neogeographica.com/site/pages/guides/engines.html#04) is recommended.
 
 ## Development
 ### Bugs and feedback
-If anything that feels weird occurs to you, or you find a definite bug, please [report it as an issue](https://github.com/hrehfeld/QuakeInjector/issues). Likewise, give us a shout if you want to help with development. Pull requests are welcome!
+If anything that feels weird occurs to you, or you find a definite bug, please [report it as an issue](https://github.com/hrehfeld/QuakeInjector/issues). Likewise, give us a shout if you want to help with development. Pull requests are what powers the project!
 
 ### Running from source
 To run the application for development, run the following command in the root directory.
@@ -77,6 +80,9 @@ On Unix:
 ```bash
 ./gradlew winDist
 ```
+
+### Notes
+- Use `git tag` to define the name of the resulting JAR: `git tag alpha05` will make gradlew compile `QuakeInjector-alpha05.jar`.
 
 ## Credits
 - Hauke 'megaman' Rehfeld (initial programming)
