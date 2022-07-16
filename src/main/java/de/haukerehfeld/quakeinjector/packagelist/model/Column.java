@@ -61,6 +61,12 @@ public enum Column {
 			return p.getRating();
 		}
 		public Class<? extends Object> getColumnClass() { return Package.Rating.class; }
+	},
+		NORMALIZEDUSERSRATING("Users'") {
+		public Object getData(Package p) {
+			return String.format("%.2f", p.getNormalizedUsersRating());
+		}
+		public Class<? extends Object> getColumnClass() { return Integer.class; }
 	}
 		;
 
