@@ -26,6 +26,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -119,7 +122,15 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 			public void mouseClicked(MouseEvent arg0) {
 				if (current != null) {
 					// TODO: Refactor; get the URL from Configuration
-					BrowserLauncher.openURL("https://www.quaddicted.com/reviews/" + current.getId() + ".html");
+					try {
+						// URLs with spaces in the path need escaping to %20, not +. We can't use built in URLEncoder
+						URL url = new URL("https://www.quaddicted.com/reviews/" + current.getId() + ".html");
+						URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+						BrowserLauncher.openURL(uri.toASCIIString());
+					}
+					catch (MalformedURLException | URISyntaxException e) {
+						// TODO: Emit an error message or something
+					}
 				}
 			}
 		});
@@ -149,9 +160,17 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
  		image.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
  		image.addMouseListener(new MouseAdapter() {
  			@Override
- 			public void mouseClicked(MouseEvent e) {
+ 			public void mouseClicked(MouseEvent arg0) {
  				// TODO: Refactor
- 				BrowserLauncher.openURL(PackageDetailPanel.this.screenshotRepositoryPath + current.getId() + ".jpg");
+				try {
+					// URLs with spaces in the path need escaping to %20, not +. We can't use built in URLEncoder
+					URL url = new URL(PackageDetailPanel.this.screenshotRepositoryPath + current.getId() + ".jpg");
+					URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+					BrowserLauncher.openURL(uri.toASCIIString());
+				}
+				catch (MalformedURLException | URISyntaxException e) {
+					// TODO: Emit an error message or something
+				}
  			}		
 		});
  		imagePanel.add(image);
@@ -265,8 +284,6 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 			addImage();
 		}
 
-
-
 		image.setIcon(null);
 		
 		supposedImageUrl = screenshotRepositoryPath + current.getId() + "_injector.jpg";
@@ -278,9 +295,14 @@ class PackageDetailPanel extends JPanel implements ChangeListener,
 			@Override
 			public ImageIcon doInBackground() {
 				try {
-					return new ImageIcon(new URL(url), current.getId());
+					// URLs with spaces in the path need escaping to %20, not +. We can't use built in URLEncoder
+					URL url = new URL(supposedImageUrl);
+					URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+					URL cleanUrl = new URL(uri.toASCIIString());
+
+					return new ImageIcon(cleanUrl, current.getId());
 				}
-				catch (java.net.MalformedURLException e) {
+				catch (MalformedURLException | URISyntaxException e) {
 				}
 				return null;
 			}
