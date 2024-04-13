@@ -7,8 +7,6 @@ plugins {
     id 'edu.sc.seis.launch4j' version '2.5.0'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
 version = "git describe --tags".execute().text.trim()
 repositories {
     mavenCentral()
@@ -59,7 +57,7 @@ task downloadJre {
     def f = new File("$buildDir/jre.zip")
     f.parentFile.mkdir()
     if (!f.exists()) {
-        new URL('https://github.com/AdoptOpenJDK/openjdk8-binaries/releases/download/jdk8u292-b10_openj9-0.26.0/OpenJDK8U-jre_x86-32_windows_openj9_8u292b10_openj9-0.26.0.zip').withInputStream {i -> f.withOutputStream {it << i}}
+        new URL('https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.10%2B7/OpenJDK17U-jdk_x86-32_windows_hotspot_17.0.10_7.zip').withInputStream {i -> f.withOutputStream {it << i}}
     }
 
     copy {
@@ -79,7 +77,7 @@ task setupWinDist(type: Copy) {
     doLast {
         copy {
             file("$buildDir/jre").eachDir {
-                if (it.name.contains("jre")) {
+                if (it.name.contains("jdk")) {
                     jreDir = it
                 }
             }
