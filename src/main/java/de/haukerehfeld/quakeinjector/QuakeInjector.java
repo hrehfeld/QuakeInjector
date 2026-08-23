@@ -152,6 +152,7 @@ public class QuakeInjector extends JFrame {
 		}
 
 		menu = createMenuBar();
+		menu.setOfflineMode(cfg.OfflineMode.get());
 		setJMenuBar(menu);
 
 		setMinimumSize(new Dimension(minWidth, minHeight));
