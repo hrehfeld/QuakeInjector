@@ -311,7 +311,7 @@ public class QuakeInjector extends JFrame {
 
 	private InputStream downloadDatabase(String databaseUrl) throws IOException {
 		//get download stream
-		Download d = Download.create(databaseUrl);
+		Download d = Download.create(databaseUrl, getConfig().OfflineMode.get());
 		d.connect();
 		InputStream dl;
 		//int size = d.getSize();
