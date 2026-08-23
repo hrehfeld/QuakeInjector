@@ -437,6 +437,12 @@ public class QuakeInjector extends JFrame {
 			}
 		};
 
+		// fully skip the download popup if offline mode is set to true
+		if (offlineMode) {
+			dbParse.execute();
+			return dbParse;
+		}
+
 		final ProgressPopup dbpopup = new ProgressPopup("Downloading package database",
 		                      new ActionListener() {
 								  public void actionPerformed(ActionEvent e) {
