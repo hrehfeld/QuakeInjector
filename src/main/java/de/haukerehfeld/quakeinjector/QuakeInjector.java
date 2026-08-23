@@ -152,6 +152,7 @@ public class QuakeInjector extends JFrame {
 		}
 
 		menu = createMenuBar();
+		menu.setOfflineMode(cfg.OfflineMode.get());
 		setJMenuBar(menu);
 
 		setMinimumSize(new Dimension(minWidth, minHeight));
@@ -311,7 +312,7 @@ public class QuakeInjector extends JFrame {
 
 	private InputStream downloadDatabase(String databaseUrl) throws IOException {
 		//get download stream
-		Download d = Download.create(databaseUrl);
+		Download d = Download.create(databaseUrl, getConfig().OfflineMode.get());
 		d.connect();
 		InputStream dl;
 		//int size = d.getSize();
@@ -343,7 +344,8 @@ public class QuakeInjector extends JFrame {
 	private Future<List<Requirement>> doParseDatabase() {
 		
 		final String databaseUrl = getConfig().RepositoryDatabasePath.get();
-		
+		final boolean offlineMode = getConfig().OfflineMode.get();
+
 		final SwingWorker<List<Requirement>, Void> dbParse
 		    = new SwingWorker<List<Requirement>,Void>() {
 			/** the stream for the database download **/
@@ -374,6 +376,11 @@ public class QuakeInjector extends JFrame {
 				cache = getConfig().LocalDatabaseFile.get();
 				cache = cache.getAbsoluteFile();
 				InputStream db;
+				//offline mode: don't even attempt an update, just use the cache
+				if (offlineMode) {
+					cacheReadStream = cachedDatabaseStream();
+					return parseDatabase(cacheReadStream);
+				}
 				try {
 					//download database and dump to file
 					downloadStream = new BufferedInputStream(downloadDatabase(databaseUrl));
@@ -418,14 +425,23 @@ public class QuakeInjector extends JFrame {
 					if (tmpFile != null && tmpFile.exists()) {
 						tmpFile.delete();
 					}
-					String msg = "Failed to fetch current database; using previously downloaded info.";
-					JOptionPane.showMessageDialog(QuakeInjector.this,
-					                              msg,
-					                              "Downloading failed!",
-					                              JOptionPane.WARNING_MESSAGE);
+					//offline mode uses the cache on purpose, so this is not a failure
+					if (!offlineMode) {
+						String msg = "Failed to fetch current database; using previously downloaded info.";
+						JOptionPane.showMessageDialog(QuakeInjector.this,
+						                              msg,
+						                              "Downloading failed!",
+						                              JOptionPane.WARNING_MESSAGE);
+					}
 				}
 			}
 		};
+
+		// fully skip the download popup if offline mode is set to true
+		if (offlineMode) {
+			dbParse.execute();
+			return dbParse;
+		}
 
 		final ProgressPopup dbpopup = new ProgressPopup("Downloading package database",
 		                      new ActionListener() {

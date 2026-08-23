@@ -38,6 +38,14 @@ public class Download {
 	private InputStream stream;
 	private URLConnection connection;
 
+	// placeholder until all Download.create() callers are moved to this method
+	public static Download create(String urlString, boolean offline) throws IOException {
+		if (offline) {
+			throw new OfflineModeException(urlString);
+		}
+		return create(urlString);
+	}
+
 	public static Download create(String urlString) throws IOException {
 		URL cleanUrl;
 		try {

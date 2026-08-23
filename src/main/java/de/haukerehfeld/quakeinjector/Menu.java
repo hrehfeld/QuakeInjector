@@ -51,7 +51,7 @@ public class Menu extends JMenuBar {
 				fileMenu.add(checkInstalled);
 
 				enableOfflineMode = new JCheckBoxMenuItem("Offline Mode");
-				checkInstalled.addActionListener(offlineAction);
+				enableOfflineMode.addActionListener(offlineAction);
 				fileMenu.add(enableOfflineMode);
 
 				JMenuItem engine = new JMenuItem("Settings...");
